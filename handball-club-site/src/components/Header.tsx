@@ -41,13 +41,18 @@ const Header = () => {
             />
           </div>
 
-          <div className="hidden sm:block min-w-0">
-            <span className="block font-display text-sm md:text-base font-extrabold uppercase tracking-[0.08em] text-white leading-tight truncate">
-              Val d'Yerres
+          <div className="min-w-0">
+            <span className="block font-display text-sm md:text-base font-extrabold uppercase tracking-[0.08em] text-white leading-tight truncate sm:hidden">
+              Val d'Yerres HB
             </span>
-            <span className="block text-[11px] md:text-xs font-medium text-white/65 tracking-[0.16em] uppercase truncate">
-              Handball Club
-            </span>
+            <div className="hidden sm:block min-w-0">
+              <span className="block font-display text-sm md:text-base font-extrabold uppercase tracking-[0.08em] text-white leading-tight truncate">
+                Val d'Yerres
+              </span>
+              <span className="block text-[11px] md:text-xs font-medium text-white/65 tracking-[0.16em] uppercase truncate">
+                Handball Club
+              </span>
+            </div>
           </div>
         </Link>
 

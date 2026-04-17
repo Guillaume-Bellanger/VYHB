@@ -76,7 +76,24 @@ const Club = () => {
       <section className="section-padding">
         <div className="container-narrow">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="w-full sm:w-auto mb-10 grid grid-cols-3 sm:inline-flex gap-1 bg-muted/50 p-1 rounded-xl">
+            {/* Mobile : select natif */}
+            <select
+              className="sm:hidden w-full mb-8 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-[hsl(220_30%_6%)]"
+              style={{
+                backgroundColor: "hsl(220 22% 10%)",
+                color: "hsl(42 38% 94%)",
+                border: "1px solid hsl(220 12% 32%)",
+              }}
+              value={activeTab}
+              onChange={(e) => handleTabChange(e.target.value)}
+            >
+              <option value="historique" style={{ backgroundColor: "hsl(220 22% 10%)", color: "hsl(42 38% 94%)" }}>Historique</option>
+              <option value="bureau" style={{ backgroundColor: "hsl(220 22% 10%)", color: "hsl(42 38% 94%)" }}>Le Bureau</option>
+              <option value="entraineurs" style={{ backgroundColor: "hsl(220 22% 10%)", color: "hsl(42 38% 94%)" }}>Entraîneurs &amp; Bénévoles</option>
+            </select>
+
+            {/* Desktop : onglets */}
+            <TabsList className="hidden sm:inline-flex mb-10 gap-1 bg-muted/50 p-1 rounded-xl">
               <TabsTrigger value="historique" className="font-display font-semibold text-sm">
                 Historique
               </TabsTrigger>
