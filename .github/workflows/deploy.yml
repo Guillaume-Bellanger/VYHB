@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npm run build || true
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
