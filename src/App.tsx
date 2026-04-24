@@ -10,6 +10,7 @@ import CollectifDetail from "./pages/CollectifDetail";
 import Registration from "./pages/Registration";
 import Partners from "./pages/Partners";
 import Shop from "./pages/Shop";
+import ProduitDetail from "./pages/ProduitDetail";
 import Contact from "./pages/Contact";
 import Events from "./pages/Events";
 import Matches from "./pages/Matches";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/inscriptions" element={<Registration />} />
             <Route path="/partenaires" element={<Partners />} />
             <Route path="/boutique" element={<Shop />} />
+            <Route path="/boutique/:id" element={<ProduitDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/evenements" element={<Events />} />
             <Route path="/matchs" element={<Matches />} />

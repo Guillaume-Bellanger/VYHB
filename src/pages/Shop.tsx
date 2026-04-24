@@ -1,129 +1,128 @@
-import { motion } from "framer-motion";
-import { ShoppingBag, Shirt, Package, Mail, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Package, Shield, RotateCcw } from "lucide-react"
+import SEO from "../components/SEO"
+import ProductCard from "../components/ProductCard"
+import { produits } from "../data/produits"
 
-const ghostProducts = [
-  { icon: Shirt, label: "Maillot domicile", sub: "Collection 2026/2027" },
-  { icon: Shirt, label: "Maillot extérieur", sub: "Collection 2026/2027" },
-  { icon: Package, label: "Survêtement", sub: "Tenue officielle" },
-  { icon: Package, label: "Sac de sport", sub: "Equipement club" },
-];
+type Categorie = 'tout' | 'maillot' | 'tenue' | 'accessoire'
 
-const Shop = () => (
-  <>
-    {/* Page Hero */}
-    <section className="relative pb-12 overflow-hidden">
-      <div className="hero-orb w-[420px] h-[420px] bg-orange-600/12 top-[-100px] right-[-80px]" style={{ animationDuration: "14s" }} />
-      <div className="hero-orb w-[280px] h-[280px] bg-red-800/10 bottom-[-60px] left-[-40px]" style={{ animationDuration: "18s", animationDelay: "2s" }} />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background pointer-events-none" />
-      <div className="relative container-narrow px-4 md:px-6 pt-12 pb-4">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <span className="eyebrow mb-5 block w-fit">Val d'Yerres Handball</span>
-          <h1 className="font-display font-black mb-4" style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)" }}>
-            La <span className="gradient-text">Boutique</span>
-          </h1>
-          <p className="text-white/45 text-lg max-w-lg leading-relaxed">
-            Équipez-vous aux couleurs du Val d'Yerres Handball.
-          </p>
-        </motion.div>
-      </div>
-    </section>
+const FILTRES: { label: string; value: Categorie }[] = [
+  { label: "Tout", value: "tout" },
+  { label: "Maillots", value: "maillot" },
+  { label: "Tenues", value: "tenue" },
+  { label: "Accessoires", value: "accessoire" },
+]
 
-    {/* Coming soon */}
-    <section className="pb-24">
-      <div className="container-narrow px-4 md:px-6">
+const Shop = () => {
+  const [categorie, setCategorie] = useState<Categorie>("tout")
 
-        {/* Badge + Message principal */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="relative rounded-3xl p-10 md:p-14 text-center mb-12 overflow-hidden border border-white/[0.06]"
-          style={{ background: "rgba(255,255,255,0.02)" }}
-        >
-          <div className="absolute top-[-60px] right-[-60px] w-[280px] h-[280px] rounded-full bg-orange-600/[0.06] blur-3xl" />
-          <div className="absolute bottom-[-40px] left-[-40px] w-[200px] h-[200px] rounded-full bg-red-600/[0.05] blur-3xl" />
+  const produitsFiltres = categorie === "tout"
+    ? produits
+    : produits.filter(p => p.categorie === categorie)
 
-          <div className="relative">
-            <div className="w-20 h-20 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-6">
-              <ShoppingBag size={38} className="text-orange-400" />
-            </div>
+  return (
+    <>
+      <SEO
+        title="Boutique"
+        description="La boutique officielle du Val d'Yerres Handball. Maillots, tenues et accessoires aux couleurs du club. Saison 2026/2027."
+        canonical="/boutique"
+      />
 
-            <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 border border-orange-500/20"
-              style={{ background: "rgba(249,115,22,0.08)" }}>
+      {/* Hero */}
+      <section className="relative pb-12 overflow-hidden">
+        <div className="hero-orb w-[500px] h-[500px] bg-red-700/15 top-[-120px] right-[-100px]" style={{ animationDuration: "14s" }} />
+        <div className="hero-orb w-[300px] h-[300px] bg-orange-600/10 bottom-[-60px] left-[-60px]" style={{ animationDuration: "18s", animationDelay: "2s" }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+
+        <div className="relative container-narrow px-4 md:px-6 pt-12 pb-6">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-5 border border-orange-500/20" style={{ background: "rgba(249,115,22,0.08)" }}>
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-              <span className="text-xs font-display font-bold text-orange-400 uppercase tracking-wider">Bientôt disponible</span>
+              <span className="text-xs font-display font-bold text-orange-400 uppercase tracking-wider">Nouvelles collections 2026/2027</span>
             </div>
-
-            <h2 className="font-display font-black text-white mb-4" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}>
-              Boutique en ligne à venir
-            </h2>
-            <p className="text-white/45 leading-relaxed mb-3 max-w-md mx-auto">
-              Maillots, survêtements et accessoires aux couleurs du club seront bientôt disponibles en ligne.
+            <h1 className="font-display font-black mb-4" style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)" }}>
+              La <span className="gradient-text">Boutique</span> VYHB
+            </h1>
+            <p className="text-white/45 text-lg max-w-lg leading-relaxed">
+              Portez les couleurs du club. Équipements officiels, tenues techniques et accessoires pour toute la famille.
             </p>
-            <p className="text-sm text-white/30 max-w-md mx-auto">
-              En attendant, contactez-nous directement pour toute commande d'équipement ou de maillot.
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Ghost product grid */}
-        <div className="mb-14">
-          <p className="text-xs font-display font-bold text-white/20 uppercase tracking-[0.2em] text-center mb-6">Aperçu de la collection</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {ghostProducts.map((p, i) => {
-              const Icon = p.icon;
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                  className="rounded-2xl border border-white/[0.05] p-6 flex flex-col items-center text-center opacity-40"
-                  style={{ background: "rgba(255,255,255,0.02)" }}
-                >
-                  <div className="w-14 h-14 rounded-xl bg-white/[0.04] flex items-center justify-center mb-4">
-                    <Icon size={26} className="text-white/40" />
-                  </div>
-                  <div className="w-full h-2.5 rounded-full bg-white/[0.07] mb-2" />
-                  <div className="w-3/4 h-2 rounded-full bg-white/[0.04]" />
-                </motion.div>
-              );
-            })}
-          </div>
+          </motion.div>
         </div>
+      </section>
 
-        {/* CTA Contact */}
+      {/* Filtres */}
+      <section className="container-narrow px-4 md:px-6 mb-8">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-wrap gap-2"
+        >
+          {FILTRES.map(f => (
+            <button
+              key={f.value}
+              onClick={() => setCategorie(f.value)}
+              className={`px-5 py-2 rounded-full text-sm font-semibold border transition-all duration-200 ${
+                categorie === f.value
+                  ? "bg-red-600 border-red-600 text-white shadow-[0_4px_16px_rgba(204,0,0,0.35)]"
+                  : "border-white/10 text-white/55 hover:text-white hover:border-white/20 bg-white/[0.03]"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* Grille produits */}
+      <section className="container-narrow px-4 md:px-6 mb-16">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={categorie}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {produitsFiltres.map(p => (
+              <ProductCard key={p.id} produit={p} />
+            ))}
+          </motion.div>
+        </AnimatePresence>
+
+        {produitsFiltres.length === 0 && (
+          <p className="text-white/30 text-center py-16">Aucun produit dans cette catégorie.</p>
+        )}
+      </section>
+
+      {/* Bannière avantages */}
+      <section className="container-narrow px-4 md:px-6 mb-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="rounded-2xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 border border-orange-500/20"
-          style={{ background: "rgba(249,115,22,0.05)" }}
+          className="rounded-2xl border border-white/[0.07] bg-white/[0.02] px-6 py-6"
         >
-          <div>
-            <p className="font-display font-black text-white text-lg mb-1">Commander maintenant ?</p>
-            <p className="text-white/45 text-sm">Contactez-nous par email pour toute commande d'équipement.</p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <a
-              href="mailto:vyhandball@gmail.com?subject=Commande équipement"
-              className="btn-primary gap-2"
-            >
-              <Mail size={16} />
-              Envoyer un email
-            </a>
-            <Link to="/contact" className="btn-secondary gap-2">
-              Formulaire de contact
-              <ArrowRight size={16} />
-            </Link>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06]">
+            <div className="flex items-center gap-3 sm:pr-4 pb-4 sm:pb-0">
+              <Package size={20} className="text-orange-400 shrink-0" />
+              <span className="text-white/60 text-sm">Livraison offerte dès <strong className="text-white">80 €</strong> d'achat</span>
+            </div>
+            <div className="flex items-center gap-3 sm:px-4 py-4 sm:py-0">
+              <RotateCcw size={20} className="text-orange-400 shrink-0" />
+              <span className="text-white/60 text-sm">Retours acceptés sous <strong className="text-white">30 jours</strong></span>
+            </div>
+            <div className="flex items-center gap-3 sm:pl-4 pt-4 sm:pt-0">
+              <Shield size={20} className="text-orange-400 shrink-0" />
+              <span className="text-white/60 text-sm"><strong className="text-white">Paiement sécurisé</strong> — bientôt disponible</span>
+            </div>
           </div>
         </motion.div>
+      </section>
+    </>
+  )
+}
 
-      </div>
-    </section>
-  </>
-);
-
-export default Shop;
+export default Shop

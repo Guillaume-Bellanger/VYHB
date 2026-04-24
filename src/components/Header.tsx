@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, ShoppingCart, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import logoClub from "../assets/logo-vy-handball.jpeg";
+import { useCartStore } from "../store/cartStore";
 
 const navLinks = [
   { to: "/", label: "Accueil" },
@@ -11,6 +12,7 @@ const navLinks = [
   { to: "/collectifs", label: "Collectifs" },
   { to: "/club", label: "Le Club" },
   { to: "/inscriptions", label: "Inscriptions" },
+  { to: "/boutique", label: "Boutique" },
   { to: "/contact", label: "Contact" },
 ];
 
@@ -18,6 +20,7 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { totalItems, toggleCart } = useCartStore();
 
   useEffect(() => {
     setMenuOpen(false);
@@ -86,7 +89,7 @@ const Header = () => {
           ))}
         </nav>
 
-        {/* Right side: CTA + hamburger */}
+        {/* Right side: CTA + panier + hamburger */}
         <div className="flex items-center gap-3">
           <Link
             to="/inscriptions"
@@ -94,6 +97,20 @@ const Header = () => {
           >
             S'inscrire
           </Link>
+
+          {/* Icône panier */}
+          <button
+            onClick={toggleCart}
+            className="relative inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] p-2 text-white transition-all hover:bg-white/10 hover:border-white/20 cursor-pointer"
+            aria-label="Ouvrir le panier"
+          >
+            <ShoppingCart size={20} />
+            {totalItems() > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center px-1">
+                {totalItems()}
+              </span>
+            )}
+          </button>
 
           <button
             onClick={() => setMenuOpen((prev) => !prev)}
