@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "node node_modules/vite/bin/vite.js build",
     "build:spa": "node node_modules/vite/bin/vite.js build",
-    "postbuild": "react-snap -- --no-sandbox",
+    "postbuild": "react-snap",
     "build:dev": "node node_modules/vite/bin/vite.js build --mode development",
     "lint": "eslint .",
     "preview": "node node_modules/vite/bin/vite.js preview",
@@ -69,7 +69,8 @@
   },
   "reactSnap": {
     "source": "dist",
-    "destination": "dist"
+    "destination": "dist",
+    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"]
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
