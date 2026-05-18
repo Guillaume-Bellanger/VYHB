@@ -14,7 +14,23 @@ _Branche : `feat/refonte-contenu-seo`_
 - [x] `supabase/schema.sql` — tables profiles + matches, enums, triggers updated_at + handle_new_user, RLS complet
 - [ ] Remplir VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans `.env.local` (depuis app.supabase.com)
 - [ ] Exécuter `supabase/schema.sql` dans l'éditeur SQL Supabase
-- [ ] Phase suivante : UI authentification (login/logout) + page admin matchs
+- [x] Phase suivante : UI authentification (login/logout) + page admin matchs → Phase 13
+
+---
+
+## PHASE 13 – AUTH ADMIN + ROUTING PROTÉGÉ
+
+- [x] `src/stores/authStore.ts` — Zustand store : user, profile, isLoading + signIn/signOut/fetchProfile + onAuthStateChange
+- [x] `src/hooks/useAuth.ts` — hook exposant user, profile, role, categorie, hasRole(), isAdmin, isResponsable, isRedacteur
+- [x] `src/components/admin/ProtectedRoute.tsx` — redirect /admin/login si non connecté, 403 si rôle insuffisant
+- [x] `src/components/admin/AdminLayout.tsx` — sidebar desktop + overlay mobile, nav filtrée par rôle, bouton déconnexion
+- [x] `src/pages/admin/LoginPage.tsx` — formulaire email/password (react-hook-form + zod + shadcn), messages d'erreur localisés
+- [x] `src/pages/admin/DashboardPage.tsx` — stub tableau de bord
+- [x] `src/pages/admin/MatchListAdminPage.tsx` — stub liste matchs admin
+- [x] `src/pages/admin/MatchFormPage.tsx` — stub formulaire match (new + edit)
+- [x] `src/pages/admin/UsersPage.tsx` — stub gestion utilisateurs (super_admin)
+- [x] `src/App.tsx` — routes admin ajoutées sans toucher aux routes publiques
+- [ ] Phase suivante : formulaire match (CRUD complet) + liste matchs admin
 
 ---
 
