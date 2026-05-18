@@ -39,7 +39,22 @@ _Branche : `feat/refonte-contenu-seo`_
 - [x] `src/hooks/useMatches.ts` — TanStack Query : useMatches(filters), useMatch(id), useCreateMatch, useUpdateMatch, useDeleteMatch + invalidation cache
 - [x] `src/pages/admin/MatchListAdminPage.tsx` — tableau complet : date, adversaire, catégorie, type, statut, score, actions (publier/éditer/supprimer). Filtres statut + catégorie. Confirmation suppression via AlertDialog
 - [x] `src/pages/admin/MatchFormPage.tsx` — formulaire create+edit : datetime, adversaire, domicile (Switch), catégorie (Select), type, statut, score (visible si joué/publié), résumé (Textarea). Permissions : rédacteur → résumé seul, responsable → catégorie verrouillée, admin → accès total
-- [ ] Phase suivante : gestion utilisateurs (UsersPage) + tableau de bord enrichi
+- [x] Phase suivante : gestion utilisateurs + page publique résultats → Phase 15
+
+---
+
+## PHASE 15 – GESTION UTILISATEURS + PAGE PUBLIQUE RÉSULTATS
+
+- [x] `supabase/schema.sql` — v2 : ajout email+disabled sur profiles, table pending_invites, UPDATE policy super_admin, lecture publique matchs prevu+publie
+- [x] `src/types/database.ts` — ajout email/disabled sur Profile, interface PendingInvite
+- [x] `src/lib/supabase.ts` — fallback placeholder pour react-snap (ne throw plus), export isSupabaseConfigured
+- [x] `src/hooks/useUsers.ts` — useUsers, useUpdateUser, useInviteUser (pending_invite + OTP magic link)
+- [x] `src/pages/admin/UsersPage.tsx` — table users, dialog invite (email+rôle+catégorie), dialog edit, toggle disable
+- [x] `src/hooks/usePublicMatches.ts` — usePublicMatches (publiés), usePublicUpcoming (prévus futurs), enabled seulement si Supabase configuré
+- [x] `src/pages/Resultats.tsx` — page publique : onglets par catégorie, section "À venir", section "Résultats", modal résumé, skeletons SSG-safe
+- [x] `src/App.tsx` — route /resultats ajoutée
+- [x] `vite.config.ts` — /resultats ajouté au sitemap
+- [ ] Phase suivante : tableau de bord enrichi (stats matchs) + lien /resultats dans le Header
 
 ---
 

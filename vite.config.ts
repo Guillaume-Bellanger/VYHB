@@ -22,6 +22,7 @@ export default defineConfig(() => ({
         "/inscriptions",
         "/partenaires",
         "/contact",
+        "/resultats",
       ],
     }),
   ],

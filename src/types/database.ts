@@ -7,6 +7,8 @@ export interface Profile {
   role: UserRole;
   categorie: string | null;
   full_name: string;
+  email: string | null;
+  disabled: boolean;
   created_at: string;
 }
 
@@ -26,6 +28,13 @@ export interface Match {
   created_at: string;
 }
 
+export interface PendingInvite {
+  email: string;
+  role: UserRole;
+  categorie: string | null;
+  invited_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -42,6 +51,11 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Omit<Match, "id" | "created_at">>;
+      };
+      pending_invites: {
+        Row: PendingInvite;
+        Insert: Omit<PendingInvite, "invited_at"> & { invited_at?: string };
+        Update: Partial<PendingInvite>;
       };
     };
     Enums: {
