@@ -30,7 +30,16 @@ _Branche : `feat/refonte-contenu-seo`_
 - [x] `src/pages/admin/MatchFormPage.tsx` — stub formulaire match (new + edit)
 - [x] `src/pages/admin/UsersPage.tsx` — stub gestion utilisateurs (super_admin)
 - [x] `src/App.tsx` — routes admin ajoutées sans toucher aux routes publiques
-- [ ] Phase suivante : formulaire match (CRUD complet) + liste matchs admin
+- [x] Phase suivante : formulaire match (CRUD complet) + liste matchs admin → Phase 14
+
+---
+
+## PHASE 14 – CRUD MATCHS ADMIN
+
+- [x] `src/hooks/useMatches.ts` — TanStack Query : useMatches(filters), useMatch(id), useCreateMatch, useUpdateMatch, useDeleteMatch + invalidation cache
+- [x] `src/pages/admin/MatchListAdminPage.tsx` — tableau complet : date, adversaire, catégorie, type, statut, score, actions (publier/éditer/supprimer). Filtres statut + catégorie. Confirmation suppression via AlertDialog
+- [x] `src/pages/admin/MatchFormPage.tsx` — formulaire create+edit : datetime, adversaire, domicile (Switch), catégorie (Select), type, statut, score (visible si joué/publié), résumé (Textarea). Permissions : rédacteur → résumé seul, responsable → catégorie verrouillée, admin → accès total
+- [ ] Phase suivante : gestion utilisateurs (UsersPage) + tableau de bord enrichi
 
 ---
 
