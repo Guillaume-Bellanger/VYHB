@@ -60,7 +60,7 @@ export function useInviteUser() {
         email,
         options: {
           shouldCreateUser: true,
-          emailRedirectTo: `${window.location.origin}/admin/dashboard`,
+          emailRedirectTo: `${window.location.origin}/admin/auth/callback`,
         },
       });
       if (otpErr) throw otpErr;

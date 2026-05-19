@@ -58,6 +58,15 @@ _Branche : `feat/refonte-contenu-seo`_
 
 ---
 
+## PHASE 16 – AUTH CALLBACK (INVITATION & RÉCUPÉRATION MOT DE PASSE)
+
+- [x] `src/pages/admin/AuthCallbackPage.tsx` — détecte le type (invite/recovery/magiclink) via hash ou query params, affiche formulaire définition de mot de passe (react-hook-form + zod + shadcn), appelle `supabase.auth.updateUser({ password })` après init session, redirige vers /admin/dashboard
+- [x] `src/App.tsx` — route publique `/admin/auth/callback` → `AuthCallbackPage`
+- [x] `src/hooks/useUsers.ts` — `emailRedirectTo` mis à jour : `/admin/dashboard` → `/admin/auth/callback`
+- [ ] **ACTION MANUELLE** : Supabase Dashboard → Authentication → URL Configuration → Redirect URLs → ajouter `http://localhost:8080/admin/auth/callback` (et l'URL de production)
+
+---
+
 ## ÉTAT GLOBAL
 - [x] Phase 0 – Audit initial
 - [x] Phase 1 – Prérequis techniques SEO

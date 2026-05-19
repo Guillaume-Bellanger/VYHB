@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import LoginPage from "./pages/admin/LoginPage";
+import AuthCallbackPage from "./pages/admin/AuthCallbackPage";
 import DashboardPage from "./pages/admin/DashboardPage";
 import MatchListAdminPage from "./pages/admin/MatchListAdminPage";
 import MatchFormPage from "./pages/admin/MatchFormPage";
@@ -63,6 +64,7 @@ const App = () => (
 
             {/* ── Routes admin ── */}
             <Route path="/admin/login" element={<LoginPage />} />
+            <Route path="/admin/auth/callback" element={<AuthCallbackPage />} />
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
             <Route element={<AdminLayout />}>
