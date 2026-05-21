@@ -30,12 +30,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   fetchProfile: async (userId) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", userId)
       .single();
-    set({ profile: data ?? null });
+    if (error) {
+      set({ profile: null });
+      return;
+    }
+    set({ profile: data });
   },
 
   _init: () => {
