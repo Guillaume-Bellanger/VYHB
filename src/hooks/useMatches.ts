@@ -11,7 +11,7 @@ export type MatchInsert = Omit<Match, "id" | "created_at" | "updated_at" | "crea
 export type MatchUpdate = Partial<MatchInsert> & { statut?: MatchStatut };
 
 export interface MatchFilters {
-  statut?: MatchStatut | "";
+  statut?: MatchStatut;
   categorie?: string;
 }
 

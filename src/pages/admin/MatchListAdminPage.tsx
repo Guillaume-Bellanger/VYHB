@@ -114,14 +114,14 @@ export default function MatchListAdminPage() {
       {/* Filtres */}
       <div className="flex gap-3 mb-6 flex-wrap">
         <Select
-          value={filters.statut ?? ""}
-          onValueChange={(v) => setFilters((f) => ({ ...f, statut: v as MatchStatut | "" }))}
+          value={filters.statut ?? "tous"}
+          onValueChange={(v) => setFilters((f) => ({ ...f, statut: v === "tous" ? undefined : v as MatchStatut }))}
         >
           <SelectTrigger className="w-40 bg-white/[0.04] border-white/[0.10] text-white">
             <SelectValue placeholder="Tous les statuts" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les statuts</SelectItem>
+            <SelectItem value="tous">Tous les statuts</SelectItem>
             <SelectItem value="prevu">Prévu</SelectItem>
             <SelectItem value="joue">Joué</SelectItem>
             <SelectItem value="publie">Publié</SelectItem>
@@ -130,14 +130,14 @@ export default function MatchListAdminPage() {
 
         {showCatFilter && (
           <Select
-            value={filters.categorie ?? ""}
-            onValueChange={(v) => setFilters((f) => ({ ...f, categorie: v || undefined }))}
+            value={filters.categorie ?? "tous"}
+            onValueChange={(v) => setFilters((f) => ({ ...f, categorie: v === "tous" ? undefined : v }))}
           >
             <SelectTrigger className="w-48 bg-white/[0.04] border-white/[0.10] text-white">
               <SelectValue placeholder="Toutes les catégories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Toutes les catégories</SelectItem>
+              <SelectItem value="tous">Toutes les catégories</SelectItem>
               {CATEGORIES.map((c) => (
                 <SelectItem key={c} value={c}>{c}</SelectItem>
               ))}

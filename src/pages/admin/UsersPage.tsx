@@ -73,12 +73,12 @@ function CategorieSelect({ control, name, disabled }: {
       control={control as ReturnType<typeof useForm<InviteForm>>["control"]}
       name={name}
       render={({ field }) => (
-        <Select value={field.value ?? ""} onValueChange={(v) => field.onChange(v || null)} disabled={disabled}>
+        <Select value={field.value ?? "none"} onValueChange={(v) => field.onChange(v === "none" ? null : v)} disabled={disabled}>
           <SelectTrigger className="bg-white/[0.04] border-white/[0.10] text-white disabled:opacity-40">
             <SelectValue placeholder="Aucune (super_admin / rédacteur)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Aucune</SelectItem>
+            <SelectItem value="none">Aucune</SelectItem>
             {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
           </SelectContent>
         </Select>
