@@ -41,12 +41,49 @@ function useCountdown(targetDate: string) {
   return diff;
 }
 
-function Countdown({ date }: { date: string }) {
+function CountdownBlock({
+  value, label, urgent, size,
+}: {
+  value: number; label: string; urgent: boolean; size: "sm" | "md";
+}) {
+  const isSmall = size === "sm";
+  return (
+    <div
+      className={`flex flex-col items-center justify-center rounded-lg ${
+        isSmall ? "min-w-[26px] px-1.5 py-1" : "min-w-[40px] px-2.5 py-2"
+      } ${
+        urgent
+          ? "bg-orange-500/15 border border-orange-500/30"
+          : "bg-white/[0.05] border border-white/[0.08]"
+      }`}
+    >
+      <span
+        className={`font-display font-black tabular-nums leading-none ${
+          isSmall ? "text-sm" : "text-2xl"
+        } ${urgent ? "text-orange-400" : "text-white"}`}
+      >
+        {String(value).padStart(2, "0")}
+      </span>
+      <span
+        className={`font-bold uppercase tracking-widest leading-none ${
+          isSmall ? "text-[7px] mt-0.5" : "text-[9px] mt-1"
+        } ${urgent ? "text-orange-400/60" : "text-white/25"}`}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function Countdown({ date, size = "md" }: { date: string; size?: "sm" | "md" }) {
   const diff = useCountdown(date);
-  const pad = (n: number) => String(n).padStart(2, "0");
 
   if (diff <= 0) {
-    return <span className="text-[10px] font-display font-bold text-white/30 tabular-nums">Match terminé</span>;
+    return (
+      <span className="text-[10px] font-display font-bold text-white/30">
+        Match terminé
+      </span>
+    );
   }
 
   const totalSec = Math.floor(diff / 1000);
@@ -56,14 +93,16 @@ function Countdown({ date }: { date: string }) {
   const seconds = totalSec % 60;
   const isUrgent = diff < 86_400_000;
 
-  const label = days > 0
-    ? `J-${days} · ${pad(hours)}h ${pad(minutes)}min ${pad(seconds)}s`
-    : `${pad(hours)}h ${pad(minutes)}min ${pad(seconds)}s`;
+  const units = days > 0
+    ? [{ value: days, label: "J" }, { value: hours, label: "H" }, { value: minutes, label: "MIN" }, { value: seconds, label: "S" }]
+    : [{ value: hours, label: "H" }, { value: minutes, label: "MIN" }, { value: seconds, label: "S" }];
 
   return (
-    <span className={`text-[10px] font-display font-bold tabular-nums ${isUrgent ? "text-orange-400" : "text-white/40"}`}>
-      {label}
-    </span>
+    <div className="flex items-center gap-1">
+      {units.map((u) => (
+        <CountdownBlock key={u.label} value={u.value} label={u.label} urgent={isUrgent} size={size} />
+      ))}
+    </div>
   );
 }
 
@@ -617,13 +656,11 @@ const Index = () => {
                         }`}
                       >
                         <td className="px-5 py-4 font-display font-bold text-foreground whitespace-nowrap">
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 mb-1.5">
                             {i === 0 && <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 animate-pulse" />}
                             {format(new Date(m.date), "EEE d MMM", { locale: fr })}
                           </div>
-                          <div className="mt-0.5 pl-3">
-                            <Countdown date={m.date} />
-                          </div>
+                          <Countdown date={m.date} size="sm" />
                         </td>
                         <td className="px-5 py-4 font-display font-bold text-accent whitespace-nowrap">
                           {format(new Date(m.date), "HH:mm")}
