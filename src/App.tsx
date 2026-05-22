@@ -27,6 +27,7 @@ import MatchListAdminPage from "./pages/admin/MatchListAdminPage";
 import MatchFormPage from "./pages/admin/MatchFormPage";
 import UsersPage from "./pages/admin/UsersPage";
 import TickerPage from "./pages/admin/TickerPage";
+import EvenementsPage from "./pages/admin/EvenementsPage";
 import { useAuthStore } from "./stores/authStore";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,7 @@ const App = () => (
               <Route element={<ProtectedRoute allowedRoles={["super_admin"]} />}>
                 <Route path="/admin/users" element={<UsersPage />} />
                 <Route path="/admin/ticker" element={<TickerPage />} />
+                <Route path="/admin/evenements" element={<EvenementsPage />} />
               </Route>
             </Route>
           </Routes>

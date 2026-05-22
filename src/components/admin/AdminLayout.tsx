@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Users,
   Megaphone,
+  CalendarRange,
   LogOut,
   Menu,
   X,
@@ -23,6 +24,7 @@ const navItems: NavItem[] = [
   { to: "/admin/matches", label: "Matchs", icon: CalendarDays },
   { to: "/admin/users", label: "Utilisateurs", icon: Users, roles: ["super_admin"] },
   { to: "/admin/ticker", label: "Bandeau com", icon: Megaphone, roles: ["super_admin"] },
+  { to: "/admin/evenements", label: "Événements", icon: CalendarRange, roles: ["super_admin"] },
 ];
 
 function NavItems({ onClose }: { onClose?: () => void }) {
