@@ -8,7 +8,7 @@ import { useCartStore } from "../store/cartStore";
 const navLinks = [
   { to: "/", label: "Accueil" },
   { to: "/evenements", label: "Événements" },
-  { to: "/matchs", label: "Matchs" },
+  { to: "/resultats", label: "Matchs" },
   { to: "/collectifs", label: "Collectifs" },
   { to: "/club", label: "Le Club" },
   { to: "/inscriptions", label: "Inscriptions" },

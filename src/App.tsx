@@ -14,7 +14,6 @@ import Shop from "./pages/Shop";
 import ProduitDetail from "./pages/ProduitDetail";
 import Contact from "./pages/Contact";
 import Events from "./pages/Events";
-import Matches from "./pages/Matches";
 import Resultats from "./pages/Resultats";
 import Legal from "./pages/Legal";
 import NotFound from "./pages/NotFound";
@@ -56,7 +55,7 @@ const App = () => (
               <Route path="/boutique/:id" element={<ProduitDetail />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/evenements" element={<Events />} />
-              <Route path="/matchs" element={<Matches />} />
+              <Route path="/matchs" element={<Navigate to="/resultats" replace />} />
               <Route path="/resultats" element={<Resultats />} />
               <Route path="/mentions-legales" element={<Legal />} />
               <Route path="*" element={<NotFound />} />
