@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Plus, Pencil, Trash2, X, CalendarRange } from "lucide-react";
+import {
+  Loader2, Plus, Pencil, Trash2, X, CalendarRange, ImageIcon, AlertTriangle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +26,7 @@ interface Evenement {
   date_fin: string | null;
   lieu: string | null;
   description: string;
+  photo_url: string | null;
   lien_cta: string | null;
   label_cta: string | null;
   expire_le: string | null;
@@ -50,6 +53,42 @@ function evUrl(path: string): string {
   return `${import.meta.env.VITE_SUPABASE_URL as string}/rest/v1/${path}`;
 }
 
+async function uploadPhoto(file: File): Promise<string> {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+  let token = key;
+  try {
+    const ref = new URL(supabaseUrl).hostname.split(".")[0];
+    const raw = localStorage.getItem(`sb-${ref}-auth-token`);
+    if (raw) {
+      const s = JSON.parse(raw) as { access_token?: string };
+      token = s.access_token ?? key;
+    }
+  } catch {}
+
+  const prefix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const filename = `${prefix}-${safeName}`;
+
+  const res = await fetch(`${supabaseUrl}/storage/v1/object/evenements/${filename}`, {
+    method: "PUT",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": file.type || "application/octet-stream",
+      "x-upsert": "true",
+    },
+    body: file,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Upload échoué (${res.status})${text ? `: ${text}` : ""}`);
+  }
+
+  return `${supabaseUrl}/storage/v1/object/public/evenements/${filename}`;
+}
+
 const CATEGORIE_OPTIONS: { value: EvenementCategorie; label: string }[] = [
   { value: "recrutement", label: "Recrutement" },
   { value: "evenement", label: "Événement" },
@@ -65,6 +104,8 @@ const CATEGORIE_COLORS: Record<EvenementCategorie, string> = {
   info: "bg-white/10 text-white/50 border-white/15",
   autre: "bg-violet-500/15 text-violet-400 border-violet-500/25",
 };
+
+const MAX_SIZE = 2 * 1024 * 1024; // 2 Mo
 
 // ── Form schema ───────────────────────────────────────────────────────────────
 
@@ -102,6 +143,62 @@ function Field({ label, error, children, hint }: {
   );
 }
 
+// ── PhotoUpload ───────────────────────────────────────────────────────────────
+
+function PhotoUpload({
+  previewUrl,
+  onSelect,
+  onClear,
+  sizeWarning,
+}: {
+  previewUrl: string | null;
+  onSelect: (file: File) => void;
+  onClear: () => void;
+  sizeWarning: boolean;
+}) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) onSelect(f);
+    e.target.value = "";
+  };
+
+  return (
+    <div className="space-y-2">
+      {previewUrl ? (
+        <div className="relative rounded-xl overflow-hidden border border-white/10">
+          <img src={previewUrl} alt="Aperçu" className="w-full h-44 object-cover" />
+          <div className="absolute top-2 right-2 flex gap-1.5">
+            <label className="cursor-pointer px-2.5 py-1 rounded-lg bg-black/70 text-white text-xs font-medium hover:bg-black/85 transition-colors">
+              Changer
+              <input type="file" accept="image/*" className="sr-only" onChange={handleChange} />
+            </label>
+            <button
+              type="button"
+              onClick={onClear}
+              className="px-2.5 py-1 rounded-lg bg-black/70 text-red-400 text-xs font-medium hover:bg-red-900/50 transition-colors"
+            >
+              Supprimer
+            </button>
+          </div>
+        </div>
+      ) : (
+        <label className="flex flex-col items-center justify-center gap-2 h-32 border-2 border-dashed border-white/[0.12] rounded-xl cursor-pointer hover:border-white/25 hover:bg-white/[0.02] transition-colors">
+          <ImageIcon size={24} className="text-white/25" />
+          <span className="text-white/40 text-sm">Choisir une photo</span>
+          <span className="text-white/20 text-xs">JPG, PNG, WebP — format 16:9 recommandé</span>
+          <input type="file" accept="image/*" className="sr-only" onChange={handleChange} />
+        </label>
+      )}
+      {sizeWarning && (
+        <div className="flex items-center gap-1.5 text-amber-400 text-xs">
+          <AlertTriangle size={12} />
+          <span>Image volumineuse (&gt; 2 Mo) — pensez à la compresser avant l'upload.</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function EvenementsPage() {
@@ -110,6 +207,15 @@ export default function EvenementsPage() {
   const [error, setError] = useState<string | null>(null);
   const [formMode, setFormMode] = useState<null | "new" | string>(null);
   const [saving, setSaving] = useState(false);
+
+  // Photo state
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
+  const [photoCleared, setPhotoCleared] = useState(false);
+
+  const displayPhotoUrl = photoPreview ?? (photoCleared ? null : existingPhotoUrl);
+  const photoSizeWarning = photoFile !== null && photoFile.size > MAX_SIZE;
 
   const {
     register,
@@ -140,12 +246,49 @@ export default function EvenementsPage() {
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
 
+  function resetPhotoState() {
+    setPhotoFile(null);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(null);
+    setExistingPhotoUrl(null);
+    setPhotoCleared(false);
+  }
+
+  function handlePhotoSelect(file: File) {
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+    setPhotoCleared(false);
+  }
+
+  function handlePhotoClear() {
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    setPhotoCleared(true);
+  }
+
   function openNew() {
-    reset({ categorie: "evenement", actif: true, ordre: events.length, titre: "", date_debut: "", description: "", date_fin: null, lieu: null, lien_cta: null, label_cta: null, expire_le: null });
+    resetPhotoState();
+    reset({
+      categorie: "evenement",
+      actif: true,
+      ordre: events.length,
+      titre: "",
+      date_debut: "",
+      description: "",
+      date_fin: null,
+      lieu: null,
+      lien_cta: null,
+      label_cta: null,
+      expire_le: null,
+    });
     setFormMode("new");
   }
 
   function openEdit(ev: Evenement) {
+    resetPhotoState();
+    setExistingPhotoUrl(ev.photo_url ?? null);
     reset({
       titre: ev.titre,
       categorie: ev.categorie,
@@ -163,26 +306,40 @@ export default function EvenementsPage() {
   }
 
   function closeForm() {
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoFile(null);
+    setPhotoPreview(null);
     setFormMode(null);
   }
 
   async function onSubmit(data: FormData) {
     setSaving(true);
     setError(null);
-    const payload = {
-      titre: data.titre,
-      categorie: data.categorie,
-      date_debut: data.date_debut,
-      date_fin: data.date_fin || null,
-      lieu: data.lieu || null,
-      description: data.description,
-      lien_cta: data.lien_cta || null,
-      label_cta: data.label_cta || null,
-      expire_le: data.expire_le || null,
-      ordre: data.ordre,
-      actif: data.actif,
-    };
     try {
+      let photo_url: string | null;
+      if (photoFile) {
+        photo_url = await uploadPhoto(photoFile);
+      } else if (photoCleared) {
+        photo_url = null;
+      } else {
+        photo_url = existingPhotoUrl;
+      }
+
+      const payload = {
+        titre: data.titre,
+        categorie: data.categorie,
+        date_debut: data.date_debut,
+        date_fin: data.date_fin || null,
+        lieu: data.lieu || null,
+        description: data.description,
+        photo_url,
+        lien_cta: data.lien_cta || null,
+        label_cta: data.label_cta || null,
+        expire_le: data.expire_le || null,
+        ordre: data.ordre,
+        actif: data.actif,
+      };
+
       if (formMode === "new") {
         const res = await fetch(evUrl("evenements"), {
           method: "POST",
@@ -198,7 +355,9 @@ export default function EvenementsPage() {
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
       }
+
       setFormMode(null);
+      resetPhotoState();
       await loadEvents();
     } catch (e) {
       setError((e as Error).message);
@@ -231,7 +390,7 @@ export default function EvenementsPage() {
         headers: { ...evHeaders(), Prefer: "return=minimal" },
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      if (formMode === id) setFormMode(null);
+      if (formMode === id) closeForm();
       await loadEvents();
     } catch (e) {
       setError((e as Error).message);
@@ -336,7 +495,6 @@ export default function EvenementsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {/* Date début */}
             <Field label="Date de début" error={errors.date_debut?.message}>
               <Input
                 type="date"
@@ -345,7 +503,6 @@ export default function EvenementsPage() {
               />
             </Field>
 
-            {/* Date fin */}
             <Field label="Date de fin" hint="Optionnel — si l'événement dure plusieurs jours">
               <Input
                 type="date"
@@ -356,7 +513,6 @@ export default function EvenementsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {/* Lieu */}
             <Field label="Lieu" hint="Optionnel">
               <Input
                 {...register("lieu")}
@@ -365,7 +521,6 @@ export default function EvenementsPage() {
               />
             </Field>
 
-            {/* Expire le */}
             <Field label="Expire le" hint="Optionnel — masquer automatiquement après cette date">
               <Input
                 type="date"
@@ -385,8 +540,17 @@ export default function EvenementsPage() {
             />
           </Field>
 
+          {/* Photo */}
+          <Field label="Photo" hint={displayPhotoUrl ? undefined : "Optionnel — apparaît en haut de la carte publique"}>
+            <PhotoUpload
+              previewUrl={displayPhotoUrl}
+              onSelect={handlePhotoSelect}
+              onClear={handlePhotoClear}
+              sizeWarning={photoSizeWarning}
+            />
+          </Field>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {/* Label CTA */}
             <Field label="Label du bouton" hint="Optionnel — ex : S'inscrire maintenant">
               <Input
                 {...register("label_cta")}
@@ -395,8 +559,7 @@ export default function EvenementsPage() {
               />
             </Field>
 
-            {/* Lien CTA */}
-            <Field label="Lien du bouton" hint="Optionnel — chemin interne (/inscriptions) ou URL externe">
+            <Field label="Lien du bouton" hint="Optionnel — chemin interne ou URL externe">
               <Input
                 {...register("lien_cta")}
                 placeholder="/inscriptions ou https://…"
@@ -405,8 +568,7 @@ export default function EvenementsPage() {
             </Field>
           </div>
 
-          {/* Ordre */}
-          <Field label="Ordre d'affichage" hint="Valeur numérique — les plus petits apparaissent en premier">
+          <Field label="Ordre d'affichage" hint="Les plus petits apparaissent en premier">
             <Input
               type="number"
               {...register("ordre")}
@@ -422,7 +584,9 @@ export default function EvenementsPage() {
               className="bg-orange-600 hover:bg-orange-500 text-white font-bold gap-2"
             >
               {saving && <Loader2 size={14} className="animate-spin" />}
-              {formMode === "new" ? "Créer l'événement" : "Enregistrer"}
+              {saving
+                ? photoFile ? "Upload en cours…" : "Enregistrement…"
+                : formMode === "new" ? "Créer l'événement" : "Enregistrer"}
             </Button>
             <Button
               type="button"
@@ -458,15 +622,28 @@ export default function EvenementsPage() {
                   : "bg-white/[0.01] border-white/[0.04] opacity-50"
               }`}
             >
-              {/* Badge catégorie */}
-              <span
-                className={`shrink-0 mt-0.5 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border ${CATEGORIE_COLORS[ev.categorie]}`}
-              >
-                {CATEGORIE_OPTIONS.find((o) => o.value === ev.categorie)?.label ?? ev.categorie}
-              </span>
+              {/* Miniature photo */}
+              {ev.photo_url ? (
+                <img
+                  src={ev.photo_url}
+                  alt=""
+                  className="w-12 h-12 rounded-lg object-cover shrink-0 border border-white/10"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0">
+                  <ImageIcon size={16} className="text-white/20" />
+                </div>
+              )}
 
-              {/* Contenu */}
+              {/* Badge catégorie + contenu */}
               <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                  <span
+                    className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${CATEGORIE_COLORS[ev.categorie]}`}
+                  >
+                    {CATEGORIE_OPTIONS.find((o) => o.value === ev.categorie)?.label ?? ev.categorie}
+                  </span>
+                </div>
                 <p className="text-white text-sm font-semibold truncate">{ev.titre}</p>
                 <p className="text-white/35 text-xs mt-0.5">
                   {ev.date_debut}
@@ -477,7 +654,6 @@ export default function EvenementsPage() {
 
               {/* Actions */}
               <div className="flex items-center gap-2 shrink-0">
-                {/* Toggle actif */}
                 <button
                   onClick={() => handleToggle(ev)}
                   className={`text-[11px] font-bold px-2.5 py-1 rounded-full border transition-all ${
@@ -489,7 +665,6 @@ export default function EvenementsPage() {
                   {ev.actif ? "Actif" : "Inactif"}
                 </button>
 
-                {/* Éditer */}
                 <button
                   onClick={() => (formMode === ev.id ? closeForm() : openEdit(ev))}
                   className={`p-1.5 rounded-lg transition-all ${
@@ -502,7 +677,6 @@ export default function EvenementsPage() {
                   <Pencil size={14} />
                 </button>
 
-                {/* Supprimer */}
                 <button
                   onClick={() => handleDelete(ev.id)}
                   className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all"

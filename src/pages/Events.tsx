@@ -20,6 +20,7 @@ interface Evenement {
   date_fin: string | null;
   lieu: string | null;
   description: string;
+  photo_url: string | null;
   lien_cta: string | null;
   label_cta: string | null;
 }
@@ -107,6 +108,7 @@ const FALLBACK_EVENTS: Evenement[] = [
     date_debut: "Dès maintenant — Saison 2026/2027",
     date_fin: null,
     lieu: "Gymnase Municipal, Boussy-Saint-Antoine",
+    photo_url: null,
     description:
       "Le Val d'Yerres Handball ouvre officiellement les inscriptions pour la saison 2026/2027 ! Toutes les catégories sont ouvertes à de nouveaux licenciés, du Baby Hand (dès 5 ans) jusqu'aux Seniors et à l'équipe Loisirs.\n\nVous souhaitez découvrir le handball ou reprendre après une pause ? Profitez de nos 2 séances d'essai gratuites, sans engagement. C'est l'occasion parfaite pour voir si le club vous convient avant de vous inscrire officiellement.\n\nLe club propose un cadre bienveillant, des entraîneurs diplômés et une atmosphère familiale unique. Que vous soyez compétiteur ou joueur loisir, débutant ou confirmé, il y a forcément une place pour vous chez nous.",
     lien_cta: "/inscriptions",
@@ -119,6 +121,7 @@ const FALLBACK_EVENTS: Evenement[] = [
     date_debut: "01 Mai – 31 Mai 2026 · Tous les week-ends",
     date_fin: null,
     lieu: "Gymnase Municipal, Boussy-Saint-Antoine",
+    photo_url: null,
     description:
       "Tout au long du mois de mai 2026, le Val d'Yerres Handball vous ouvre grand les portes de son gymnase ! C'est l'occasion idéale pour venir découvrir l'univers du handball en famille, essayer quelques gestes techniques avec nos entraîneurs, et rencontrer les joueurs et joueuses du club.\n\nCes journées portes ouvertes s'adressent à tous : enfants dès 5 ans, adolescents, adultes débutants ou anciens joueurs qui souhaitent reprendre une activité sportive. Pas besoin de matériel ni de licence — venez simplement avec vos chaussures de sport !\n\nDes créneaux d'initiation sont organisés chaque samedi matin pour les plus jeunes (5–12 ans) et chaque vendredi soir pour les adultes. L'entrée est gratuite et ouverte à tous.",
     lien_cta: "/contact",
@@ -131,6 +134,7 @@ const FALLBACK_EVENTS: Evenement[] = [
     date_debut: "Juin 2026 — Date exacte à confirmer",
     date_fin: null,
     lieu: "Gymnase Municipal, Boussy-Saint-Antoine",
+    photo_url: null,
     description:
       "L'Assemblée Générale Ordinaire du Val d'Yerres Handball se tiendra en juin 2026. Cet événement annuel incontournable réunit l'ensemble des membres du club — joueurs, parents, entraîneurs et bénévoles — pour dresser le bilan de la saison écoulée et préparer la suivante.\n\nAu programme : présentation du rapport moral du Président, rapport financier de la Trésorière, bilan sportif de chaque équipe, et vote des nouvelles orientations pour la saison 2026/2027. C'est également l'occasion d'élire les membres du Conseil d'Administration si des postes sont à renouveler.\n\nTous les licenciés et parents de licenciés sont invités à y participer. La présence de chacun est précieuse pour que la vie associative du club soit le reflet de sa communauté. Un pot de clôture de saison sera organisé à l'issue de l'assemblée !",
     lien_cta: "/contact",
@@ -143,6 +147,7 @@ const FALLBACK_EVENTS: Evenement[] = [
     date_debut: "Toute la saison 2026/2027",
     date_fin: null,
     lieu: "À apporter lors des entraînements",
+    photo_url: null,
     description:
       "Le Val d'Yerres Handball s'engage pour une cause solidaire : la collecte de bouchons plastiques ! Tout au long de la saison, le club collecte des bouchons de bouteilles en plastique afin de les reverser à des associations caritatives qui les recycleront pour financer du matériel médical ou sportif pour des personnes en situation de handicap.\n\nBouchons de bouteilles d'eau, de jus de fruits, de lait, de produits ménagers… tous les bouchons en plastique sont bons à collecter ! Apportez-les lors de vos entraînements ou lors des matchs à domicile. Des sacs de collecte sont mis à votre disposition dans les vestiaires.\n\nPetits gestes, grands impacts : en participant à cette collecte, vous contribuez non seulement à valoriser les déchets plastiques, mais également à aider des associations qui œuvrent pour l'autonomie des personnes handicapées.",
     lien_cta: "/contact",
@@ -224,6 +229,18 @@ const Events = () => {
               >
                 {/* Colored top bar */}
                 <div className="h-1 w-full" style={{ background: cfg.gradientBar }} />
+
+                {/* Photo */}
+                {ev.photo_url && (
+                  <div className="h-52 overflow-hidden">
+                    <img
+                      src={ev.photo_url}
+                      alt={ev.titre}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
 
                 <div className="p-8 md:p-10">
                   {/* Header */}
