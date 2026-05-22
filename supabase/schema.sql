@@ -33,6 +33,7 @@ CREATE TABLE matches (
   type        match_type  NOT NULL DEFAULT 'championnat',
   statut      match_statut NOT NULL DEFAULT 'prevu',
   resume      TEXT,
+  lieu        TEXT,
   created_by  UUID        NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()

@@ -30,6 +30,43 @@ const fadeUp = {
   }),
 };
 
+// ─── Countdown hook + component
+
+function useCountdown(targetDate: string) {
+  const [diff, setDiff] = useState(() => new Date(targetDate).getTime() - Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setDiff(new Date(targetDate).getTime() - Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [targetDate]);
+  return diff;
+}
+
+function Countdown({ date }: { date: string }) {
+  const diff = useCountdown(date);
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  if (diff <= 0) {
+    return <span className="text-[10px] font-display font-bold text-white/30 tabular-nums">Match terminé</span>;
+  }
+
+  const totalSec = Math.floor(diff / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = totalSec % 60;
+  const isUrgent = diff < 86_400_000;
+
+  const label = days > 0
+    ? `J-${days} · ${pad(hours)}h ${pad(minutes)}min ${pad(seconds)}s`
+    : `${pad(hours)}h ${pad(minutes)}min ${pad(seconds)}s`;
+
+  return (
+    <span className={`text-[10px] font-display font-bold tabular-nums ${isUrgent ? "text-orange-400" : "text-white/40"}`}>
+      {label}
+    </span>
+  );
+}
+
 // ─── Animated counter hook
 const useCountUp = (target: number, inView: boolean) => {
   const [count, setCount] = useState(0);
@@ -580,8 +617,13 @@ const Index = () => {
                         }`}
                       >
                         <td className="px-5 py-4 font-display font-bold text-foreground whitespace-nowrap">
-                          {i === 0 && <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 mr-2 mb-0.5 animate-pulse" />}
-                          {format(new Date(m.date), "EEE d MMM", { locale: fr })}
+                          <div className="flex items-center gap-1.5">
+                            {i === 0 && <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 animate-pulse" />}
+                            {format(new Date(m.date), "EEE d MMM", { locale: fr })}
+                          </div>
+                          <div className="mt-0.5 pl-3">
+                            <Countdown date={m.date} />
+                          </div>
                         </td>
                         <td className="px-5 py-4 font-display font-bold text-accent whitespace-nowrap">
                           {format(new Date(m.date), "HH:mm")}
@@ -591,7 +633,7 @@ const Index = () => {
                         <td className="px-5 py-4 text-xs">
                           <span className={`flex items-center gap-1 ${m.domicile ? "text-orange-400/80" : "text-blue-400/80"}`}>
                             {m.domicile ? <Home size={11} /> : <Plane size={11} />}
-                            {m.domicile ? "Domicile" : "Extérieur"}
+                            {m.lieu ?? (m.domicile ? "Domicile" : "Extérieur")}
                           </span>
                         </td>
                       </motion.tr>
@@ -610,9 +652,9 @@ const Index = () => {
                     transition={{ delay: i * 0.07, duration: 0.4 }}
                     className={`card-sport p-4 ${i === 0 ? "border-orange-500/35 shadow-[0_0_20px_rgba(249,115,22,0.1)]" : ""}`}
                   >
-                    <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
-                        {i === 0 && <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />}
+                        {i === 0 && <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 animate-pulse" />}
                         <span className="font-display font-black text-foreground">
                           {format(new Date(m.date), "EEE d MMM", { locale: fr })}
                         </span>
@@ -621,11 +663,14 @@ const Index = () => {
                         {format(new Date(m.date), "HH:mm")}
                       </span>
                     </div>
+                    <div className="mb-2">
+                      <Countdown date={m.date} />
+                    </div>
                     <div className="font-display font-bold text-sm text-foreground">{m.categorie}</div>
                     <div className="text-sm text-muted-foreground">vs {m.adversaire}</div>
                     <div className={`text-xs mt-1 flex items-center gap-1 ${m.domicile ? "text-orange-400/60" : "text-blue-400/60"}`}>
                       {m.domicile ? <Home size={10} /> : <Plane size={10} />}
-                      {m.domicile ? "Domicile" : "Extérieur"}
+                      {m.lieu ?? (m.domicile ? "Domicile" : "Extérieur")}
                     </div>
                   </motion.div>
                 ))}

@@ -18,6 +18,11 @@ import {
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
+const SALLES_DOMICILE = [
+  "Halle des sports",
+  "Salle polyvalente Georges Pompidou",
+] as const;
+
 const CATEGORIES = [
   "Séniors Masculins",
   "Séniors Féminins",
@@ -56,6 +61,7 @@ const schema = z.object({
   score_nous: z.number().int().min(0).nullable(),
   score_eux: z.number().int().min(0).nullable(),
   resume: z.string().nullable(),
+  lieu: z.string().nullable(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -115,6 +121,7 @@ export default function MatchFormPage() {
       score_nous: null,
       score_eux: null,
       resume: null,
+      lieu: null,
     },
   });
 
@@ -131,12 +138,15 @@ export default function MatchFormPage() {
         score_nous: existing.score_nous,
         score_eux: existing.score_eux,
         resume: existing.resume ?? "",
+        lieu: existing.lieu ?? "",
       });
     }
   }, [existing, reset]);
 
   const statut = watch("statut");
+  const domicile = watch("domicile");
   const showScore = statut === "joue" || statut === "publie";
+  const showResume = statut === "joue" || statut === "publie";
 
   // Permissions
   const fieldsDisabled = isRedacteur; // rédacteur : tout sauf resume
@@ -146,7 +156,8 @@ export default function MatchFormPage() {
     const payload = {
       ...data,
       date: new Date(data.date).toISOString(),
-      resume: data.resume || null,
+      lieu: data.lieu || null,
+      resume: showResume ? (data.resume || null) : null,
       score_nous: showScore ? data.score_nous : null,
       score_eux: showScore ? data.score_eux : null,
     };
@@ -242,6 +253,41 @@ export default function MatchFormPage() {
           />
         </div>
 
+        {/* Lieu */}
+        {domicile ? (
+          <Field label="Salle (optionnel)">
+            <Controller
+              control={control}
+              name="lieu"
+              render={({ field }) => (
+                <Select
+                  value={field.value ?? ""}
+                  onValueChange={(v) => field.onChange(v || null)}
+                  disabled={fieldsDisabled}
+                >
+                  <SelectTrigger className="bg-white/[0.04] border-white/[0.10] text-white disabled:opacity-40">
+                    <SelectValue placeholder="Sélectionner une salle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SALLES_DOMICILE.map((s) => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </Field>
+        ) : (
+          <Field label="Adresse du match (optionnel)">
+            <Input
+              placeholder="Adresse ou nom de la salle adverse"
+              disabled={fieldsDisabled}
+              className="bg-white/[0.04] border-white/[0.10] text-white placeholder:text-white/25 disabled:opacity-40"
+              {...register("lieu")}
+            />
+          </Field>
+        )}
+
         {/* Catégorie */}
         <Field label="Catégorie" error={errors.categorie?.message}>
           <Controller
@@ -335,15 +381,17 @@ export default function MatchFormPage() {
           </div>
         )}
 
-        {/* Résumé — éditable par tous les rôles */}
-        <Field label="Résumé du match" error={errors.resume?.message}>
-          <Textarea
-            placeholder="Compte-rendu du match, points forts, résultat commenté…"
-            rows={5}
-            className="bg-white/[0.04] border-white/[0.10] text-white placeholder:text-white/25 resize-none"
-            {...register("resume")}
-          />
-        </Field>
+        {/* Résumé — visible uniquement si joué ou publié */}
+        {showResume && (
+          <Field label="Résumé du match" error={errors.resume?.message}>
+            <Textarea
+              placeholder="Compte-rendu du match, points forts, résultat commenté…"
+              rows={5}
+              className="bg-white/[0.04] border-white/[0.10] text-white placeholder:text-white/25 resize-none"
+              {...register("resume")}
+            />
+          </Field>
+        )}
 
         {/* Erreur serveur */}
         {mutationError && (

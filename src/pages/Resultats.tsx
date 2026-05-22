@@ -73,7 +73,7 @@ function UpcomingCard({ match, index }: { match: Match; index: number }) {
       <div className="flex items-center justify-between text-xs">
         <span className={`flex items-center gap-1 font-medium ${match.domicile ? "text-orange-400/80" : "text-blue-400/80"}`}>
           {match.domicile ? <Home size={11} /> : <Plane size={11} />}
-          {match.domicile ? "Domicile" : "Extérieur"}
+          {match.lieu ?? (match.domicile ? "Domicile" : "Extérieur")}
         </span>
         <span className="text-white/30">{TYPE_LABELS[match.type]}</span>
       </div>
@@ -141,7 +141,7 @@ function ResultCard({
         <div className="flex items-center justify-between">
           <span className={`text-xs flex items-center gap-1 ${match.domicile ? "text-orange-400/60" : "text-blue-400/60"}`}>
             {match.domicile ? <Home size={10} /> : <Plane size={10} />}
-            {match.domicile ? "Domicile" : "Extérieur"}
+            {match.lieu ?? (match.domicile ? "Domicile" : "Extérieur")}
           </span>
           {match.resume && (
             <button

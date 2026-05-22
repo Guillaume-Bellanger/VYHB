@@ -23,6 +23,7 @@ export interface Match {
   type: MatchType;
   statut: MatchStatut;
   resume: string | null;
+  lieu: string | null;
   created_by: string;
   updated_at: string;
   created_at: string;
