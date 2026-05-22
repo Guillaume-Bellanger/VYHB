@@ -8,6 +8,7 @@ interface Match {
   date: string;
   adversaire: string;
   categorie: string;
+  lieu: string | null;
 }
 
 interface MatchPoste {
@@ -16,9 +17,9 @@ interface MatchPoste {
 
 interface Profile {
   email: string | null;
-  role: string;
-  categorie: string | null;
 }
+
+type AlertLevel = 7 | 3 | 1;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -30,6 +31,24 @@ const POSTE_LABELS: Record<string, string> = {
 };
 
 const ADMIN_URL = "https://v2.vyhb.fr/admin/matches";
+
+const ALERT_CONFIG: Record<AlertLevel, { subject: string; intro: string; color: string }> = {
+  7: {
+    subject: "📋 Postes à attribuer - Match dans 7 jours",
+    intro: "Des postes sont encore à attribuer pour le match suivant. Vous avez 7 jours pour compléter les informations.",
+    color: "#2563eb",
+  },
+  3: {
+    subject: "⚠️ Rappel - Postes non attribués - Match dans 3 jours",
+    intro: "Attention — des postes obligatoires ne sont toujours pas attribués. Le match a lieu dans 3 jours.",
+    color: "#d97706",
+  },
+  1: {
+    subject: "🚨 URGENT - Postes non attribués - Match DEMAIN",
+    intro: "ACTION REQUISE — Des postes obligatoires sont encore non attribués pour le match de DEMAIN. Merci d'agir immédiatement.",
+    color: "#dc2626",
+  },
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -49,49 +68,93 @@ function formatTime(iso: string): string {
   });
 }
 
+function matchWindow(daysFromNow: number): { from: string; to: string } {
+  const now = new Date();
+  const target = new Date(now.getTime() + daysFromNow * 24 * 60 * 60 * 1000);
+  const TOLERANCE_MS = 2 * 60 * 60 * 1000; // ±2h
+  return {
+    from: new Date(target.getTime() - TOLERANCE_MS).toISOString(),
+    to: new Date(target.getTime() + TOLERANCE_MS).toISOString(),
+  };
+}
+
 async function sendMail(
   resendKey: string,
   to: string[],
   match: Match,
-  emptyPostes: MatchPoste[]
+  emptyPostes: MatchPoste[],
+  level: AlertLevel
 ): Promise<void> {
   if (to.length === 0) return;
+
+  const { subject, intro, color } = ALERT_CONFIG[level];
 
   const postesList = emptyPostes
     .map((p) => `  - ${POSTE_LABELS[p.poste] ?? p.poste}`)
     .join("\n");
 
-  const subject = "⚠️ Postes non attribués - Match VYHB dans 7 jours";
+  const lieuLine = match.lieu ? `\nLieu : ${match.lieu}` : "";
+  const lieuHtml = match.lieu
+    ? `<tr><td style="color:#888;padding:3px 0">Lieu</td><td style="padding:3px 0 3px 14px"><strong>${match.lieu}</strong></td></tr>`
+    : "";
 
   const text = `Bonjour,
 
-Le match [VYHB vs ${match.adversaire}] du ${formatDate(match.date)} à ${formatTime(match.date)} (catégorie ${match.categorie}) a des postes obligatoires non attribués :
+${intro}
 
+Match     : VYHB vs ${match.adversaire}
+Date      : ${formatDate(match.date)} à ${formatTime(match.date)}${lieuLine}
+Catégorie : ${match.categorie}
+
+Postes non attribués :
 ${postesList}
 
-Merci de compléter les informations sur le site admin :
+→ Compléter sur le site admin :
 ${ADMIN_URL}/${match.id}/edit
 
 ---
 Val d'Yerres Handball — Notification automatique`;
 
-  const html = `<p>Bonjour,</p>
-<p>
-  Le match <strong>VYHB vs ${match.adversaire}</strong><br>
-  du <strong>${formatDate(match.date)}</strong> à <strong>${formatTime(match.date)}</strong><br>
-  (catégorie <strong>${match.categorie}</strong>)
-  a des postes obligatoires non attribués :
-</p>
-<ul>
-  ${emptyPostes.map((p) => `<li>${POSTE_LABELS[p.poste] ?? p.poste}</li>`).join("\n  ")}
-</ul>
-<p>
-  <a href="${ADMIN_URL}/${match.id}/edit">
-    Compléter les informations sur le site admin →
-  </a>
-</p>
-<hr>
-<p style="color:#888;font-size:12px;">Val d'Yerres Handball — Notification automatique</p>`;
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<body style="font-family:system-ui,sans-serif;max-width:540px;margin:0 auto;padding:16px;color:#1a1a1a">
+  <div style="background:${color};padding:14px 20px;border-radius:8px 8px 0 0">
+    <p style="color:#fff;font-weight:700;font-size:15px;margin:0">${subject}</p>
+  </div>
+  <div style="background:#fafafa;padding:24px;border:1px solid #e5e5e5;border-top:none;border-radius:0 0 8px 8px">
+    <p style="margin-top:0;line-height:1.5">${intro}</p>
+
+    <table style="border-collapse:collapse;margin-bottom:18px;font-size:14px">
+      <tr>
+        <td style="color:#888;padding:3px 0;white-space:nowrap">Match</td>
+        <td style="padding:3px 0 3px 14px"><strong>VYHB vs ${match.adversaire}</strong></td>
+      </tr>
+      <tr>
+        <td style="color:#888;padding:3px 0;white-space:nowrap">Date</td>
+        <td style="padding:3px 0 3px 14px"><strong>${formatDate(match.date)} à ${formatTime(match.date)}</strong></td>
+      </tr>
+      ${lieuHtml}
+      <tr>
+        <td style="color:#888;padding:3px 0;white-space:nowrap">Catégorie</td>
+        <td style="padding:3px 0 3px 14px"><strong>${match.categorie}</strong></td>
+      </tr>
+    </table>
+
+    <p style="font-weight:600;margin-bottom:8px;font-size:14px">Postes non attribués :</p>
+    <ul style="margin:0 0 22px;padding-left:18px;font-size:14px">
+      ${emptyPostes.map((p) => `<li style="margin:5px 0">${POSTE_LABELS[p.poste] ?? p.poste}</li>`).join("\n      ")}
+    </ul>
+
+    <a href="${ADMIN_URL}/${match.id}/edit"
+       style="display:inline-block;background:${color};color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">
+      Compléter les postes →
+    </a>
+  </div>
+  <p style="color:#bbb;font-size:11px;text-align:center;margin-top:14px">
+    Val d'Yerres Handball — Notification automatique
+  </p>
+</body>
+</html>`;
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -130,35 +193,7 @@ serve(async () => {
 
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-  // Fenêtre J-7 ± 1h
-  const now = new Date();
-  const target = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const from = new Date(target.getTime() - 60 * 60 * 1000).toISOString();
-  const to = new Date(target.getTime() + 60 * 60 * 1000).toISOString();
-
-  // Récupérer les matchs dans la fenêtre J-7
-  const { data: matches, error: matchesError } = await supabase
-    .from("matches")
-    .select("id, date, adversaire, categorie")
-    .gte("date", from)
-    .lte("date", to)
-    .in("statut", ["prevu", "joue"]);
-
-  if (matchesError) {
-    return new Response(
-      JSON.stringify({ error: matchesError.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
-  }
-
-  if (!matches || matches.length === 0) {
-    return new Response(
-      JSON.stringify({ message: "Aucun match dans 7 jours", sent: 0 }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  }
-
-  // Récupérer tous les super_admin emails une seule fois
+  // Récupérer les emails super_admin une seule fois
   const { data: admins } = await supabase
     .from("profiles")
     .select("email")
@@ -169,46 +204,68 @@ serve(async () => {
     .map((p: Profile) => p.email)
     .filter((e): e is string => !!e);
 
-  let sentCount = 0;
+  let totalSent = 0;
+  const levelResults: Record<string, number> = {};
 
-  for (const match of matches as Match[]) {
-    // Postes obligatoires non attribués pour ce match
-    const { data: emptyPostes } = await supabase
-      .from("match_postes")
-      .select("poste")
-      .eq("match_id", match.id)
-      .eq("facultatif", false)
-      .is("personne", null);
+  // Boucle sur les 3 niveaux d'alerte
+  for (const level of [7, 3, 1] as AlertLevel[]) {
+    const { from, to } = matchWindow(level);
 
-    if (!emptyPostes || emptyPostes.length === 0) continue;
+    const { data: matches, error: matchesError } = await supabase
+      .from("matches")
+      .select("id, date, adversaire, categorie, lieu")
+      .gte("date", from)
+      .lte("date", to)
+      .in("statut", ["prevu", "joue"]);
 
-    // Email du responsable de la catégorie
-    const { data: responsables } = await supabase
-      .from("profiles")
-      .select("email")
-      .eq("role", "responsable")
-      .eq("categorie", match.categorie)
-      .eq("disabled", false);
-
-    const responsableEmails = (responsables ?? [])
-      .map((p: Profile) => p.email)
-      .filter((e): e is string => !!e);
-
-    // Destinataires uniques : responsable(s) + super_admins
-    const recipients = [...new Set([...responsableEmails, ...adminEmails])];
-
-    if (recipients.length === 0) continue;
-
-    try {
-      await sendMail(resendKey, recipients, match, emptyPostes as MatchPoste[]);
-      sentCount++;
-    } catch (e) {
-      console.error(`Erreur mail match ${match.id}:`, e);
+    if (matchesError) {
+      console.error(`Erreur query J-${level}:`, matchesError.message);
+      levelResults[`j${level}`] = 0;
+      continue;
     }
+
+    let levelSent = 0;
+
+    for (const match of (matches ?? []) as Match[]) {
+      // Postes obligatoires non attribués (NULL ou chaîne vide)
+      const { data: emptyPostes } = await supabase
+        .from("match_postes")
+        .select("poste")
+        .eq("match_id", match.id)
+        .eq("facultatif", false)
+        .or("personne.is.null,personne.eq.");
+
+      if (!emptyPostes || emptyPostes.length === 0) continue;
+
+      // Email du ou des responsables de la catégorie
+      const { data: responsables } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("role", "responsable")
+        .eq("categorie", match.categorie)
+        .eq("disabled", false);
+
+      const responsableEmails = (responsables ?? [])
+        .map((p: Profile) => p.email)
+        .filter((e): e is string => !!e);
+
+      const recipients = [...new Set([...responsableEmails, ...adminEmails])];
+      if (recipients.length === 0) continue;
+
+      try {
+        await sendMail(resendKey, recipients, match, emptyPostes as MatchPoste[], level);
+        levelSent++;
+        totalSent++;
+      } catch (e) {
+        console.error(`Erreur mail J-${level} match ${match.id}:`, e);
+      }
+    }
+
+    levelResults[`j${level}`] = levelSent;
   }
 
   return new Response(
-    JSON.stringify({ message: "Alertes envoyées", sent: sentCount }),
+    JSON.stringify({ message: "Alertes envoyées", total: totalSent, ...levelResults }),
     { status: 200, headers: { "Content-Type": "application/json" } }
   );
 });
