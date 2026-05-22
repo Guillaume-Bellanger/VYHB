@@ -235,7 +235,7 @@ const Events = () => {
                   <img
                     src={ev.photo_url}
                     alt={ev.titre}
-                    style={{ width: "100%", height: "200px", objectFit: "cover", display: "block" }}
+                    style={{ width: "100%", height: "auto", display: "block" }}
                     loading="lazy"
                   />
                 )}
