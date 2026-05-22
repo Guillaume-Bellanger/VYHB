@@ -232,14 +232,12 @@ const Events = () => {
 
                 {/* Photo */}
                 {ev.photo_url && (
-                  <div className="h-52 overflow-hidden">
-                    <img
-                      src={ev.photo_url}
-                      alt={ev.titre}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img
+                    src={ev.photo_url}
+                    alt={ev.titre}
+                    style={{ width: "100%", height: "200px", objectFit: "cover", display: "block" }}
+                    loading="lazy"
+                  />
                 )}
 
                 <div className="p-8 md:p-10">
