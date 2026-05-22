@@ -589,7 +589,7 @@ export default function MatchFormPage() {
 
         {/* Score — visible si joué ou publié */}
         {showScore && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Score (nous)" error={errors.score_nous?.message}>
               <Input
                 type="number"

@@ -143,7 +143,7 @@ export default function TickerPage() {
       </div>
 
       {/* Ajouter un message */}
-      <div className="flex gap-2 mb-8">
+      <div className="flex flex-col sm:flex-row gap-2 mb-8">
         <Input
           value={newMsg}
           onChange={(e) => setNewMsg(e.target.value)}

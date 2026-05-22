@@ -290,8 +290,64 @@ export default function UsersPage() {
         </div>
       )}
 
+      {/* Cartes mobile */}
       {!isLoading && users && users.length > 0 && (
-        <div className="rounded-2xl border border-white/[0.06] overflow-hidden">
+        <div className="md:hidden space-y-3">
+          {users.map((user) => (
+            <div
+              key={user.id}
+              className={`bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 space-y-3 ${user.disabled ? "opacity-50" : ""}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-white font-semibold text-sm">{user.full_name}</p>
+                  <p className="text-white/40 text-xs mt-0.5 truncate">{user.email ?? "—"}</p>
+                </div>
+                <RoleBadge role={user.role} />
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs text-white/40 space-y-0.5">
+                  <p>{user.categorie ?? "—"}</p>
+                  {user.disabled ? (
+                    <span className="text-[11px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-md">
+                      Désactivé
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                      Actif
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setEditTarget(user)}
+                    className="text-white/50 hover:text-white hover:bg-white/[0.06] h-8 w-8 p-0"
+                    title="Modifier le rôle"
+                  >
+                    <Pencil size={14} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={updateUser.isPending}
+                    onClick={() => handleToggleDisable(user)}
+                    className={`h-8 w-8 p-0 ${user.disabled ? "text-emerald-400 hover:bg-emerald-500/10" : "text-white/30 hover:text-red-400 hover:bg-red-500/10"}`}
+                    title={user.disabled ? "Réactiver" : "Désactiver"}
+                  >
+                    <Power size={14} />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Tableau desktop */}
+      {!isLoading && users && users.length > 0 && (
+        <div className="hidden md:block rounded-2xl border border-white/[0.06] overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="border-white/[0.06] hover:bg-transparent">

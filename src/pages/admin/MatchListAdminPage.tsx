@@ -166,9 +166,73 @@ export default function MatchListAdminPage() {
         </p>
       )}
 
-      {/* Table */}
+      {/* Cartes mobile */}
       {!isLoading && matches && matches.length > 0 && (
-        <div className="rounded-2xl border border-white/[0.06] overflow-hidden">
+        <div className="md:hidden space-y-3">
+          {matches.map((match) => (
+            <div key={match.id} className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="text-white font-semibold text-sm">{match.adversaire}</span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${match.domicile ? "bg-emerald-500/15 text-emerald-400" : "bg-white/[0.06] text-white/40"}`}>
+                      {match.domicile ? "DOM" : "EXT"}
+                    </span>
+                  </div>
+                  <p className="text-white/40 text-xs">
+                    {format(new Date(match.date), "d MMM yyyy · HH:mm", { locale: fr })}
+                  </p>
+                  <p className="text-white/35 text-xs mt-0.5">
+                    {match.categorie} · {TYPE_LABELS[match.type]}
+                  </p>
+                </div>
+                <div className="shrink-0 flex flex-col items-end gap-1.5">
+                  <StatutBadge statut={match.statut} />
+                  <Score match={match} />
+                </div>
+              </div>
+              <div className="flex items-center gap-2 pt-2 border-t border-white/[0.05]">
+                {!isRedacteur && match.statut === "joue" && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={updateMutation.isPending}
+                    onClick={() => handlePublish(match)}
+                    className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 h-8 px-2.5 text-xs gap-1"
+                  >
+                    <Eye size={12} />
+                    Publier
+                  </Button>
+                )}
+                <div className="ml-auto flex gap-1">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => navigate(`/admin/matches/${match.id}/edit`)}
+                    className="text-white/50 hover:text-white hover:bg-white/[0.06] h-8 w-8 p-0"
+                  >
+                    <Pencil size={13} />
+                  </Button>
+                  {isAdmin && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setDeleteTarget(match)}
+                      className="text-white/30 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"
+                    >
+                      <Trash2 size={13} />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Tableau desktop */}
+      {!isLoading && matches && matches.length > 0 && (
+        <div className="hidden md:block rounded-2xl border border-white/[0.06] overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="border-white/[0.06] hover:bg-transparent">
@@ -201,7 +265,6 @@ export default function MatchListAdminPage() {
                   <TableCell><Score match={match} /></TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center gap-1 justify-end">
-                      {/* Publier — visible si joué et pas encore publié */}
                       {!isRedacteur && match.statut === "joue" && (
                         <Button
                           size="sm"
@@ -214,7 +277,6 @@ export default function MatchListAdminPage() {
                           Publier
                         </Button>
                       )}
-                      {/* Éditer */}
                       <Button
                         size="sm"
                         variant="ghost"
@@ -223,7 +285,6 @@ export default function MatchListAdminPage() {
                       >
                         <Pencil size={14} />
                       </Button>
-                      {/* Supprimer — super_admin uniquement */}
                       {isAdmin && (
                         <Button
                           size="sm"

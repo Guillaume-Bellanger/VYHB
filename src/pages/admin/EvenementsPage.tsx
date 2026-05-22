@@ -621,47 +621,9 @@ export default function EvenementsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {events.map((ev) => (
-            <div
-              key={ev.id}
-              className={`flex items-start gap-4 p-4 rounded-xl border transition-colors ${
-                ev.actif
-                  ? "bg-white/[0.03] border-white/[0.08]"
-                  : "bg-white/[0.01] border-white/[0.04] opacity-50"
-              }`}
-            >
-              {/* Miniature photo */}
-              {ev.photo_url ? (
-                <img
-                  src={ev.photo_url}
-                  alt=""
-                  className="w-12 h-12 rounded-lg object-cover shrink-0 border border-white/10"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0">
-                  <ImageIcon size={16} className="text-white/20" />
-                </div>
-              )}
-
-              {/* Badge catégorie + contenu */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                  <span
-                    className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${CATEGORIE_COLORS[ev.categorie]}`}
-                  >
-                    {CATEGORIE_OPTIONS.find((o) => o.value === ev.categorie)?.label ?? ev.categorie}
-                  </span>
-                </div>
-                <p className="text-white text-sm font-semibold truncate">{ev.titre}</p>
-                <p className="text-white/35 text-xs mt-0.5">
-                  {ev.date_debut}
-                  {ev.date_fin && ` – ${ev.date_fin}`}
-                  {ev.lieu && ` · ${ev.lieu}`}
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 shrink-0">
+          {events.map((ev) => {
+            const actionButtons = (
+              <>
                 <button
                   onClick={() => handleToggle(ev)}
                   className={`text-[11px] font-bold px-2.5 py-1 rounded-full border transition-all ${
@@ -672,7 +634,6 @@ export default function EvenementsPage() {
                 >
                   {ev.actif ? "Actif" : "Inactif"}
                 </button>
-
                 <button
                   onClick={() => (formMode === ev.id ? closeForm() : openEdit(ev))}
                   className={`p-1.5 rounded-lg transition-all ${
@@ -684,7 +645,6 @@ export default function EvenementsPage() {
                 >
                   <Pencil size={14} />
                 </button>
-
                 <button
                   onClick={() => handleDelete(ev.id)}
                   className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all"
@@ -692,9 +652,58 @@ export default function EvenementsPage() {
                 >
                   <Trash2 size={14} />
                 </button>
+              </>
+            );
+
+            return (
+              <div
+                key={ev.id}
+                className={`p-4 rounded-xl border transition-colors ${
+                  ev.actif
+                    ? "bg-white/[0.03] border-white/[0.08]"
+                    : "bg-white/[0.01] border-white/[0.04] opacity-50"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  {/* Miniature photo */}
+                  {ev.photo_url ? (
+                    <img
+                      src={ev.photo_url}
+                      alt=""
+                      className="w-12 h-12 rounded-lg object-cover shrink-0 border border-white/10"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0">
+                      <ImageIcon size={16} className="text-white/20" />
+                    </div>
+                  )}
+
+                  {/* Contenu */}
+                  <div className="flex-1 min-w-0">
+                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${CATEGORIE_COLORS[ev.categorie]}`}>
+                      {CATEGORIE_OPTIONS.find((o) => o.value === ev.categorie)?.label ?? ev.categorie}
+                    </span>
+                    <p className="text-white text-sm font-semibold truncate mt-0.5">{ev.titre}</p>
+                    <p className="text-white/35 text-xs mt-0.5 truncate">
+                      {ev.date_debut}
+                      {ev.date_fin && ` – ${ev.date_fin}`}
+                      {ev.lieu && ` · ${ev.lieu}`}
+                    </p>
+                  </div>
+
+                  {/* Actions — desktop uniquement */}
+                  <div className="hidden sm:flex items-center gap-2 shrink-0">
+                    {actionButtons}
+                  </div>
+                </div>
+
+                {/* Actions — mobile uniquement */}
+                <div className="flex sm:hidden items-center gap-2 mt-3 pt-2.5 border-t border-white/[0.05]">
+                  {actionButtons}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
