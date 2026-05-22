@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Home, Plane, BookOpen, Calendar, Trophy } from "lucide-react";
 import SEO from "@/components/SEO";
-import { usePublicMatches, usePublicUpcoming } from "@/hooks/usePublicMatches";
+import { usePublicMatches } from "@/hooks/usePublicMatches";
 import type { Match } from "@/types/database";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -166,8 +166,12 @@ export default function Resultats() {
 
   const catFilter = activeTab === "tous" ? undefined : activeTab;
 
-  const { data: results, isLoading: loadingResults } = usePublicMatches(catFilter);
-  const { data: upcoming, isLoading: loadingUpcoming } = usePublicUpcoming(catFilter);
+  const { data, isLoading, isError } = usePublicMatches(catFilter);
+
+  const now = new Date();
+  const results = data?.filter((m) => m.statut === "publie") ?? [];
+  const upcoming = (data?.filter((m) => m.statut === "prevu" && new Date(m.date) > now) ?? [])
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const tabs = [{ value: "tous", label: "Tous" }, ...ALL_CATS.map((c) => ({ value: c, label: c }))];
 
@@ -245,11 +249,11 @@ export default function Resultats() {
                   <Calendar size={18} className="text-orange-400" />
                   Matchs à venir
                 </h2>
-                {loadingUpcoming && <MatchSkeletons />}
-                {!loadingUpcoming && upcoming?.length === 0 && (
+                {isLoading && <MatchSkeletons />}
+                {!isLoading && !isError && upcoming.length === 0 && (
                   <p className="text-white/25 text-sm py-6 text-center">Aucun match à venir.</p>
                 )}
-                {!loadingUpcoming && upcoming && upcoming.length > 0 && (
+                {!isLoading && upcoming.length > 0 && (
                   <div className="space-y-3">
                     {upcoming.map((m, i) => (
                       <UpcomingCard key={m.id} match={m} index={i} />
@@ -264,11 +268,14 @@ export default function Resultats() {
                   <Trophy size={18} className="text-orange-400" />
                   Résultats
                 </h2>
-                {loadingResults && <MatchSkeletons />}
-                {!loadingResults && results?.length === 0 && (
+                {isLoading && <MatchSkeletons />}
+                {!isLoading && isError && (
+                  <p className="text-white/25 text-sm py-6 text-center">Impossible de charger les résultats.</p>
+                )}
+                {!isLoading && !isError && results.length === 0 && (
                   <p className="text-white/25 text-sm py-6 text-center">Aucun résultat publié.</p>
                 )}
-                {!loadingResults && results && results.length > 0 && (
+                {!isLoading && !isError && results.length > 0 && (
                   <div className="space-y-3">
                     {results.map((m, i) => (
                       <ResultCard key={m.id} match={m} index={i} onResume={setResumeMatch} />

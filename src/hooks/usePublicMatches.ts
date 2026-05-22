@@ -12,14 +12,14 @@ export function usePublicMatches(categorie?: string) {
       let q = supabase
         .from("matches")
         .select("*")
-        .eq("statut", "publie")
+        .in("statut", ["publie", "prevu"])
         .order("date", { ascending: false });
 
       if (categorie) q = q.eq("categorie", categorie);
 
       const { data, error } = await q;
       if (error) throw error;
-      return data as Match[];
+      return (data ?? []) as Match[];
     },
   });
 }
