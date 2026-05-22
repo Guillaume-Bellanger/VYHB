@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
   { to: "/admin/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { to: "/admin/matches", label: "Matchs", icon: CalendarDays },
   { to: "/admin/users", label: "Utilisateurs", icon: Users, roles: ["super_admin"] },
-  { to: "/admin/ticker", label: "Ticker", icon: Megaphone, roles: ["super_admin"] },
+  { to: "/admin/ticker", label: "Bandeau com", icon: Megaphone, roles: ["super_admin"] },
 ];
 
 function NavItems({ onClose }: { onClose?: () => void }) {
