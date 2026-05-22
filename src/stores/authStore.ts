@@ -19,6 +19,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: true,
 
   signIn: async (email, password) => {
+    set({ isLoading: true, user: null, profile: null });
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     if (data.user) {
@@ -46,9 +47,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   _init: () => {
+    // Retire les tokens Supabase expirés ou corrompus du localStorage
+    try {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(key) ?? "{}");
+            const expired =
+              parsed?.expires_at && parsed.expires_at < Math.floor(Date.now() / 1000);
+            if (expired) localStorage.removeItem(key);
+          } catch {
+            localStorage.removeItem(key); // token corrompu
+          }
+        }
+      });
+    } catch {
+      // localStorage indisponible (SSG, iframe sandboxé)
+    }
+
     const safetyTimer = setTimeout(() => {
       if (get().isLoading) set({ isLoading: false });
-    }, 5000);
+    }, 2000);
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const user = session?.user ?? null;
