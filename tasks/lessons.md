@@ -11,7 +11,7 @@
 - `/matchs` → Matchs
 - `/mentions-legales` → Mentions légales
 
-[2026-05-18] | supabase.ts ne doit pas throw à l'import | Si les variables d'env Supabase sont absentes (ex: react-snap SSG), un throw à l'import crashe toute l'app. Solution : utiliser des placeholders et exporter isSupabaseConfigured pour conditionner les queries avec enabled.
+[2026-05-18 → corrigé 2026-05-22] | Ne JAMAIS mettre de fallback URL dans le client Supabase | Le fallback "https://placeholder.supabase.co" fait pointer le client vers un domaine fictif : le await supabase.from(...).select() accroche indéfiniment, aucune requête HTTP n'est émise, pas d'erreur visible. Fix définitif : supabase.ts ne contient que createClient(url, key) sans fallback ni condition. Si les variables ne sont pas là, le client crashe à la création — ce qui est visible et diagnostiquable.
 
 [2026-05-18 → corrigé 2026-05-22] | Ne PAS utiliser enabled: isSupabaseConfigured dans les hooks publics | enabled: isSupabaseConfigured désactive la query si les env vars Vite ne sont pas injectées (ex: dev server démarré avant .env.local, ou build sans variables). La query est alors silencieusement disabled → zéro requête réseau, zéro message d'erreur. Fix : supprimer enabled, laisser TanStack Query catcher les erreurs réseau. SSG-safety garantie par les placeholders dans supabase.ts (pas de throw à l'import). isSupabaseConfigured doit se baser sur l'URL résolue (supabaseUrl !== placeholder), pas sur import.meta.env brut.
 
