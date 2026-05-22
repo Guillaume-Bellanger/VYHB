@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -84,6 +84,238 @@ function Field({ label, error, children }: {
       <Label className="text-white/70 text-sm">{label}</Label>
       {children}
       {error && <p className="text-red-400 text-xs">{error}</p>}
+    </div>
+  );
+}
+
+// ── Postes types & helpers ───────────────────────────────────────────────────
+
+type PosteNom = "responsable_salle" | "secretaire" | "table" | "arbitre" | "videaste" | "buvette";
+
+interface MatchPoste {
+  id: string;
+  match_id: string;
+  poste: PosteNom;
+  personne: string | null;
+  facultatif: boolean;
+}
+
+const POSTE_LABELS: Record<PosteNom, string> = {
+  responsable_salle: "Responsable de salle",
+  secretaire: "Secrétaire",
+  table: "Table de marque",
+  arbitre: "Arbitre",
+  videaste: "Vidéaste",
+  buvette: "Buvette",
+};
+
+function postesHeaders(): Record<string, string> {
+  const url = import.meta.env.VITE_SUPABASE_URL as string;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+  let token = key;
+  try {
+    const ref = new URL(url).hostname.split(".")[0];
+    const raw = localStorage.getItem(`sb-${ref}-auth-token`);
+    if (raw) {
+      const s = JSON.parse(raw) as { access_token?: string };
+      token = s.access_token ?? key;
+    }
+  } catch {}
+  return { apikey: key, Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+}
+
+function postesRestUrl(path: string): string {
+  return `${import.meta.env.VITE_SUPABASE_URL as string}/rest/v1/${path}`;
+}
+
+// ── PosteRow ─────────────────────────────────────────────────────────────────
+
+function PosteRow({
+  poste, value, onChange,
+}: {
+  poste: MatchPoste;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const filled = value.trim().length > 0;
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+      <div className="flex-1 min-w-0">
+        <p className="text-white/55 text-xs font-medium mb-1.5">{POSTE_LABELS[poste.poste]}</p>
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Nom du bénévole"
+          className="bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 h-8 text-sm"
+        />
+      </div>
+      <div className="shrink-0">
+        {filled ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 whitespace-nowrap">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            Attribué
+          </span>
+        ) : (
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold whitespace-nowrap ${
+            poste.facultatif
+              ? "bg-white/[0.06] text-white/30 border border-white/[0.10]"
+              : "bg-red-500/15 text-red-400 border border-red-500/25"
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${poste.facultatif ? "bg-white/30" : "bg-red-400"}`} />
+            Non attribué
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── PostesSection ────────────────────────────────────────────────────────────
+
+function PostesSection({ matchId, categorie }: { matchId: string; categorie: string }) {
+  const [postes, setPostes] = useState<MatchPoste[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [personnes, setPersonnes] = useState<Record<string, string>>({});
+
+  const loadPostes = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        postesRestUrl(`match_postes?match_id=eq.${matchId}&select=*&order=facultatif`),
+        { headers: postesHeaders() }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      let data: MatchPoste[] = await res.json();
+
+      if (data.length === 0) {
+        const rpcRes = await fetch(postesRestUrl("rpc/init_match_postes"), {
+          method: "POST",
+          headers: postesHeaders(),
+          body: JSON.stringify({ p_match_id: matchId, p_categorie: categorie }),
+        });
+        if (!rpcRes.ok) throw new Error(`HTTP ${rpcRes.status}`);
+
+        const res2 = await fetch(
+          postesRestUrl(`match_postes?match_id=eq.${matchId}&select=*&order=facultatif`),
+          { headers: postesHeaders() }
+        );
+        if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
+        data = await res2.json();
+      }
+
+      setPostes(data);
+      const map: Record<string, string> = {};
+      for (const p of data) map[p.poste] = p.personne ?? "";
+      setPersonnes(map);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }, [matchId, categorie]);
+
+  useEffect(() => { loadPostes(); }, [loadPostes]);
+
+  async function handleSave() {
+    setSaving(true);
+    setError(null);
+    try {
+      await Promise.all(
+        postes.map((p) =>
+          fetch(
+            postesRestUrl(`match_postes?match_id=eq.${matchId}&poste=eq.${p.poste}`),
+            {
+              method: "PATCH",
+              headers: { ...postesHeaders(), Prefer: "return=minimal" },
+              body: JSON.stringify({ personne: personnes[p.poste]?.trim() || null }),
+            }
+          ).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); })
+        )
+      );
+      await loadPostes();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const obligatoires = postes.filter((p) => !p.facultatif);
+  const facultatifs = postes.filter((p) => p.facultatif);
+
+  return (
+    <div className="mt-10 pt-8 border-t border-white/[0.08]">
+      <h2 className="text-lg font-display font-black text-white mb-6">
+        Bénévoles &amp; Postes
+      </h2>
+
+      {loading && (
+        <div className="flex items-center gap-2 text-white/40 py-4">
+          <Loader2 size={15} className="animate-spin" />
+          <span className="text-sm">Chargement des postes…</span>
+        </div>
+      )}
+
+      {!loading && error && (
+        <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
+          {error}
+        </p>
+      )}
+
+      {!loading && (
+        <>
+          {obligatoires.length > 0 && (
+            <div className="mb-5">
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-white/35 mb-3">
+                <span className="w-2 h-2 rounded-full bg-red-500/80 inline-block" />
+                Postes obligatoires
+              </p>
+              <div className="space-y-2">
+                {obligatoires.map((p) => (
+                  <PosteRow
+                    key={p.poste}
+                    poste={p}
+                    value={personnes[p.poste] ?? ""}
+                    onChange={(v) => setPersonnes((prev) => ({ ...prev, [p.poste]: v }))}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {facultatifs.length > 0 && (
+            <div className="mb-6">
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-white/35 mb-3">
+                <span className="w-2 h-2 rounded-full bg-white/25 inline-block" />
+                Postes facultatifs
+              </p>
+              <div className="space-y-2">
+                {facultatifs.map((p) => (
+                  <PosteRow
+                    key={p.poste}
+                    poste={p}
+                    value={personnes[p.poste] ?? ""}
+                    onChange={(v) => setPersonnes((prev) => ({ ...prev, [p.poste]: v }))}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-white/[0.07] hover:bg-white/[0.12] text-white border border-white/[0.10] font-bold gap-2"
+          >
+            {saving && <Loader2 size={15} className="animate-spin" />}
+            {saving ? "Enregistrement…" : "Enregistrer les bénévoles"}
+          </Button>
+        </>
+      )}
     </div>
   );
 }
@@ -420,6 +652,10 @@ export default function MatchFormPage() {
           </Button>
         </div>
       </form>
+
+      {isEditMode && existing && (
+        <PostesSection matchId={id!} categorie={existing.categorie} />
+      )}
     </div>
   );
 }
