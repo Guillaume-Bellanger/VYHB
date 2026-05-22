@@ -21,7 +21,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signIn: async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    if (data.user) await get().fetchProfile(data.user.id);
+    if (data.user) {
+      await get().fetchProfile(data.user.id);
+      set({ user: data.user, isLoading: false });
+    }
   },
 
   signOut: async () => {
@@ -43,6 +46,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   _init: () => {
+    const safetyTimer = setTimeout(() => {
+      if (get().isLoading) set({ isLoading: false });
+    }, 5000);
+
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const user = session?.user ?? null;
       if (user) await get().fetchProfile(user.id);
@@ -50,7 +57,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user, isLoading: false });
     });
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      clearTimeout(safetyTimer);
+      listener.subscription.unsubscribe();
+    };
   },
 }));
 
