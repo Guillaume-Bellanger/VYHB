@@ -1,24 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
 import type { Match } from "@/types/database";
+
+async function pgFetch<T>(path: string): Promise<T> {
+  const url = import.meta.env.VITE_SUPABASE_URL as string;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+  const res = await fetch(`${url}/rest/v1/${path}`, {
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+    },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json() as Promise<T>;
+}
 
 // ── Matchs publiés + prévus (page /resultats) ────────────────
 
 export function usePublicMatches(categorie?: string) {
   return useQuery({
     queryKey: ["public-matches", categorie],
-    queryFn: async () => {
-      let q = supabase
-        .from("matches")
-        .select("*")
-        .in("statut", ["publie", "prevu"])
-        .order("date", { ascending: false });
-
-      if (categorie) q = q.eq("categorie", categorie);
-
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data ?? []) as Match[];
+    queryFn: () => {
+      let q = `matches?select=*&statut=in.(publie,prevu)&order=date.desc`;
+      if (categorie) q += `&categorie=eq.${encodeURIComponent(categorie)}`;
+      return pgFetch<Match[]>(q);
     },
   });
 }
@@ -28,19 +32,11 @@ export function usePublicMatches(categorie?: string) {
 export function usePublicUpcoming(categorie?: string) {
   return useQuery({
     queryKey: ["public-upcoming", categorie],
-    queryFn: async () => {
-      let q = supabase
-        .from("matches")
-        .select("*")
-        .eq("statut", "prevu")
-        .gte("date", new Date().toISOString())
-        .order("date", { ascending: true });
-
-      if (categorie) q = q.eq("categorie", categorie);
-
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data ?? []) as Match[];
+    queryFn: () => {
+      const now = new Date().toISOString();
+      let q = `matches?select=*&statut=eq.prevu&date=gte.${now}&order=date.asc`;
+      if (categorie) q += `&categorie=eq.${encodeURIComponent(categorie)}`;
+      return pgFetch<Match[]>(q);
     },
   });
 }
