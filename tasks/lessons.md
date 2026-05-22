@@ -13,7 +13,7 @@
 
 [2026-05-18] | supabase.ts ne doit pas throw à l'import | Si les variables d'env Supabase sont absentes (ex: react-snap SSG), un throw à l'import crashe toute l'app. Solution : utiliser des placeholders et exporter isSupabaseConfigured pour conditionner les queries avec enabled.
 
-[2026-05-18] | Les queries publiques doivent être SSG-safe | Toujours ajouter enabled: isSupabaseConfigured aux hooks TanStack Query des pages publiques pour éviter des erreurs réseau pendant le pré-rendu react-snap.
+[2026-05-18 → corrigé 2026-05-22] | Ne PAS utiliser enabled: isSupabaseConfigured dans les hooks publics | enabled: isSupabaseConfigured désactive la query si les env vars Vite ne sont pas injectées (ex: dev server démarré avant .env.local, ou build sans variables). La query est alors silencieusement disabled → zéro requête réseau, zéro message d'erreur. Fix : supprimer enabled, laisser TanStack Query catcher les erreurs réseau. SSG-safety garantie par les placeholders dans supabase.ts (pas de throw à l'import). isSupabaseConfigured doit se baser sur l'URL résolue (supabaseUrl !== placeholder), pas sur import.meta.env brut.
 
 [2026-05-22] | Ne jamais appeler navigate() ou setState pendant le rendu | Appeler navigate() directement dans le corps d'un composant (hors event handler) déclenche "Cannot update a component while rendering a different component". Toujours entourer dans un useEffect avec les bonnes dépendances.
 

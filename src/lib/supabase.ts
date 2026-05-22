@@ -6,4 +6,5 @@ const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || "https://pl
 const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || "placeholder";
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
-export const isSupabaseConfigured = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+export const isSupabaseConfigured =
+  supabaseUrl !== "https://placeholder.supabase.co" && supabaseAnonKey !== "placeholder";

@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import type { Match } from "@/types/database";
 
-// ── Matchs publiés (résultats) ────────────────────────────────
+// ── Matchs publiés + prévus (page /resultats) ────────────────
 
 export function usePublicMatches(categorie?: string) {
   return useQuery({
     queryKey: ["public-matches", categorie],
-    enabled: isSupabaseConfigured,
     queryFn: async () => {
       let q = supabase
         .from("matches")
@@ -29,7 +28,6 @@ export function usePublicMatches(categorie?: string) {
 export function usePublicUpcoming(categorie?: string) {
   return useQuery({
     queryKey: ["public-upcoming", categorie],
-    enabled: isSupabaseConfigured,
     queryFn: async () => {
       let q = supabase
         .from("matches")
@@ -42,7 +40,7 @@ export function usePublicUpcoming(categorie?: string) {
 
       const { data, error } = await q;
       if (error) throw error;
-      return data as Match[];
+      return (data ?? []) as Match[];
     },
   });
 }
