@@ -55,16 +55,24 @@ function evUrl(path: string): string {
 
 async function uploadPhoto(file: File): Promise<string> {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-  let token = key;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
+  // Lire le JWT depuis localStorage — même pattern que tous les autres hooks
+  let token: string | undefined;
   try {
     const ref = new URL(supabaseUrl).hostname.split(".")[0];
     const raw = localStorage.getItem(`sb-${ref}-auth-token`);
     if (raw) {
-      const s = JSON.parse(raw) as { access_token?: string };
-      token = s.access_token ?? key;
+      const session = JSON.parse(raw) as { access_token?: string };
+      token = session.access_token;
     }
   } catch {}
+
+  console.log("[uploadPhoto] token:", token ? `${token.slice(0, 20)}…` : "undefined ⚠️");
+
+  if (!token) {
+    throw new Error("Session introuvable — reconnectez-vous et réessayez.");
+  }
 
   const prefix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -73,8 +81,8 @@ async function uploadPhoto(file: File): Promise<string> {
   const res = await fetch(`${supabaseUrl}/storage/v1/object/evenements/${filename}`, {
     method: "PUT",
     headers: {
-      apikey: key,
       Authorization: `Bearer ${token}`,
+      apikey: anonKey,
       "Content-Type": file.type || "application/octet-stream",
       "x-upsert": "true",
     },
