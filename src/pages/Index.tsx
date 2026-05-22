@@ -251,9 +251,6 @@ const Index = () => {
   const { data: upcomingData, isLoading: upcomingLoading } = usePublicUpcoming();
   const upcomingMatches = (upcomingData ?? []).slice(0, 3);
 
-  const tickerText =
-    "RECRUTEMENT OUVERT 2026/2027  •  PORTES OUVERTES MAI 2026  •  REJOIGNEZ LA FAMILLE  •  ESSAI GRATUIT  •  VAL D'YERRES HANDBALL  •  ";
-
   return (
     <>
       <SEO
@@ -333,21 +330,6 @@ const Index = () => {
           <ChevronDown size={16} className="text-white/25" />
         </motion.div>
       </section>
-
-      {/* ══════════════════════════════════════════
-          TICKER MARQUEE
-      ══════════════════════════════════════════ */}
-      <div
-        className="overflow-hidden border-y border-white/[0.05] py-3"
-        style={{ background: "hsl(0 0% 0% / 0.65)" }}
-        aria-hidden="true"
-      >
-        <div className="flex">
-          <span className="animate-ticker text-sm font-display font-bold uppercase tracking-[0.18em] text-orange-400 whitespace-nowrap">
-            {tickerText.repeat(6)}
-          </span>
-        </div>
-      </div>
 
       {/* ══════════════════════════════════════════
           ACTUALITÉS — BENTO
