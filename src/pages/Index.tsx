@@ -6,10 +6,14 @@ import {
   ChevronDown, ChevronRight, ArrowRight,
   Users, Trophy, Clock, Heart,
   Phone, Mail, Megaphone, Zap,
-  UserPlus, Home, PartyPopper, Recycle,
+  UserPlus, Home, PartyPopper, Recycle, Plane,
 } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import heroImage from "@/assets/hero-handball.jpg";
 import { collectifs } from "@/data/collectifs";
+import { usePublicUpcoming } from "@/hooks/usePublicMatches";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 // ─── Animation presets
@@ -116,14 +120,6 @@ const news = [
   },
 ];
 
-const matchsDomicile = [
-  { date: "03/05", heure: "14h00", equipe: "Seniors M", adversaire: "JS Corbeil", salle: "Jean Moulin", isNext: true },
-  { date: "10/05", heure: "10h30", equipe: "-13F", adversaire: "HBC Yerres", salle: "Boussy" },
-  { date: "17/05", heure: "15h00", equipe: "Seniors F", adversaire: "Ste-Geneviève HB", salle: "Jean Moulin" },
-  { date: "24/05", heure: "11h00", equipe: "-15/-18M", adversaire: "Draveil HB", salle: "Paul Bert" },
-  { date: "31/05", heure: "09h30", equipe: "-11M", adversaire: "HC Brunoy", salle: "Boussy" },
-];
-
 const statsData = [
   { value: 245, label: "Licenciés", icon: Users, suffix: "" },
   { value: 10,  label: "Équipes",   icon: Trophy, suffix: "" },
@@ -176,6 +172,9 @@ const SectionHeader = ({ title, subtitle }: { title: string; subtitle: string })
 
 // ─── Main page
 const Index = () => {
+  const { data: upcomingData, isLoading: upcomingLoading } = usePublicUpcoming();
+  const upcomingMatches = (upcomingData ?? []).slice(0, 3);
+
   const tickerText =
     "RECRUTEMENT OUVERT 2026/2027  •  PORTES OUVERTES MAI 2026  •  REJOIGNEZ LA FAMILLE  •  ESSAI GRATUIT  •  VAL D'YERRES HANDBALL  •  ";
 
@@ -534,81 +533,109 @@ const Index = () => {
       </section>
 
       {/* ══════════════════════════════════════════
-          MATCHS DOMICILE
+          MATCHS À VENIR
       ══════════════════════════════════════════ */}
       <section className="section-padding bg-muted/30">
         <div className="container-narrow">
           <SectionHeader
-            title="Matchs à venir à domicile"
+            title="Matchs à venir"
             subtitle="Venez encourager nos équipes !"
           />
 
-          <div className="hidden md:block overflow-hidden rounded-2xl border border-border/50">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/60" style={{ background: "hsl(var(--muted) / 0.5)" }}>
-                  {["Date", "Heure", "Équipe", "Adversaire", "Salle"].map((h) => (
-                    <th key={h} className="text-left px-5 py-3.5 font-display font-bold text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {matchsDomicile.map((m, i) => (
-                  <motion.tr
-                    key={i}
-                    initial={{ opacity: 0, x: -12 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.06, duration: 0.4 }}
-                    className={`border-t border-border/40 transition-colors duration-200 hover:bg-accent/[0.04] ${
-                      m.isNext ? "bg-accent/[0.06]" : i % 2 === 0 ? "bg-card/40" : ""
-                    }`}
-                  >
-                    <td className="px-5 py-4 font-display font-bold text-foreground whitespace-nowrap">
-                      {m.isNext && <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 mr-2 mb-0.5 animate-pulse" />}
-                      {m.date}
-                    </td>
-                    <td className="px-5 py-4 font-display font-bold text-accent whitespace-nowrap">{m.heure}</td>
-                    <td className="px-5 py-4 text-foreground font-medium">{m.equipe}</td>
-                    <td className="px-5 py-4 text-muted-foreground">vs {m.adversaire}</td>
-                    <td className="px-5 py-4 text-muted-foreground text-xs">{m.salle}</td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {upcomingLoading && (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 rounded-xl bg-white/[0.04]" />
+              ))}
+            </div>
+          )}
 
-          <div className="md:hidden space-y-3">
-            {matchsDomicile.map((m, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07, duration: 0.4 }}
-                className={`card-sport p-4 ${m.isNext ? "border-orange-500/35 shadow-[0_0_20px_rgba(249,115,22,0.1)]" : ""}`}
-              >
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="flex items-center gap-2">
-                    {m.isNext && <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />}
-                    <span className="font-display font-black text-foreground">{m.date}</span>
-                  </div>
-                  <span className="score-badge text-sm !px-3 !py-1">{m.heure}</span>
-                </div>
-                <div className="font-display font-bold text-sm text-foreground">{m.equipe}</div>
-                <div className="text-sm text-muted-foreground">vs {m.adversaire}</div>
-                <div className="text-xs text-muted-foreground/60 mt-1 flex items-center gap-1">
-                  <span className="text-[10px]">📍</span> {m.salle}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          {!upcomingLoading && upcomingMatches.length === 0 && (
+            <p className="text-center text-muted-foreground py-8">Aucun match à venir.</p>
+          )}
+
+          {!upcomingLoading && upcomingMatches.length > 0 && (
+            <>
+              <div className="hidden md:block overflow-hidden rounded-2xl border border-border/50">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/60" style={{ background: "hsl(var(--muted) / 0.5)" }}>
+                      {["Date", "Heure", "Équipe", "Adversaire", "Lieu"].map((h) => (
+                        <th key={h} className="text-left px-5 py-3.5 font-display font-bold text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {upcomingMatches.map((m, i) => (
+                      <motion.tr
+                        key={m.id}
+                        initial={{ opacity: 0, x: -12 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.06, duration: 0.4 }}
+                        className={`border-t border-border/40 transition-colors duration-200 hover:bg-accent/[0.04] ${
+                          i === 0 ? "bg-accent/[0.06]" : i % 2 === 0 ? "bg-card/40" : ""
+                        }`}
+                      >
+                        <td className="px-5 py-4 font-display font-bold text-foreground whitespace-nowrap">
+                          {i === 0 && <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 mr-2 mb-0.5 animate-pulse" />}
+                          {format(new Date(m.date), "EEE d MMM", { locale: fr })}
+                        </td>
+                        <td className="px-5 py-4 font-display font-bold text-accent whitespace-nowrap">
+                          {format(new Date(m.date), "HH:mm")}
+                        </td>
+                        <td className="px-5 py-4 text-foreground font-medium">{m.categorie}</td>
+                        <td className="px-5 py-4 text-muted-foreground">vs {m.adversaire}</td>
+                        <td className="px-5 py-4 text-xs">
+                          <span className={`flex items-center gap-1 ${m.domicile ? "text-orange-400/80" : "text-blue-400/80"}`}>
+                            {m.domicile ? <Home size={11} /> : <Plane size={11} />}
+                            {m.domicile ? "Domicile" : "Extérieur"}
+                          </span>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden space-y-3">
+                {upcomingMatches.map((m, i) => (
+                  <motion.div
+                    key={m.id}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.07, duration: 0.4 }}
+                    className={`card-sport p-4 ${i === 0 ? "border-orange-500/35 shadow-[0_0_20px_rgba(249,115,22,0.1)]" : ""}`}
+                  >
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center gap-2">
+                        {i === 0 && <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />}
+                        <span className="font-display font-black text-foreground">
+                          {format(new Date(m.date), "EEE d MMM", { locale: fr })}
+                        </span>
+                      </div>
+                      <span className="score-badge text-sm !px-3 !py-1">
+                        {format(new Date(m.date), "HH:mm")}
+                      </span>
+                    </div>
+                    <div className="font-display font-bold text-sm text-foreground">{m.categorie}</div>
+                    <div className="text-sm text-muted-foreground">vs {m.adversaire}</div>
+                    <div className={`text-xs mt-1 flex items-center gap-1 ${m.domicile ? "text-orange-400/60" : "text-blue-400/60"}`}>
+                      {m.domicile ? <Home size={10} /> : <Plane size={10} />}
+                      {m.domicile ? "Domicile" : "Extérieur"}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
 
           <div className="mt-8 text-center">
-            <Link to="/matchs" className="btn-secondary gap-2 text-xs">
-              Calendrier complet &amp; classements <ArrowRight size={13} />
+            <Link to="/resultats" className="btn-secondary gap-2 text-xs">
+              Calendrier complet &amp; résultats <ArrowRight size={13} />
             </Link>
           </div>
         </div>
