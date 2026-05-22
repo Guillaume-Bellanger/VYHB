@@ -4,6 +4,7 @@ import { Menu, ShoppingCart, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import logoClub from "../assets/logo-vy-handball.jpeg";
 import { useCartStore } from "../store/cartStore";
+import { useAuthStore } from "../stores/authStore";
 
 const navLinks = [
   { to: "/", label: "Accueil" },
@@ -21,6 +22,9 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { totalItems, toggleCart } = useCartStore();
+  const user = useAuthStore((s) => s.user);
+  const adminTo = user ? "/admin/dashboard" : "/admin/login";
+  const adminLabel = user ? "Espace admin" : "Administration";
 
   useEffect(() => {
     setMenuOpen(false);
@@ -91,6 +95,12 @@ const Header = () => {
 
         {/* Right side: CTA + panier + hamburger */}
         <div className="flex items-center gap-3">
+          <Link
+            to={adminTo}
+            className="hidden lg:inline-flex items-center px-3 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/55 border border-white/[0.07] hover:border-white/[0.15] hover:bg-white/[0.04] transition-all duration-200"
+          >
+            {adminLabel}
+          </Link>
           <Link
             to="/inscriptions"
             className="hidden lg:flex btn-primary !py-2 !px-5 !text-xs"
@@ -186,7 +196,23 @@ const Header = () => {
                   </Link>
                 </motion.div>
               ))}
-              <div className="mt-4 pt-4 border-t border-white/[0.06]">
+              <div className="pt-2">
+                <Link
+                  to={adminTo}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setTimeout(() => {
+                      document.documentElement.scrollTop = 0;
+                      document.body.scrollTop = 0;
+                      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+                    }, 50);
+                  }}
+                  className="flex items-center rounded-xl px-4 py-2.5 text-xs font-medium text-white/25 hover:bg-white/[0.03] hover:text-white/45 border border-transparent transition-all duration-200"
+                >
+                  {adminLabel}
+                </Link>
+              </div>
+              <div className="mt-2 pt-4 border-t border-white/[0.06]">
                 <Link
                   to="/inscriptions"
                   onClick={() => {
