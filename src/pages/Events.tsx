@@ -5,8 +5,9 @@ import { Link } from "react-router-dom";
 import {
   UserPlus, Home, Trophy, Info, Recycle,
   CalendarDays, MapPin, ArrowRight, ExternalLink,
-  Clock,
+  Clock, CalendarX,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -98,73 +99,49 @@ function isExternal(url: string | null): boolean {
   return !!url && (url.startsWith("http://") || url.startsWith("https://"));
 }
 
-// ── Fallback data (statique si Supabase indisponible) ─────────────────────────
+// ── Skeleton card ─────────────────────────────────────────────────────────────
 
-const FALLBACK_EVENTS: Evenement[] = [
-  {
-    id: "recrutement",
-    titre: "Recrutement ouvert — Saison 2026/2027",
-    categorie: "recrutement",
-    date_debut: "Dès maintenant — Saison 2026/2027",
-    date_fin: null,
-    lieu: "Gymnase Municipal, Boussy-Saint-Antoine",
-    photo_url: null,
-    description:
-      "Le Val d'Yerres Handball ouvre officiellement les inscriptions pour la saison 2026/2027 ! Toutes les catégories sont ouvertes à de nouveaux licenciés, du Baby Hand (dès 5 ans) jusqu'aux Seniors et à l'équipe Loisirs.\n\nVous souhaitez découvrir le handball ou reprendre après une pause ? Profitez de nos 2 séances d'essai gratuites, sans engagement. C'est l'occasion parfaite pour voir si le club vous convient avant de vous inscrire officiellement.\n\nLe club propose un cadre bienveillant, des entraîneurs diplômés et une atmosphère familiale unique. Que vous soyez compétiteur ou joueur loisir, débutant ou confirmé, il y a forcément une place pour vous chez nous.",
-    lien_cta: "/inscriptions",
-    label_cta: "S'inscrire maintenant",
-  },
-  {
-    id: "portes-ouvertes",
-    titre: "Portes ouvertes — Mai 2026",
-    categorie: "evenement",
-    date_debut: "01 Mai – 31 Mai 2026 · Tous les week-ends",
-    date_fin: null,
-    lieu: "Gymnase Municipal, Boussy-Saint-Antoine",
-    photo_url: null,
-    description:
-      "Tout au long du mois de mai 2026, le Val d'Yerres Handball vous ouvre grand les portes de son gymnase ! C'est l'occasion idéale pour venir découvrir l'univers du handball en famille, essayer quelques gestes techniques avec nos entraîneurs, et rencontrer les joueurs et joueuses du club.\n\nCes journées portes ouvertes s'adressent à tous : enfants dès 5 ans, adolescents, adultes débutants ou anciens joueurs qui souhaitent reprendre une activité sportive. Pas besoin de matériel ni de licence — venez simplement avec vos chaussures de sport !\n\nDes créneaux d'initiation sont organisés chaque samedi matin pour les plus jeunes (5–12 ans) et chaque vendredi soir pour les adultes. L'entrée est gratuite et ouverte à tous.",
-    lien_cta: "/contact",
-    label_cta: "Y participer — C'est gratuit",
-  },
-  {
-    id: "assemblee-generale",
-    titre: "Assemblée Générale Annuelle 2026",
-    categorie: "info",
-    date_debut: "Juin 2026 — Date exacte à confirmer",
-    date_fin: null,
-    lieu: "Gymnase Municipal, Boussy-Saint-Antoine",
-    photo_url: null,
-    description:
-      "L'Assemblée Générale Ordinaire du Val d'Yerres Handball se tiendra en juin 2026. Cet événement annuel incontournable réunit l'ensemble des membres du club — joueurs, parents, entraîneurs et bénévoles — pour dresser le bilan de la saison écoulée et préparer la suivante.\n\nAu programme : présentation du rapport moral du Président, rapport financier de la Trésorière, bilan sportif de chaque équipe, et vote des nouvelles orientations pour la saison 2026/2027. C'est également l'occasion d'élire les membres du Conseil d'Administration si des postes sont à renouveler.\n\nTous les licenciés et parents de licenciés sont invités à y participer. La présence de chacun est précieuse pour que la vie associative du club soit le reflet de sa communauté. Un pot de clôture de saison sera organisé à l'issue de l'assemblée !",
-    lien_cta: "/contact",
-    label_cta: "Confirmer ma présence",
-  },
-  {
-    id: "collecte-bouchons",
-    titre: "Collecte de bouchons plastiques",
-    categorie: "autre",
-    date_debut: "Toute la saison 2026/2027",
-    date_fin: null,
-    lieu: "À apporter lors des entraînements",
-    photo_url: null,
-    description:
-      "Le Val d'Yerres Handball s'engage pour une cause solidaire : la collecte de bouchons plastiques ! Tout au long de la saison, le club collecte des bouchons de bouteilles en plastique afin de les reverser à des associations caritatives qui les recycleront pour financer du matériel médical ou sportif pour des personnes en situation de handicap.\n\nBouchons de bouteilles d'eau, de jus de fruits, de lait, de produits ménagers… tous les bouchons en plastique sont bons à collecter ! Apportez-les lors de vos entraînements ou lors des matchs à domicile. Des sacs de collecte sont mis à votre disposition dans les vestiaires.\n\nPetits gestes, grands impacts : en participant à cette collecte, vous contribuez non seulement à valoriser les déchets plastiques, mais également à aider des associations qui œuvrent pour l'autonomie des personnes handicapées.",
-    lien_cta: "/contact",
-    label_cta: "En savoir plus",
-  },
-];
+function EventSkeleton() {
+  return (
+    <div className="glass-premium rounded-3xl overflow-hidden border border-white/[0.08]">
+      <div className="h-1 w-full bg-white/[0.06]" />
+      <div className="p-8 md:p-10 space-y-5">
+        <div className="flex items-start gap-4">
+          <Skeleton className="w-14 h-14 rounded-2xl shrink-0" />
+          <div className="flex-1 space-y-2.5 pt-1">
+            <Skeleton className="h-3 w-24 rounded-full" />
+            <Skeleton className="h-6 w-3/4 rounded-lg" />
+          </div>
+        </div>
+        <div className="flex gap-6">
+          <Skeleton className="h-3 w-36 rounded" />
+          <Skeleton className="h-3 w-48 rounded" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-full rounded" />
+          <Skeleton className="h-3 w-full rounded" />
+          <Skeleton className="h-3 w-4/5 rounded" />
+        </div>
+        <Skeleton className="h-10 w-40 rounded-xl" />
+      </div>
+    </div>
+  );
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const Events = () => {
   const { hash } = useLocation();
-  const [events, setEvents] = useState<Evenement[]>(FALLBACK_EVENTS);
+  const [events, setEvents] = useState<Evenement[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-    if (!url || !key) return;
+    if (!url || !key) {
+      setLoading(false);
+      return;
+    }
 
     const today = new Date().toISOString().split("T")[0];
     fetch(
@@ -172,20 +149,19 @@ const Events = () => {
       { headers: { apikey: key, Authorization: `Bearer ${key}` } }
     )
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data: Evenement[]) => {
-        if (data.length > 0) setEvents(data);
-      })
-      .catch(() => {});
+      .then((data: Evenement[]) => setEvents(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    if (!hash) return;
+    if (!hash || loading) return;
     const id = hash.replace("#", "");
     const el = document.getElementById(id);
     if (el) {
       setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     }
-  }, [hash, events]);
+  }, [hash, loading]);
 
   return (
     <>
@@ -210,7 +186,34 @@ const Events = () => {
       {/* Events list */}
       <section className="pb-24">
         <div className="container-narrow px-4 md:px-6 max-w-4xl space-y-6">
-          {events.map((ev, i) => {
+
+          {/* Skeletons */}
+          {loading && (
+            <>
+              <EventSkeleton />
+              <EventSkeleton />
+            </>
+          )}
+
+          {/* État vide */}
+          {!loading && events.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-premium rounded-3xl p-16 text-center border border-white/[0.06]"
+            >
+              <CalendarX size={36} className="text-white/20 mx-auto mb-4" />
+              <p className="text-white/50 font-display font-bold text-lg mb-1">
+                Aucun événement en cours
+              </p>
+              <p className="text-white/30 text-sm">
+                Revenez bientôt — de nouveaux événements seront annoncés prochainement.
+              </p>
+            </motion.div>
+          )}
+
+          {/* Cartes */}
+          {!loading && events.map((ev, i) => {
             const cfg = CATEGORIE_CONFIG[ev.categorie] ?? CATEGORIE_CONFIG.autre;
             const Icon = cfg.icon;
             const paragraphs = ev.description.split("\n\n").filter(Boolean);
@@ -304,25 +307,27 @@ const Events = () => {
           })}
 
           {/* Bottom CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="relative rounded-3xl p-10 text-center overflow-hidden border border-white/[0.06]"
-            style={{ background: "rgba(255,255,255,0.02)" }}
-          >
-            <div className="absolute top-[-40px] right-[-40px] w-[200px] h-[200px] rounded-full bg-orange-600/[0.08] blur-3xl pointer-events-none" />
-            <Clock size={28} className="text-orange-400 mx-auto mb-4" />
-            <h3 className="font-display font-black text-white text-xl mb-3">
-              Un événement à proposer ?
-            </h3>
-            <p className="text-white/40 text-sm mb-6 max-w-sm mx-auto">
-              Tournoi, initiative solidaire ou soirée club — contactez-nous pour en discuter.
-            </p>
-            <Link to="/contact" className="btn-primary gap-2">
-              Nous contacter <ArrowRight size={15} />
-            </Link>
-          </motion.div>
+          {!loading && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="relative rounded-3xl p-10 text-center overflow-hidden border border-white/[0.06]"
+              style={{ background: "rgba(255,255,255,0.02)" }}
+            >
+              <div className="absolute top-[-40px] right-[-40px] w-[200px] h-[200px] rounded-full bg-orange-600/[0.08] blur-3xl pointer-events-none" />
+              <Clock size={28} className="text-orange-400 mx-auto mb-4" />
+              <h3 className="font-display font-black text-white text-xl mb-3">
+                Un événement à proposer ?
+              </h3>
+              <p className="text-white/40 text-sm mb-6 max-w-sm mx-auto">
+                Tournoi, initiative solidaire ou soirée club — contactez-nous pour en discuter.
+              </p>
+              <Link to="/contact" className="btn-primary gap-2">
+                Nous contacter <ArrowRight size={15} />
+              </Link>
+            </motion.div>
+          )}
         </div>
       </section>
     </>
