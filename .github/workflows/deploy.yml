@@ -28,6 +28,11 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
+      - name: Clean pre-rendered HTML files
+        run: |
+          find dist -name "*.html" ! -name "index.html" -delete
+          echo "Cleaned pre-rendered HTML files"
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
