@@ -16,15 +16,15 @@ interface NavItem {
   to: string;
   label: string;
   icon: React.ElementType;
-  roles?: Array<"super_admin" | "responsable" | "redacteur">;
+  roles?: Array<"super_admin" | "president" | "entraineur" | "evenements_com">;
 }
 
 const navItems: NavItem[] = [
   { to: "/admin/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { to: "/admin/matches", label: "Matchs", icon: CalendarDays },
-  { to: "/admin/users", label: "Utilisateurs", icon: Users, roles: ["super_admin"] },
-  { to: "/admin/ticker", label: "Bandeau com", icon: Megaphone, roles: ["super_admin"] },
-  { to: "/admin/evenements", label: "Événements", icon: CalendarRange, roles: ["super_admin"] },
+  { to: "/admin/users", label: "Utilisateurs", icon: Users, roles: ["super_admin", "president"] },
+  { to: "/admin/ticker", label: "Bandeau com", icon: Megaphone, roles: ["super_admin", "president", "evenements_com"] },
+  { to: "/admin/evenements", label: "Événements", icon: CalendarRange, roles: ["super_admin", "president", "evenements_com"] },
 ];
 
 function NavItems({ onClose }: { onClose?: () => void }) {
@@ -67,8 +67,9 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
   const roleLabel: Record<string, string> = {
     super_admin: "Super Admin",
-    responsable: "Responsable",
-    redacteur: "Rédacteur",
+    president: "Président",
+    entraineur: "Entraîneur",
+    evenements_com: "Événements & Com",
   };
 
   return (

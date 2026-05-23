@@ -65,7 +65,7 @@ function Score({ match }: { match: Match }) {
 
 export default function MatchListAdminPage() {
   const navigate = useNavigate();
-  const { isAdmin, isRedacteur, isResponsable, categorie } = useAuth();
+  const { isAdmin, can, role, categorie } = useAuth();
 
   const [filters, setFilters] = useState<MatchFilters>({});
   const [deleteTarget, setDeleteTarget] = useState<Match | null>(null);
@@ -74,7 +74,7 @@ export default function MatchListAdminPage() {
   const deleteMutation = useDeleteMatch();
   const updateMutation = useUpdateMatch();
 
-  const canCreate = isAdmin || isResponsable;
+  const canCreate = can("manage_own_matches");
 
   function handlePublish(match: Match) {
     updateMutation.mutate({ id: match.id, data: { statut: "publie" } });
@@ -87,8 +87,7 @@ export default function MatchListAdminPage() {
     });
   }
 
-  // Categories visible dans le filtre (responsable limité à la sienne)
-  const showCatFilter = isAdmin;
+  const showCatFilter = can("manage_all_matches");
 
   return (
     <div>
@@ -96,7 +95,7 @@ export default function MatchListAdminPage() {
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-display font-black text-white">Matchs</h1>
-          {isResponsable && categorie && (
+          {role === "entraineur" && categorie && (
             <p className="text-white/40 text-sm mt-0.5">Catégorie : {categorie}</p>
           )}
         </div>
@@ -192,7 +191,7 @@ export default function MatchListAdminPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2 pt-2 border-t border-white/[0.05]">
-                {!isRedacteur && match.statut === "joue" && (
+                {can("publish_match") && match.statut === "joue" && (
                   <Button
                     size="sm"
                     variant="ghost"
@@ -265,7 +264,7 @@ export default function MatchListAdminPage() {
                   <TableCell><Score match={match} /></TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center gap-1 justify-end">
-                      {!isRedacteur && match.statut === "joue" && (
+                      {can("publish_match") && match.statut === "joue" && (
                         <Button
                           size="sm"
                           variant="ghost"

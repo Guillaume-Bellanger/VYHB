@@ -327,7 +327,7 @@ export default function MatchFormPage() {
   const navigate = useNavigate();
   const isEditMode = !!id;
 
-  const { isAdmin, isResponsable, isRedacteur, categorie: userCategorie } = useAuth();
+  const { role, can, categorie: userCategorie } = useAuth();
 
   const { data: existing, isLoading: loadingMatch } = useMatch(id);
   const createMutation = useCreateMatch();
@@ -378,11 +378,11 @@ export default function MatchFormPage() {
   const statut = watch("statut");
   const domicile = watch("domicile");
   const showScore = statut === "joue" || statut === "publie";
-  const showResume = statut === "joue" || statut === "publie";
+  const showResume = (statut === "joue" || statut === "publie") && can("edit_resume");
 
   // Permissions
-  const fieldsDisabled = isRedacteur; // rédacteur : tout sauf resume
-  const categorieLocked = isResponsable; // responsable : catégorie figée
+  const fieldsDisabled = !can("manage_own_matches");
+  const categorieLocked = role === "entraineur";
 
   async function onSubmit(data: FormData) {
     const payload = {
@@ -396,8 +396,8 @@ export default function MatchFormPage() {
 
     try {
       if (isEditMode) {
-        // Rédacteur ne soumet que le résumé
-        const updatePayload = isRedacteur
+        // evenements_com ne soumet que le résumé
+        const updatePayload = fieldsDisabled
           ? { resume: payload.resume }
           : payload;
         await updateMutation.mutateAsync({ id: id!, data: updatePayload });
@@ -437,9 +437,9 @@ export default function MatchFormPage() {
         </h1>
       </div>
 
-      {isRedacteur && (
+      {fieldsDisabled && (
         <div className="mb-6 px-4 py-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-300 text-sm">
-          Mode rédacteur — seul le champ Résumé est modifiable.
+          Accès limité — seul le champ Résumé est modifiable.
         </div>
       )}
 
@@ -578,7 +578,7 @@ export default function MatchFormPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {STATUT_OPTIONS.map(({ value, label }) => (
+                  {STATUT_OPTIONS.filter(({ value }) => !(value === "publie" && !can("publish_match"))).map(({ value, label }) => (
                     <SelectItem key={value} value={value}>{label}</SelectItem>
                   ))}
                 </SelectContent>

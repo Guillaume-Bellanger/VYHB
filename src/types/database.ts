@@ -1,4 +1,4 @@
-export type UserRole = "super_admin" | "responsable" | "redacteur";
+export type UserRole = "super_admin" | "president" | "entraineur" | "evenements_com";
 export type MatchType = "championnat" | "coupe" | "amical" | "tournoi";
 export type MatchStatut = "prevu" | "joue" | "publie";
 

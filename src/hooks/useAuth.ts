@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/stores/authStore";
 import type { UserRole } from "@/types/database";
+import { can as permCan } from "@/lib/permissions";
 
 export function useAuth() {
   const { user, profile, isLoading, signIn, signOut } = useAuthStore();
@@ -12,9 +13,15 @@ export function useAuth() {
     return roles.includes(role);
   };
 
+  const can = (action: string, context?: { userCategorie?: string; matchCategorie?: string }): boolean => {
+    if (!role) return false;
+    return permCan(role, action, context);
+  };
+
   const isAdmin = hasRole("super_admin");
-  const isResponsable = hasRole("responsable");
-  const isRedacteur = hasRole("redacteur");
+  const isPresident = hasRole("president");
+  const isEntraineur = hasRole("entraineur");
+  const isEvenementsCom = hasRole("evenements_com");
 
   return {
     user,
@@ -24,9 +31,11 @@ export function useAuth() {
     isLoading,
     isAuthenticated: !!user,
     isAdmin,
-    isResponsable,
-    isRedacteur,
+    isPresident,
+    isEntraineur,
+    isEvenementsCom,
     hasRole,
+    can,
     signIn,
     signOut,
   };

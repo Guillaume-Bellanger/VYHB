@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UserPlus, Pencil, Power, Loader2, ShieldAlert } from "lucide-react";
 import { useUsers, useUpdateUser, useInviteUser, type InvitePayload } from "@/hooks/useUsers";
+import { useAuth } from "@/hooks/useAuth";
 import type { Profile, UserRole } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,26 +28,28 @@ const CATEGORIES = [
 
 const ROLE_LABELS: Record<UserRole, string> = {
   super_admin: "Super Admin",
-  responsable: "Responsable",
-  redacteur: "Rédacteur",
+  president: "Président",
+  entraineur: "Entraîneur",
+  evenements_com: "Événements & Com",
 };
 
 const ROLE_COLORS: Record<UserRole, string> = {
   super_admin: "bg-orange-500/15 text-orange-400 border-orange-500/25",
-  responsable: "bg-blue-500/15 text-blue-400 border-blue-500/25",
-  redacteur: "bg-white/[0.06] text-white/50 border-white/[0.10]",
+  president: "bg-purple-500/15 text-purple-400 border-purple-500/25",
+  entraineur: "bg-blue-500/15 text-blue-400 border-blue-500/25",
+  evenements_com: "bg-white/[0.06] text-white/50 border-white/[0.10]",
 };
 
 // ── Schemas ──────────────────────────────────────────────────
 
 const inviteSchema = z.object({
   email: z.string().email("Email invalide"),
-  role: z.enum(["super_admin", "responsable", "redacteur"] as const),
+  role: z.enum(["super_admin", "president", "entraineur", "evenements_com"] as const),
   categorie: z.string().nullable(),
 });
 
 const editSchema = z.object({
-  role: z.enum(["super_admin", "responsable", "redacteur"] as const),
+  role: z.enum(["super_admin", "president", "entraineur", "evenements_com"] as const),
   categorie: z.string().nullable(),
 });
 
@@ -89,11 +92,11 @@ function CategorieSelect({ control, name, disabled }: {
 
 // ── Invite Dialog ────────────────────────────────────────────
 
-function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+function InviteDialog({ open, onClose, canEditRole }: { open: boolean; onClose: () => void; canEditRole: boolean }) {
   const invite = useInviteUser();
   const { register, handleSubmit, control, watch, formState: { errors } } = useForm<InviteForm>({
     resolver: zodResolver(inviteSchema),
-    defaultValues: { role: "redacteur", categorie: null },
+    defaultValues: { role: "evenements_com", categorie: null },
   });
   const role = watch("role");
 
@@ -128,12 +131,12 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
               control={control}
               name="role"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="bg-white/[0.04] border-white/[0.10] text-white">
+                <Select value={field.value} onValueChange={field.onChange} disabled={!canEditRole}>
+                  <SelectTrigger className="bg-white/[0.04] border-white/[0.10] text-white disabled:opacity-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(["super_admin", "responsable", "redacteur"] as UserRole[]).map((r) => (
+                    {(["super_admin", "president", "entraineur", "evenements_com"] as UserRole[]).map((r) => (
                       <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
                     ))}
                   </SelectContent>
@@ -142,7 +145,7 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
             />
           </div>
 
-          {role === "responsable" && (
+          {role === "entraineur" && (
             <div className="space-y-1.5">
               <Label className="text-white/70">Catégorie</Label>
               <CategorieSelect control={control as never} name="categorie" />
@@ -176,7 +179,7 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
 
 // ── Edit Dialog ───────────────────────────────────────────────
 
-function EditDialog({ user, onClose }: { user: Profile; onClose: () => void }) {
+function EditDialog({ user, onClose, canEditRole }: { user: Profile; onClose: () => void; canEditRole: boolean }) {
   const update = useUpdateUser();
   const { handleSubmit, control, watch, formState: { errors } } = useForm<EditForm>({
     resolver: zodResolver(editSchema),
@@ -204,12 +207,12 @@ function EditDialog({ user, onClose }: { user: Profile; onClose: () => void }) {
               control={control}
               name="role"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="bg-white/[0.04] border-white/[0.10] text-white">
+                <Select value={field.value} onValueChange={field.onChange} disabled={!canEditRole}>
+                  <SelectTrigger className="bg-white/[0.04] border-white/[0.10] text-white disabled:opacity-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(["super_admin", "responsable", "redacteur"] as UserRole[]).map((r) => (
+                    {(["super_admin", "president", "entraineur", "evenements_com"] as UserRole[]).map((r) => (
                       <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
                     ))}
                   </SelectContent>
@@ -218,7 +221,7 @@ function EditDialog({ user, onClose }: { user: Profile; onClose: () => void }) {
             />
           </div>
 
-          {role === "responsable" && (
+          {role === "entraineur" && (
             <div className="space-y-1.5">
               <Label className="text-white/70">Catégorie</Label>
               <CategorieSelect control={control as never} name="categorie" />
@@ -253,6 +256,8 @@ function EditDialog({ user, onClose }: { user: Profile; onClose: () => void }) {
 export default function UsersPage() {
   const { data: users, isLoading, error } = useUsers();
   const updateUser = useUpdateUser();
+  const { can } = useAuth();
+  const canEditRole = can("edit_user_role");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Profile | null>(null);
 
@@ -414,8 +419,8 @@ export default function UsersPage() {
         <p className="text-white/30 text-sm py-12 text-center">Aucun utilisateur trouvé.</p>
       )}
 
-      <InviteDialog open={inviteOpen} onClose={() => setInviteOpen(false)} />
-      {editTarget && <EditDialog user={editTarget} onClose={() => setEditTarget(null)} />}
+      <InviteDialog open={inviteOpen} onClose={() => setInviteOpen(false)} canEditRole={canEditRole} />
+      {editTarget && <EditDialog user={editTarget} onClose={() => setEditTarget(null)} canEditRole={canEditRole} />}
     </div>
   );
 }

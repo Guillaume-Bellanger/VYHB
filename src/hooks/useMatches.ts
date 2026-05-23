@@ -88,13 +88,13 @@ async function pgDelete(path: string): Promise<void> {
 // ── Queries ───────────────────────────────────────────────────
 
 export function useMatches(filters: MatchFilters = {}) {
-  const { isResponsable, categorie } = useAuth();
+  const { isEntraineur, categorie } = useAuth();
 
   return useQuery({
-    queryKey: [...MATCHES_QK, filters, isResponsable, categorie],
+    queryKey: [...MATCHES_QK, filters, isEntraineur, categorie],
     queryFn: () => {
       let q = `matches?select=*&order=date.desc`;
-      if (isResponsable && categorie) q += `&categorie=eq.${encodeURIComponent(categorie)}`;
+      if (isEntraineur && categorie) q += `&categorie=eq.${encodeURIComponent(categorie)}`;
       if (filters.statut) q += `&statut=eq.${filters.statut}`;
       if (filters.categorie) q += `&categorie=eq.${encodeURIComponent(filters.categorie)}`;
       return pgList<Match[]>(q);

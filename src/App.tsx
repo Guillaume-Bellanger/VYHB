@@ -75,15 +75,19 @@ const App = () => (
                 <Route path="/admin/matches" element={<MatchListAdminPage />} />
               </Route>
 
-              {/* super_admin + responsable uniquement */}
-              <Route element={<ProtectedRoute allowedRoles={["super_admin", "responsable"]} />}>
+              {/* super_admin + president + entraineur + evenements_com */}
+              <Route element={<ProtectedRoute allowedRoles={["super_admin", "president", "entraineur", "evenements_com"]} />}>
                 <Route path="/admin/matches/new" element={<MatchFormPage />} />
                 <Route path="/admin/matches/:id/edit" element={<MatchFormPage />} />
               </Route>
 
-              {/* super_admin uniquement */}
-              <Route element={<ProtectedRoute allowedRoles={["super_admin"]} />}>
+              {/* super_admin + president uniquement */}
+              <Route element={<ProtectedRoute allowedRoles={["super_admin", "president"]} />}>
                 <Route path="/admin/users" element={<UsersPage />} />
+              </Route>
+
+              {/* super_admin + president + evenements_com */}
+              <Route element={<ProtectedRoute allowedRoles={["super_admin", "president", "evenements_com"]} />}>
                 <Route path="/admin/ticker" element={<TickerPage />} />
                 <Route path="/admin/evenements" element={<EvenementsPage />} />
               </Route>
