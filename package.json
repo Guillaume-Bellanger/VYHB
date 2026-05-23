@@ -7,7 +7,6 @@
     "dev": "vite",
     "build": "node node_modules/vite/bin/vite.js build",
     "build:spa": "node node_modules/vite/bin/vite.js build",
-    "postbuild": "react-snap",
     "build:dev": "node node_modules/vite/bin/vite.js build --mode development",
     "lint": "eslint .",
     "preview": "node node_modules/vite/bin/vite.js preview",
@@ -69,20 +68,6 @@
     "zod": "^3.25.76",
     "zustand": "^5.0.12"
   },
-  "reactSnap": {
-    "source": "dist",
-    "destination": "dist",
-    "exclude": [
-      "/resultats",
-      "/evenements",
-      "/admin",
-      "/admin/*"
-    ],
-    "puppeteerArgs": [
-      "--no-sandbox",
-      "--disable-setuid-sandbox"
-    ]
-  },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.57.0",
@@ -100,7 +85,6 @@
     "globals": "^15.15.0",
     "jsdom": "^29.0.1",
     "postcss": "^8.5.6",
-    "react-snap": "^1.23.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
