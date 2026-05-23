@@ -97,6 +97,8 @@ const Header = () => {
         <div className="flex items-center gap-3">
           <Link
             to={adminTo}
+            target="_blank"
+            rel="noopener noreferrer"
             className="hidden lg:inline-flex items-center px-3 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/55 border border-white/[0.07] hover:border-white/[0.15] hover:bg-white/[0.04] transition-all duration-200"
           >
             {adminLabel}
@@ -199,6 +201,8 @@ const Header = () => {
               <div className="pt-2">
                 <Link
                   to={adminTo}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={() => {
                     setMenuOpen(false);
                     setTimeout(() => {
