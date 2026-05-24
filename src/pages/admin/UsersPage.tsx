@@ -44,7 +44,7 @@ const ROLE_COLORS: Record<UserRole, string> = {
 
 const inviteSchema = z.object({
   email: z.string().email("Email invalide"),
-  role: z.enum(["super_admin", "president", "entraineur", "evenements_com"] as const),
+  role: z.enum(["president", "entraineur", "evenements_com"] as const),
   categorie: z.string().nullable(),
 });
 
@@ -96,7 +96,7 @@ function InviteDialog({ open, onClose, canEditRole }: { open: boolean; onClose: 
   const invite = useInviteUser();
   const { register, handleSubmit, control, watch, formState: { errors } } = useForm<InviteForm>({
     resolver: zodResolver(inviteSchema),
-    defaultValues: { role: "evenements_com", categorie: null },
+    defaultValues: { role: "entraineur", categorie: null },
   });
   const role = watch("role");
 
@@ -136,7 +136,7 @@ function InviteDialog({ open, onClose, canEditRole }: { open: boolean; onClose: 
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(["super_admin", "president", "entraineur", "evenements_com"] as UserRole[]).map((r) => (
+                    {(["president", "entraineur", "evenements_com"] as UserRole[]).map((r) => (
                       <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
                     ))}
                   </SelectContent>

@@ -1,17 +1,29 @@
 -- Trigger : création automatique du profil à l'invitation
+-- Lit pending_invites pour assigner le bon rôle/catégorie
 
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  v_role      user_role := 'entraineur';
+  v_categorie TEXT      := NULL;
 BEGIN
+  SELECT role, categorie
+  INTO   v_role, v_categorie
+  FROM   pending_invites
+  WHERE  email = NEW.email;
+
   INSERT INTO profiles (id, full_name, role, email, categorie)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-    'entraineur',
+    COALESCE(v_role, 'entraineur'),
     NEW.email,
-    NULL
+    v_categorie
   )
   ON CONFLICT (id) DO NOTHING;
+
+  DELETE FROM pending_invites WHERE email = NEW.email;
+
   RETURN NEW;
 EXCEPTION WHEN OTHERS THEN
   RETURN NEW;
