@@ -7,10 +7,9 @@ import SEO from "@/components/SEO";
 const collectifIcons: Record<string, React.ElementType> = {
   "baby-hand": Heart,
   "-7": Star,
-  "-9": Zap,
+  "-9-11": Zap,
   "-11f": Sparkles,
-  "-11m": Trophy,
-  "-13f": Flame,
+  "-13m": Flame,
   "-15-18f": Flame,
   "-15-18m": Trophy,
   "seniors-feminines": Crown,
@@ -22,7 +21,7 @@ const Collectifs = () => (
   <>
     <SEO
       title="Nos équipes"
-      description="Baby Hand, -7, -9, -11F, -11M, -13F, -15/-18F, -15/-18M, Seniors, Loisirs — les 11 équipes du Val d'Yerres Handball en Essonne. Trouvez votre catégorie !"
+      description="Baby Hand, -7, -9/-11, -11F, -13M, -15/-18F, -15/-18M, Seniors, Loisirs — les 10 équipes du Val d'Yerres Handball en Essonne. Trouvez votre catégorie !"
       canonical="/collectifs"
       breadcrumb={[
         { name: "Accueil", url: "/" },

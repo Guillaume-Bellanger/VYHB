@@ -6,38 +6,63 @@ export interface Entraineur {
 
 export const entraineurs: Entraineur[] = [
   {
-    prenom: "Thomas",
-    role: "Seniors Masculins",
-    avatarUrl: "https://ui-avatars.com/api/?name=Thomas&background=cc0000&color=fff&size=128&bold=true",
+    prenom: "Véronique",
+    role: "Baby / -7 / -9/-11",
+    avatarUrl: "https://ui-avatars.com/api/?name=Veronique&background=cc0000&color=fff&size=128&bold=true",
   },
   {
-    prenom: "Sophie",
-    role: "Seniors Féminines",
-    avatarUrl: "https://ui-avatars.com/api/?name=Sophie&background=cc0000&color=fff&size=128&bold=true",
+    prenom: "Alexandre",
+    role: "-7",
+    avatarUrl: "https://ui-avatars.com/api/?name=Alexandre&background=cc0000&color=fff&size=128&bold=true",
   },
   {
-    prenom: "Karim",
+    prenom: "Céline",
+    role: "-9/-11",
+    avatarUrl: "https://ui-avatars.com/api/?name=Celine&background=cc0000&color=fff&size=128&bold=true",
+  },
+  {
+    prenom: "Fred",
+    role: "-11F / -15/-18F",
+    avatarUrl: "https://ui-avatars.com/api/?name=Fred&background=cc0000&color=fff&size=128&bold=true",
+  },
+  {
+    prenom: "Jérémy",
+    role: "-13M",
+    avatarUrl: "https://ui-avatars.com/api/?name=Jeremy&background=cc0000&color=fff&size=128&bold=true",
+  },
+  {
+    prenom: "Guillaume",
+    role: "-15/-18M / Seniors Masculins",
+    avatarUrl: "https://ui-avatars.com/api/?name=Guillaume&background=cc0000&color=fff&size=128&bold=true",
+  },
+  {
+    prenom: "Lénaïck",
     role: "-15/-18M",
-    avatarUrl: "https://ui-avatars.com/api/?name=Karim&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "https://ui-avatars.com/api/?name=Lenaick&background=cc0000&color=fff&size=128&bold=true",
   },
   {
-    prenom: "Julie",
+    prenom: "Ronan",
     role: "-15/-18F",
-    avatarUrl: "https://ui-avatars.com/api/?name=Julie&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "https://ui-avatars.com/api/?name=Ronan&background=cc0000&color=fff&size=128&bold=true",
   },
   {
-    prenom: "Marc",
-    role: "-13F",
-    avatarUrl: "https://ui-avatars.com/api/?name=Marc&background=cc0000&color=fff&size=128&bold=true",
+    prenom: "Sofian",
+    role: "Seniors Féminines",
+    avatarUrl: "https://ui-avatars.com/api/?name=Sofian&background=cc0000&color=fff&size=128&bold=true",
   },
   {
-    prenom: "Léa",
-    role: "-11M / -11F",
-    avatarUrl: "https://ui-avatars.com/api/?name=Lea&background=cc0000&color=fff&size=128&bold=true",
+    prenom: "Sylvain",
+    role: "Seniors Masculins",
+    avatarUrl: "https://ui-avatars.com/api/?name=Sylvain&background=cc0000&color=fff&size=128&bold=true",
   },
   {
-    prenom: "Paul",
-    role: "-9 / -7 / Baby Hand",
-    avatarUrl: "https://ui-avatars.com/api/?name=Paul&background=cc0000&color=fff&size=128&bold=true",
+    prenom: "Lydie",
+    role: "Loisirs",
+    avatarUrl: "https://ui-avatars.com/api/?name=Lydie&background=cc0000&color=fff&size=128&bold=true",
+  },
+  {
+    prenom: "Michel",
+    role: "Loisirs",
+    avatarUrl: "https://ui-avatars.com/api/?name=Michel&background=cc0000&color=fff&size=128&bold=true",
   },
 ];

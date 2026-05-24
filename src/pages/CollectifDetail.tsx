@@ -6,10 +6,9 @@ import { collectifs } from "@/data/collectifs";
 const collectifIcons: Record<string, React.ElementType> = {
   "baby-hand": Heart,
   "-7": Star,
-  "-9": Zap,
+  "-9-11": Zap,
   "-11f": Sparkles,
-  "-11m": Trophy,
-  "-13f": Flame,
+  "-13m": Flame,
   "-15-18f": Flame,
   "-15-18m": Trophy,
   "seniors-feminines": Crown,
