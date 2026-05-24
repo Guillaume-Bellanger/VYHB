@@ -30,6 +30,7 @@ interface Evenement {
   lien_cta: string | null;
   label_cta: string | null;
   expire_le: string | null;
+  publie_le: string | null;
   actif: boolean;
   ordre: number;
 }
@@ -127,6 +128,7 @@ const schema = z.object({
   lien_cta: z.string().nullable().optional(),
   label_cta: z.string().nullable().optional(),
   expire_le: z.string().nullable().optional(),
+  publie_le: z.string().nullable().optional(),
   ordre: z.coerce.number().int().default(0),
   actif: z.boolean().default(true),
 });
@@ -290,6 +292,7 @@ export default function EvenementsPage() {
       lien_cta: null,
       label_cta: null,
       expire_le: null,
+      publie_le: new Date().toISOString().split("T")[0],
     });
     setFormMode("new");
   }
@@ -307,6 +310,7 @@ export default function EvenementsPage() {
       lien_cta: ev.lien_cta ?? null,
       label_cta: ev.label_cta ?? null,
       expire_le: ev.expire_le ?? null,
+      publie_le: ev.publie_le ?? null,
       ordre: ev.ordre,
       actif: ev.actif,
     });
@@ -344,6 +348,7 @@ export default function EvenementsPage() {
         lien_cta: data.lien_cta || null,
         label_cta: data.label_cta || null,
         expire_le: data.expire_le || null,
+        publie_le: data.publie_le || null,
         ordre: data.ordre,
         actif: data.actif,
       };
@@ -520,7 +525,7 @@ export default function EvenementsPage() {
             </Field>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <Field label="Lieu" hint="Optionnel">
               <Input
                 {...register("lieu")}
@@ -533,6 +538,14 @@ export default function EvenementsPage() {
               <Input
                 type="date"
                 {...register("expire_le")}
+                className="bg-white/[0.04] border-white/[0.10] text-white"
+              />
+            </Field>
+
+            <Field label="Date de publication" hint="L'événement sera visible à partir de cette date">
+              <Input
+                type="date"
+                {...register("publie_le")}
                 className="bg-white/[0.04] border-white/[0.10] text-white"
               />
             </Field>
