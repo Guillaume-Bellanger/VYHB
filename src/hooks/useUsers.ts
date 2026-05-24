@@ -80,23 +80,9 @@ export function useInviteUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ email, role, categorie }: InvitePayload) => {
-      // 1. Enregistrer le rôle/catégorie avant le 1er login
-      const upsertRes = await fetch(restUrl("pending_invites"), {
-        method: "POST",
-        headers: {
-          ...baseHeaders(),
-          "Content-Type": "application/json",
-          Prefer: "resolution=merge-duplicates",
-        },
-        body: JSON.stringify({ email, role, categorie }),
-      });
-      if (!upsertRes.ok) {
-        const err = await upsertRes.json().catch(() => ({}));
-        throw new Error(err.message ?? "Erreur lors de la pré-invitation");
-      }
-
-      // 2. Envoyer l'invitation via l'endpoint admin (nécessite VITE_SUPABASE_SERVICE_ROLE_KEY)
       const serviceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string;
+
+      // 1. Créer le user via l'endpoint admin
       const inviteRes = await fetch(authUrl("admin/users"), {
         method: "POST",
         headers: {
@@ -113,9 +99,52 @@ export function useInviteUser() {
       });
 
       const inviteText = await inviteRes.text();
+      console.log('[invite] status:', inviteRes.status);
+      console.log('[invite] response:', inviteText);
       if (!inviteRes.ok) {
-        const err = JSON.parse(inviteText || '{}');
+        const err = JSON.parse(inviteText || '{}') as { msg?: string; message?: string };
         throw new Error(err.msg ?? err.message ?? "Erreur lors de l'envoi de l'invitation");
+      }
+
+      // 2. Créer le profil directement (trigger désactivé sur plan gratuit)
+      const { id: userId } = JSON.parse(inviteText) as { id: string };
+      const profileBody = {
+        id: userId,
+        full_name: email.split('@')[0],
+        role,
+        email,
+        categorie: categorie ?? null,
+      };
+
+      const profileRes = await fetch(restUrl("profiles"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+          Prefer: "resolution=merge-duplicates",
+        },
+        body: JSON.stringify(profileBody),
+      });
+
+      if (profileRes.status === 409) {
+        const patchRes = await fetch(restUrl(`profiles?id=eq.${userId}`), {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ full_name: email.split('@')[0], role, email, categorie: categorie ?? null }),
+        });
+        if (!patchRes.ok) throw new Error(`Erreur profil PATCH HTTP ${patchRes.status}`);
+        return;
+      }
+
+      if (!profileRes.ok) {
+        const err = await profileRes.json().catch(() => ({})) as { message?: string };
+        throw new Error(err.message ?? `Erreur création profil HTTP ${profileRes.status}`);
       }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: USERS_QK }),
