@@ -97,20 +97,24 @@ export function useInviteUser() {
 
       // 2. Envoyer l'invitation via l'endpoint admin (nécessite VITE_SUPABASE_SERVICE_ROLE_KEY)
       const serviceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string;
-      const inviteRes = await fetch(authUrl("invite"), {
+      const inviteRes = await fetch(authUrl("admin/users"), {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           apikey: serviceKey,
           Authorization: `Bearer ${serviceKey}`,
-          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email,
-          redirect_to: `${window.location.origin}/admin`,
+          email_confirm: false,
+          invite: true,
+          redirect_to: `${window.location.origin}/admin/auth/callback`,
         }),
       });
+
+      const inviteText = await inviteRes.text();
       if (!inviteRes.ok) {
-        const err = await inviteRes.json().catch(() => ({}));
+        const err = JSON.parse(inviteText || '{}');
         throw new Error(err.msg ?? err.message ?? "Erreur lors de l'envoi de l'invitation");
       }
     },
