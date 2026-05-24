@@ -1,66 +1,14 @@
 import { create } from "zustand";
+import { createClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 import type { Profile, UserRole } from "@/types/database";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-// Clé localStorage : sb-{project-ref}-auth-token
-const STORAGE_KEY = (() => {
-  try {
-    return `sb-${new URL(SUPABASE_URL).hostname.split(".")[0]}-auth-token`;
-  } catch {
-    return "sb-auth-token";
-  }
-})();
-
-// ── Session localStorage ──────────────────────────────────────
-
-interface RawSession {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  expires_at?: number;
-  user: User;
-}
-
-interface StoredSession {
-  access_token: string;
-  refresh_token: string;
-  expires_at: number;
-  user: User;
-}
-
-function readSession(): StoredSession | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const s: StoredSession = JSON.parse(raw);
-    if (s.expires_at < Math.floor(Date.now() / 1000)) {
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-    return s;
-  } catch {
-    localStorage.removeItem(STORAGE_KEY);
-    return null;
-  }
-}
-
-function saveSession(raw: RawSession): StoredSession {
-  const stored: StoredSession = {
-    access_token: raw.access_token,
-    refresh_token: raw.refresh_token,
-    expires_at: raw.expires_at ?? Math.floor(Date.now() / 1000) + raw.expires_in,
-    user: raw.user,
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-  return stored;
-}
-
-function clearSession() {
-  localStorage.removeItem(STORAGE_KEY);
-}
+// Client dédié à l'auth uniquement — gère le refresh automatique des tokens
+// et la persistance localStorage au format attendu par baseHeaders() dans les autres hooks
+const authClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── Store ─────────────────────────────────────────────────────
 
@@ -80,57 +28,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: true,
 
   signIn: async (email, password) => {
-    set({ isLoading: true, user: null, profile: null });
-
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_KEY,
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error_description ?? err.message ?? "Identifiants incorrects.");
-    }
-
-    const session = saveSession((await res.json()) as RawSession);
-    await get().fetchProfile(session.user.id);
-    set({ user: session.user, isLoading: false });
+    const { error } = await authClient.auth.signInWithPassword({ email, password });
+    if (error) throw new Error(error.message);
+    // La mise à jour du state se fait via onAuthStateChange (SIGNED_IN)
   },
 
   signOut: async () => {
-    const session = readSession();
-    if (session) {
-      try {
-        await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
-          method: "POST",
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-      } catch {}
-    }
-    clearSession();
-    set({ user: null, profile: null, isLoading: false });
+    await authClient.auth.signOut();
+    // La mise à jour du state se fait via onAuthStateChange (SIGNED_OUT)
   },
 
   fetchProfile: async (userId) => {
-    const session = readSession();
+    const { data: { session } } = await authClient.auth.getSession();
     const token = session?.access_token ?? SUPABASE_KEY;
 
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=*`,
-      {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=*`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!res.ok) {
       set({ profile: null });
@@ -142,25 +59,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   _init: () => {
-    const session = readSession();
-
-    if (session) {
-      get()
-        .fetchProfile(session.user.id)
-        .then(() => set({ user: session.user, isLoading: false }))
-        .catch(() => {
-          clearSession();
-          set({ user: null, profile: null, isLoading: false });
-        });
-    } else {
-      set({ isLoading: false });
-    }
-
     const safetyTimer = setTimeout(() => {
       if (get().isLoading) set({ isLoading: false });
-    }, 2000);
+    }, 3000);
+
+    const { data: { subscription } } = authClient.auth.onAuthStateChange(
+      async (event, session) => {
+        clearTimeout(safetyTimer);
+
+        if (event === "SIGNED_OUT") {
+          set({ user: null, profile: null, isLoading: false });
+          return;
+        }
+
+        if (session?.user) {
+          if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+            await get().fetchProfile(session.user.id);
+          }
+          set({ user: session.user, isLoading: false });
+        } else {
+          set({ user: null, profile: null, isLoading: false });
+        }
+      }
+    );
 
     return () => {
+      subscription.unsubscribe();
       clearTimeout(safetyTimer);
     };
   },
