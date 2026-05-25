@@ -26,17 +26,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signIn: async (email, password) => {
     try {
       console.log('[signIn] attempting...');
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Auth timeout')), 10000)
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/auth/v1/token?grant_type=password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ email, password }),
+        }
       );
-      const result = await Promise.race([
-        authClient.auth.signInWithPassword({ email, password }),
-        timeoutPromise,
-      ]) as Awaited<ReturnType<typeof authClient.auth.signInWithPassword>>;
-      const { data, error } = result;
-      console.log('[signIn] data:', data);
-      console.log('[signIn] error:', error);
-      if (error) throw error;
+      const data = await response.json();
+      console.log('[signIn] response ok:', response.ok);
+      if (!response.ok) throw new Error(data.error_description || data.msg || 'Login failed');
+
+      await authClient.auth.setSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+      });
       // La mise à jour du state se fait via onAuthStateChange (SIGNED_IN)
     } catch (e) {
       console.log('[signIn] catch:', e);
