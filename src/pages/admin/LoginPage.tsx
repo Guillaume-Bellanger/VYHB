@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthStore } from "@/stores/authStore";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +51,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     setServerError(null);
     try {
       await signIn(email, password);
-      onSuccess();
+      if (useAuthStore.getState().user) onSuccess();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erreur inconnue";
       setServerError(friendlyError(msg));

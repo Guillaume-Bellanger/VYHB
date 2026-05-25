@@ -45,7 +45,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         access_token: data.access_token,
         refresh_token: data.refresh_token,
       });
-      // La mise à jour du state se fait via onAuthStateChange (SIGNED_IN)
+      await get().fetchProfile(data.user.id);
+      set({ user: data.user, isLoading: false });
     } catch (e) {
       console.log('[signIn] catch:', e);
       set({ isLoading: false });
