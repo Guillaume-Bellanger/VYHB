@@ -5,7 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import {
   ChevronDown, ChevronRight, ArrowRight,
   Users, Trophy, Clock, Heart,
-  Phone, Mail, Megaphone, Zap,
+  Phone, Mail, Megaphone, Zap, Facebook,
   UserPlus, Home, PartyPopper, Recycle, Plane,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -200,7 +200,7 @@ const statsData = [
   { value: 245, label: "Licenciés", icon: Users, suffix: "" },
   { value: 10,  label: "Équipes",   icon: Trophy, suffix: "" },
   { value: 23,  label: "Ans d'histoire", icon: Clock,  suffix: "" },
-  { value: 45,  label: "Bénévoles", icon: Heart,  suffix: "+" },
+  { value: 25,  label: "Bénévoles", icon: Heart,  suffix: "+" },
 ];
 
 // ─── Stat card with animated counter
@@ -306,7 +306,7 @@ const Index = () => {
             </motion.h1>
 
             <motion.p custom={2} variants={fadeUp} className="text-lg text-white/55 max-w-xl mb-10 leading-relaxed md:mx-auto">
-              Un club convivial et ambitieux. 245 licenciés, 10 équipes, 23 ans de passion — du baby hand aux seniors.
+              Un club convivial et dynamique. 245 licenciés, 10 équipes, 23 ans de passion — du baby hand aux seniors.
             </motion.p>
 
             <motion.div custom={3} variants={fadeUp} className="flex flex-col sm:flex-row gap-4 md:justify-center">
@@ -324,7 +324,7 @@ const Index = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2, duration: 1 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 animate-scroll-bounce cursor-default"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 w-max flex flex-col items-center gap-1.5 animate-scroll-bounce cursor-default"
         >
           <span className="text-[10px] text-white/25 uppercase tracking-[0.22em] font-display font-bold">Défiler</span>
           <ChevronDown size={16} className="text-white/25" />
@@ -350,7 +350,7 @@ const Index = () => {
               className="h-full"
             >
               <Link
-                to={`/evenements#${news[0].slug}`}
+                to="/evenements"
                 className="card-sport relative overflow-hidden group flex flex-col justify-between min-h-[240px] h-full p-7 block cursor-pointer hover:border-orange-500/30 hover:shadow-[0_16px_48px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-0.5"
               >
                 <div className={`absolute inset-0 transition-opacity duration-500 opacity-0 pointer-events-none ${news[0].hoverGlow}`} />
@@ -383,7 +383,7 @@ const Index = () => {
                   transition={{ delay: (i + 1) * 0.08, duration: 0.5 }}
                 >
                   <Link
-                    to={`/evenements#${item.slug}`}
+                    to="/evenements"
                     className="card-sport relative overflow-hidden group flex items-start gap-4 p-5 block cursor-pointer hover:border-white/15 hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <div className={`absolute inset-0 transition-opacity duration-500 opacity-0 pointer-events-none ${item.hoverGlow}`} />
@@ -443,8 +443,16 @@ const Index = () => {
         <div className="w-11 h-11 rounded-2xl bg-pink-500/15 flex items-center justify-center border border-pink-500/20">
           <span className="text-lg">📸</span>
         </div>
+        <div className="w-11 h-11 rounded-2xl bg-blue-600/15 flex items-center justify-center border border-blue-600/20">
+          <Facebook size={20} className="text-blue-400" />
+        </div>
+        <div className="w-11 h-11 rounded-2xl bg-white/[0.07] flex items-center justify-center border border-white/[0.12]">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" className="text-white/60">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.55V6.78a4.85 4.85 0 0 1-1.07-.09z"/>
+          </svg>
+        </div>
         <span className="font-display font-bold text-sm text-muted-foreground tracking-wider uppercase">
-          Instagram
+          Réseaux sociaux
         </span>
       </div>
 
@@ -489,13 +497,13 @@ const Index = () => {
       </div>
     </motion.div>
 
-    {/* CTA BUTTON */}
+    {/* CTA BUTTONS */}
     <motion.div
       initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: 0.2, duration: 0.5 }}
-      className="mt-10 text-center"
+      className="mt-10 flex flex-wrap items-center justify-center gap-3"
     >
       <a
         href="https://www.instagram.com/VOTRE_COMPTE_INSTAGRAM/"
@@ -503,7 +511,26 @@ const Index = () => {
         rel="noopener noreferrer"
         className="btn-secondary inline-flex items-center gap-2 text-xs"
       >
-        Suivre le club <ArrowRight size={13} />
+        <span className="text-sm leading-none">📸</span> Instagram <ArrowRight size={13} />
+      </a>
+      <a
+        href="https://www.facebook.com/vyhandball"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="btn-secondary inline-flex items-center gap-2 text-xs"
+      >
+        <Facebook size={13} /> Facebook <ArrowRight size={13} />
+      </a>
+      <a
+        href="https://www.tiktok.com/@valdyerreshandball91"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="btn-secondary inline-flex items-center gap-2 text-xs"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.55V6.78a4.85 4.85 0 0 1-1.07-.09z"/>
+        </svg>
+        TikTok <ArrowRight size={13} />
       </a>
     </motion.div>
 

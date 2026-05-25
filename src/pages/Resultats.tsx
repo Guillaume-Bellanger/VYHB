@@ -14,8 +14,8 @@ import {
 // ── Constants ────────────────────────────────────────────────
 
 const ALL_CATS = [
-  "Séniors Masculins", "Séniors Féminins", "-15/-18M", "-15/-18F",
-  "-13F", "-13H", "-11 Mixte", "-9", "Baby / -7", "Loisir",
+  "Baby / -7", "-7", "-9/-11", "-11F", "-13M",
+  "-15/-18M", "-15/-18F", "Séniors Féminines", "Séniors Masculins", "Loisirs",
 ];
 
 const TYPE_LABELS: Record<string, string> = {

@@ -176,9 +176,6 @@ const Events = () => {
             <h1 className="font-display font-black mb-4" style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)" }}>
               Événements <span className="gradient-text">&amp; Actus</span>
             </h1>
-            <p className="text-white/45 text-lg max-w-2xl leading-relaxed mx-auto">
-              Recrutement, portes ouvertes, assemblée générale et initiatives solidaires — toute la vie du club.
-            </p>
           </motion.div>
         </div>
       </section>
