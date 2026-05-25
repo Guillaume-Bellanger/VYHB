@@ -45,6 +45,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         access_token: data.access_token,
         refresh_token: data.refresh_token,
       });
+      console.log('[signIn] user id:', data.user?.id);
+      console.log('[signIn] calling fetchProfile...');
       await get().fetchProfile(data.user.id);
       set({ user: data.user, isLoading: false });
     } catch (e) {
@@ -60,6 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   fetchProfile: async (userId) => {
+    console.log('[fetchProfile] called with uid:', userId);
     const { data: { session } } = await authClient.auth.getSession();
     const token = session?.access_token ?? SUPABASE_KEY;
 
@@ -76,6 +79,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     const data: Profile[] = await res.json();
+    console.log('[fetchProfile] result:', JSON.stringify(data)?.slice(0, 100));
     set({ profile: data[0] ?? null });
   },
 
