@@ -5,6 +5,7 @@ import { supabase as authClient } from "@/lib/supabase";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const STORAGE_KEY = 'sb-qasrphlunnbioicircdz-auth-token';
 
 // ── Store ─────────────────────────────────────────────────────
 
@@ -45,10 +46,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         console.log('[signIn] session keys:', Object.keys(session));
         if (!response.ok) throw new Error(session.error_description || session.msg || 'Login failed');
 
-        await authClient.auth.setSession({
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
           access_token: session.access_token,
           refresh_token: session.refresh_token,
-        });
+          expires_at: session.expires_at,
+          expires_in: session.expires_in,
+          token_type: session.token_type,
+          user: session.user,
+        }));
         console.log('[signIn] user id:', session.user?.id);
         console.log('[signIn] calling fetchProfile...');
         await get().fetchProfile(session.user.id);
@@ -94,26 +99,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   _init: () => {
+    // Restaure la session depuis localStorage au chargement de la page
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const session = JSON.parse(stored);
+        if (session?.user) {
+          get().fetchProfile(session.user.id).finally(() => {
+            set({ user: session.user, isLoading: false });
+          });
+        } else {
+          set({ isLoading: false });
+        }
+      } else {
+        set({ isLoading: false });
+      }
+    } catch {
+      set({ isLoading: false });
+    }
+
     const safetyTimer = setTimeout(() => {
       if (get().isLoading) set({ isLoading: false });
     }, 3000);
 
     const { data: { subscription } } = authClient.auth.onAuthStateChange(
-      async (event, session) => {
-        clearTimeout(safetyTimer);
-
-        if (event === "SIGNED_OUT") {
+      (event, session) => {
+        if (event === 'SIGNED_OUT') {
+          localStorage.removeItem(STORAGE_KEY);
           set({ user: null, profile: null, isLoading: false });
           return;
         }
-
-        if (session?.user) {
-          if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
-            await get().fetchProfile(session.user.id);
-          }
-          set({ user: session.user, isLoading: false });
-        } else {
-          set({ user: null, profile: null, isLoading: false });
+        if (event === 'TOKEN_REFRESHED' && session) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+            expires_at: session.expires_at,
+            expires_in: session.expires_in,
+            token_type: session.token_type,
+            user: session.user,
+          }));
+          set({ user: session.user });
         }
       }
     );
