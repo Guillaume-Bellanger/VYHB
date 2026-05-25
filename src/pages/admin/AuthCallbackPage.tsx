@@ -56,8 +56,21 @@ export default function AuthCallbackPage() {
     console.log('[callback] search:', window.location.search);
     console.log('[callback] href:', window.location.href);
 
-    // Supabase échange automatiquement les tokens de l'URL (hash ou code PKCE)
-    // On attend l'événement pour savoir quand la session est prête
+    const searchParams = new URLSearchParams(window.location.search);
+    const tokenHash = searchParams.get('token_hash');
+    const tokenType = searchParams.get('type') as 'invite' | 'recovery' | 'magiclink' | null;
+
+    if (tokenHash && tokenType) {
+      // Flow PKCE : token_hash dans les query params (recovery, invite récents)
+      supabase.auth.verifyOtp({ token_hash: tokenHash, type: tokenType })
+        .then(({ error }) => {
+          if (error) setServerError(error.message);
+          else setSessionReady(true);
+        });
+      return;
+    }
+
+    // Flow implicite : tokens dans le hash (invitations anciennes)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
@@ -71,7 +84,6 @@ export default function AuthCallbackPage() {
       }
     });
 
-    // Cas où la session est déjà établie avant l'écoute
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) setSessionReady(true);
     });
