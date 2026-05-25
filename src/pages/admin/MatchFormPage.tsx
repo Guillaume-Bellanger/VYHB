@@ -243,8 +243,13 @@ function PostesSection({ matchId, categorie }: { matchId: string; categorie: str
     }
   }
 
-  const obligatoires = postes.filter((p) => !p.facultatif);
-  const facultatifs = postes.filter((p) => p.facultatif);
+  const postesVisibles = postes.filter(
+    (p) =>
+      p.poste &&
+      !(categorie === "Loisirs" && (p.poste === "responsable_salle" || p.poste === "secretaire"))
+  );
+  const obligatoires = postesVisibles.filter((p) => !p.facultatif);
+  const facultatifs = postesVisibles.filter((p) => p.facultatif);
 
   return (
     <div className="mt-10 pt-8 border-t border-white/[0.08]">
