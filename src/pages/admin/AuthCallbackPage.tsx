@@ -52,6 +52,10 @@ export default function AuthCallbackPage() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
+    console.log('[callback] hash:', window.location.hash);
+    console.log('[callback] search:', window.location.search);
+    console.log('[callback] href:', window.location.href);
+
     // Supabase échange automatiquement les tokens de l'URL (hash ou code PKCE)
     // On attend l'événement pour savoir quand la session est prête
     const {
