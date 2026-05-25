@@ -15,7 +15,7 @@ import {
 
 const ALL_CATS = [
   "Baby / -7", "-7", "-9/-11", "-11F", "-13M",
-  "-15/-18M", "-15/-18F", "Séniors Féminines", "Séniors Masculins", "Loisirs",
+  "-15M", "-15F", "Séniors Féminines", "Séniors Masculins", "Loisirs",
 ];
 
 const TYPE_LABELS: Record<string, string> = {

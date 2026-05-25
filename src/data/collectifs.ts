@@ -86,8 +86,8 @@ export const collectifs: Collectif[] = [
   },
   {
     slug: "-15-18m",
-    name: "-15M/-18M",
-    shortName: "-15/-18M",
+    name: "-15M",
+    shortName: "-15M",
     icon: "🏅",
     age: "13–17 ans (Garçons)",
     level: "Départemental",
@@ -103,8 +103,8 @@ export const collectifs: Collectif[] = [
   },
   {
     slug: "-15-18f",
-    name: "-15F/-18F",
-    shortName: "-15/-18F",
+    name: "-15F",
+    shortName: "-15F",
     icon: "🔥",
     age: "13–17 ans (Filles)",
     level: "Départemental",

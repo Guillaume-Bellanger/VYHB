@@ -22,7 +22,7 @@ export const entraineurs: Entraineur[] = [
   },
   {
     prenom: "Fred",
-    role: "-11F / -15/-18F",
+    role: "-11F / -15F",
     avatarUrl: "https://ui-avatars.com/api/?name=Fred&background=cc0000&color=fff&size=128&bold=true",
   },
   {
@@ -32,17 +32,17 @@ export const entraineurs: Entraineur[] = [
   },
   {
     prenom: "Guillaume",
-    role: "-15/-18M / Seniors Masculins",
+    role: "-15M / Seniors Masculins",
     avatarUrl: "https://ui-avatars.com/api/?name=Guillaume&background=cc0000&color=fff&size=128&bold=true",
   },
   {
     prenom: "Lénaïck",
-    role: "-15/-18M",
+    role: "-15M",
     avatarUrl: "https://ui-avatars.com/api/?name=Lenaick&background=cc0000&color=fff&size=128&bold=true",
   },
   {
     prenom: "Ronan",
-    role: "-15/-18F",
+    role: "-15F",
     avatarUrl: "https://ui-avatars.com/api/?name=Ronan&background=cc0000&color=fff&size=128&bold=true",
   },
   {

@@ -24,15 +24,15 @@ const SALLES_DOMICILE = [
 ] as const;
 
 const CATEGORIES = [
-  "Séniors Masculins",
-  "Séniors Féminins",
-  "-15/-18M",
-  "-15/-18F",
-  "-13F",
+  "Baby",
+  "-7",
+  "-9/-11",
+  "-11F",
   "-13M",
-  "-11 Mixte",
-  "-9",
-  "Baby / -7",
+  "-15M",
+  "-15F",
+  "Séniors Masculins",
+  "Séniors Féminines",
   "Loisirs",
 ];
 

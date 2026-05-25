@@ -10,9 +10,9 @@ const prochainsMatchs = [
   { date: "10/05/2026", heure: "10h30", equipe: "-13F", adversaire: "HBC Yerres", competition: "Chpt. Dépt.", lieu: "Gymnase Municipal, Boussy-S-A.", domicile: true, isNext: false },
   { date: "10/05/2026", heure: "15h00", equipe: "Seniors Féminines", adversaire: "Ste-Geneviève HB", competition: "Chpt. Dépt.", lieu: "Gymnase Jean Moulin, Boussy-S-A.", domicile: true, isNext: false },
   { date: "12/05/2026", heure: "14h00", equipe: "Seniors Masculins", adversaire: "Quincy HB", competition: "Chpt. Dépt. D2", lieu: "Gymnase de Quincy-sous-Sénart", domicile: false, isNext: false },
-  { date: "17/05/2026", heure: "15h00", equipe: "-15/-18M", adversaire: "Draveil HB", competition: "Chpt. Dépt.", lieu: "Gymnase Paul Bert, Boussy-S-A.", domicile: true, isNext: false },
+  { date: "17/05/2026", heure: "15h00", equipe: "-15M", adversaire: "Draveil HB", competition: "Chpt. Dépt.", lieu: "Gymnase Paul Bert, Boussy-S-A.", domicile: true, isNext: false },
   { date: "19/05/2026", heure: "10h00", equipe: "-11M", adversaire: "HC Brunoy", competition: "Chpt. Dépt.", lieu: "Gymnase de Brunoy", domicile: false, isNext: false },
-  { date: "24/05/2026", heure: "11h00", equipe: "-15/-18M", adversaire: "HBC Yerres", competition: "Chpt. Dépt.", lieu: "Gymnase Jean Moulin, Boussy-S-A.", domicile: true, isNext: false },
+  { date: "24/05/2026", heure: "11h00", equipe: "-15M", adversaire: "HBC Yerres", competition: "Chpt. Dépt.", lieu: "Gymnase Jean Moulin, Boussy-S-A.", domicile: true, isNext: false },
   { date: "31/05/2026", heure: "09h30", equipe: "-11M", adversaire: "HC Brunoy", competition: "Chpt. Dépt.", lieu: "Gymnase Municipal, Boussy-S-A.", domicile: true, isNext: false },
 ];
 
@@ -21,12 +21,12 @@ const resultats = [
   { date: "26/04/2026", equipe: "-13F", adversaire: "Épinay HB", scoreNous: 24, scoreAdv: 20, domicile: true, competition: "Chpt. Dépt.", resultat: "V" },
   { date: "20/04/2026", equipe: "Seniors Féminines", adversaire: "HBC Yerres", scoreNous: 19, scoreAdv: 22, domicile: true, competition: "Chpt. Dépt.", resultat: "D" },
   { date: "19/04/2026", equipe: "Seniors Masculins", adversaire: "Brunoy HB", scoreNous: 25, scoreAdv: 19, domicile: false, competition: "Chpt. Dépt. D2", resultat: "V" },
-  { date: "13/04/2026", equipe: "-15/-18M", adversaire: "Quincy HB", scoreNous: 31, scoreAdv: 18, domicile: true, competition: "Chpt. Dépt.", resultat: "V" },
+  { date: "13/04/2026", equipe: "-15M", adversaire: "Quincy HB", scoreNous: 31, scoreAdv: 18, domicile: true, competition: "Chpt. Dépt.", resultat: "V" },
   { date: "12/04/2026", equipe: "-13F", adversaire: "Ste-Geneviève HB", scoreNous: 16, scoreAdv: 21, domicile: false, competition: "Chpt. Dépt.", resultat: "D" },
   { date: "06/04/2026", equipe: "Seniors Féminines", adversaire: "Draveil HB", scoreNous: 22, scoreAdv: 22, domicile: false, competition: "Chpt. Dépt.", resultat: "N" },
   { date: "05/04/2026", equipe: "Seniors Masculins", adversaire: "Draveil HB", scoreNous: 22, scoreAdv: 22, domicile: true, competition: "Chpt. Dépt. D2", resultat: "N" },
   { date: "30/03/2026", equipe: "-11M", adversaire: "HC Brunoy", scoreNous: 14, scoreAdv: 8, domicile: true, competition: "Chpt. Dépt.", resultat: "V" },
-  { date: "29/03/2026", equipe: "-15/-18M", adversaire: "HBC Yerres", scoreNous: 24, scoreAdv: 27, domicile: false, competition: "Chpt. Dépt.", resultat: "D" },
+  { date: "29/03/2026", equipe: "-15M", adversaire: "HBC Yerres", scoreNous: 24, scoreAdv: 27, domicile: false, competition: "Chpt. Dépt.", resultat: "D" },
 ];
 
 const classements = [
