@@ -3,6 +3,8 @@ import type { Profile, UserRole } from "@/types/database";
 
 export const USERS_QK = ["users"] as const;
 
+const CALLBACK_URL = `${window.location.origin}/admin/auth/callback`;
+
 // ── Helpers (env vars + token lus à chaque appel) ─────────────
 
 function baseHeaders(): Record<string, string> {
@@ -94,7 +96,7 @@ export function useInviteUser() {
           email,
           email_confirm: false,
           invite: true,
-          redirect_to: `${window.location.origin}/admin/auth/callback`,
+          redirect_to: CALLBACK_URL,
         }),
       });
 
