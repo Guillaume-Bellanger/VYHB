@@ -81,8 +81,8 @@ const App = () => (
                 <Route path="/admin/matches/:id/edit" element={<MatchFormPage />} />
               </Route>
 
-              {/* super_admin + president uniquement */}
-              <Route element={<ProtectedRoute allowedRoles={["super_admin", "president"]} />}>
+              {/* super_admin uniquement */}
+              <Route element={<ProtectedRoute allowedRoles={["super_admin"]} />}>
                 <Route path="/admin/users" element={<UsersPage />} />
               </Route>
 
