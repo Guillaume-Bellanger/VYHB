@@ -23,8 +23,13 @@ const signupSchema = z.object({
   password: z.string().min(8, "Minimum 8 caractères"),
 });
 
+const forgotSchema = z.object({
+  email: z.string().email("Email invalide"),
+});
+
 type LoginData = z.infer<typeof loginSchema>;
 type SignupData = z.infer<typeof signupSchema>;
+type ForgotData = z.infer<typeof forgotSchema>;
 
 const LOGIN_ERRORS: Record<string, string> = {
   "Invalid login credentials": "Identifiants incorrects.",
@@ -177,10 +182,98 @@ function SignupForm({ onCancel }: { onCancel: () => void }) {
   );
 }
 
+function ForgotPasswordForm({ onCancel }: { onCancel: () => void }) {
+  const [success, setSuccess] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ForgotData>({
+    resolver: zodResolver(forgotSchema),
+  });
+
+  const onSubmit = async ({ email }: ForgotData) => {
+    setServerError(null);
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/auth/v1/recover`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({
+        email,
+        redirect_to: 'https://v2.vyhb.fr/admin/auth/callback',
+      }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({})) as { msg?: string; error_description?: string };
+      setServerError(data.msg ?? data.error_description ?? "Une erreur est survenue.");
+      return;
+    }
+    setSuccess(true);
+  };
+
+  if (success) {
+    return (
+      <div className="space-y-4">
+        <p className="text-green-400 text-sm bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
+          Un lien a été envoyé à votre adresse email.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full border-white/10 text-white/60 hover:text-white"
+          onClick={onCancel}
+        >
+          Retour à la connexion
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="forgot-email" className="text-white/70">Email</Label>
+        <Input
+          id="forgot-email"
+          type="email"
+          autoComplete="email"
+          placeholder="prenom@club.fr"
+          className="bg-white/[0.04] border-white/[0.10] text-white placeholder:text-white/25"
+          {...register("email")}
+        />
+        {errors.email && <p className="text-red-400 text-xs">{errors.email.message}</p>}
+      </div>
+
+      {serverError && (
+        <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+          {serverError}
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold"
+      >
+        {isSubmitting ? "Envoi…" : "Envoyer le lien"}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        className="w-full text-white/30 hover:text-white/60 text-xs"
+        onClick={onCancel}
+      >
+        Retour à la connexion
+      </Button>
+    </form>
+  );
+}
+
 export default function LoginPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [showSignup, setShowSignup] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -203,25 +296,37 @@ export default function LoginPage() {
         <Card className="bg-white/[0.04] border-white/[0.08] text-white">
           <CardHeader>
             <CardTitle className="text-white">
-              {showSignup ? "Créer un compte" : "Connexion"}
+              {showSignup ? "Créer un compte" : showForgot ? "Mot de passe oublié" : "Connexion"}
             </CardTitle>
             <CardDescription className="text-white/40">
               {showSignup
                 ? "Compte temporaire — désactiver VITE_ALLOW_SIGNUP en prod."
+                : showForgot
+                ? "Entrez votre email pour recevoir un lien de réinitialisation."
                 : "Les comptes sont créés par l'administrateur."}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {showSignup ? (
               <SignupForm onCancel={() => setShowSignup(false)} />
+            ) : showForgot ? (
+              <ForgotPasswordForm onCancel={() => setShowForgot(false)} />
             ) : (
               <>
                 <LoginForm onSuccess={() => navigate("/admin/dashboard", { replace: true })} />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full mt-2 text-white/30 hover:text-white/60 text-xs"
+                  onClick={() => setShowForgot(true)}
+                >
+                  Mot de passe oublié ?
+                </Button>
                 {ALLOW_SIGNUP && (
                   <Button
                     type="button"
                     variant="ghost"
-                    className="w-full mt-3 text-white/30 hover:text-white/60 text-xs"
+                    className="w-full mt-1 text-white/30 hover:text-white/60 text-xs"
                     onClick={() => setShowSignup(true)}
                   >
                     Créer un compte
