@@ -29,11 +29,11 @@ const CATEGORIES = [
   "-15/-18M",
   "-15/-18F",
   "-13F",
-  "-13H",
+  "-13M",
   "-11 Mixte",
   "-9",
   "Baby / -7",
-  "Loisir",
+  "Loisirs",
 ];
 
 const TYPE_OPTIONS = [

@@ -23,7 +23,7 @@ import {
 
 const CATEGORIES = [
   "Séniors Masculins", "Séniors Féminins", "-15/-18M", "-15/-18F",
-  "-13F", "-13H", "-11 Mixte", "-9", "Baby / -7", "Loisir",
+  "-13F", "-13M", "-11 Mixte", "-9", "Baby / -7", "Loisirs",
 ];
 
 const ROLE_LABELS: Record<UserRole, string> = {
