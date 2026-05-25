@@ -1,14 +1,10 @@
 import { create } from "zustand";
-import { createClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 import type { Profile, UserRole } from "@/types/database";
+import { supabase as authClient } from "@/lib/supabase";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
-// Client dédié à l'auth uniquement — gère le refresh automatique des tokens
-// et la persistance localStorage au format attendu par baseHeaders() dans les autres hooks
-const authClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── Store ─────────────────────────────────────────────────────
 
@@ -28,9 +24,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: true,
 
   signIn: async (email, password) => {
-    const { error } = await authClient.auth.signInWithPassword({ email, password });
-    if (error) throw new Error(error.message);
-    // La mise à jour du state se fait via onAuthStateChange (SIGNED_IN)
+    try {
+      console.log('[signIn] attempting...');
+      const { data, error } = await authClient.auth.signInWithPassword({ email, password });
+      console.log('[signIn] data:', data);
+      console.log('[signIn] error:', error);
+      if (error) throw error;
+      // La mise à jour du state se fait via onAuthStateChange (SIGNED_IN)
+    } catch (e) {
+      console.log('[signIn] catch:', e);
+      set({ isLoading: false });
+      throw e;
+    }
   },
 
   signOut: async () => {
