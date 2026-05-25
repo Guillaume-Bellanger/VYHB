@@ -90,7 +90,7 @@ function Field({ label, error, children }: {
 
 // ── Postes types & helpers ───────────────────────────────────────────────────
 
-type PosteNom = "responsable_salle" | "secretaire" | "table" | "arbitre" | "videaste" | "buvette";
+type PosteNom = "responsable_salle" | "secretaire" | "chronometreur" | "arbitre" | "videaste" | "buvette";
 
 interface MatchPoste {
   id: string;
@@ -103,7 +103,7 @@ interface MatchPoste {
 const POSTE_LABELS: Record<PosteNom, string> = {
   responsable_salle: "Responsable de salle",
   secretaire: "Secrétaire",
-  table: "Table de marque",
+  chronometreur: "Chronométreur",
   arbitre: "Arbitre",
   videaste: "Vidéaste",
   buvette: "Buvette",

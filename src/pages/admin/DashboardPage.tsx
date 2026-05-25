@@ -69,7 +69,7 @@ interface MatchIncomplet {
 const POSTE_LABELS: Record<string, string> = {
   responsable_salle: "Resp. salle",
   secretaire: "Secrétaire",
-  table: "Table",
+  chronometreur: "Chronométreur",
   arbitre: "Arbitre",
   videaste: "Vidéaste",
   buvette: "Buvette",

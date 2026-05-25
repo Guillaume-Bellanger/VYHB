@@ -6,7 +6,7 @@
 CREATE TYPE poste_nom AS ENUM (
   'responsable_salle',
   'secretaire',
-  'table',
+  'chronometreur',
   'arbitre',
   'videaste',
   'buvette'
@@ -65,15 +65,21 @@ RETURNS VOID AS $$
 DECLARE
   v_need_arbitre BOOLEAN;
 BEGIN
-  -- Arbitre obligatoire sauf pour Séniors Masculins et Séniors Féminins
-  v_need_arbitre := p_categorie NOT IN ('Séniors Masculins', 'Séniors Féminins');
+  -- Arbitre obligatoire sauf pour Séniors Masculins et Séniors Féminines
+  v_need_arbitre := p_categorie NOT IN ('Séniors Masculins', 'Séniors Féminines');
 
-  -- Postes obligatoires pour tous
+  -- Chronométreur obligatoire pour tous
   INSERT INTO match_postes (match_id, poste, facultatif) VALUES
-    (p_match_id, 'responsable_salle', FALSE),
-    (p_match_id, 'secretaire', FALSE),
-    (p_match_id, 'table', FALSE)
+    (p_match_id, 'chronometreur', FALSE)
   ON CONFLICT (match_id, poste) DO NOTHING;
+
+  -- Responsable salle et secrétaire uniquement hors Loisirs
+  IF p_categorie != 'Loisirs' THEN
+    INSERT INTO match_postes (match_id, poste, facultatif) VALUES
+      (p_match_id, 'responsable_salle', FALSE),
+      (p_match_id, 'secretaire', FALSE)
+    ON CONFLICT (match_id, poste) DO NOTHING;
+  END IF;
 
   -- Arbitre selon catégorie
   IF v_need_arbitre THEN
