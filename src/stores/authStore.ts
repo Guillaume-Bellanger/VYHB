@@ -26,7 +26,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signIn: async (email, password) => {
     try {
       console.log('[signIn] attempting...');
-      const { data, error } = await authClient.auth.signInWithPassword({ email, password });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Auth timeout')), 10000)
+      );
+      const result = await Promise.race([
+        authClient.auth.signInWithPassword({ email, password }),
+        timeoutPromise,
+      ]) as Awaited<ReturnType<typeof authClient.auth.signInWithPassword>>;
+      const { data, error } = result;
       console.log('[signIn] data:', data);
       console.log('[signIn] error:', error);
       if (error) throw error;
