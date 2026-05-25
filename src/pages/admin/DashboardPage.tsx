@@ -45,6 +45,7 @@ interface MatchItem {
   adversaire: string;
   categorie: string;
   lieu: string | null;
+  domicile: boolean;
 }
 
 interface PosteItem {
@@ -148,7 +149,7 @@ export default function DashboardPage() {
         const [matchesMoisRaw, futureMatches, events] = await Promise.all([
           dbFetch<{ id: string }[]>(`matches?date=gte.${startMonthStr}&select=id`),
           dbFetch<MatchItem[]>(
-            `matches?statut=eq.prevu&date=gte.${todayStr}&order=date.asc&select=id,date,adversaire,categorie,lieu`
+            `matches?statut=eq.prevu&date=gte.${todayStr}&order=date.asc&select=id,date,adversaire,categorie,lieu,domicile`
           ),
           dbFetch<EvenementItem[]>(
             `evenements?actif=eq.true&or=(expire_le.is.null,expire_le.gte.${todayStr})&order=ordre.asc,date_debut.asc&select=id,titre,date_debut,expire_le`
@@ -157,10 +158,11 @@ export default function DashboardPage() {
 
         if (cancelled) return;
 
-        // Batch 2 — postes (dépend des IDs de matchs futurs)
+        // Batch 2 — postes (dépend des IDs de matchs domicile futurs)
         let postes: PosteItem[] = [];
-        if (futureMatches.length > 0) {
-          const ids = futureMatches.map((m) => m.id).join(",");
+        const homeMatches = futureMatches.filter((m) => m.domicile);
+        if (homeMatches.length > 0) {
+          const ids = homeMatches.map((m) => m.id).join(",");
           postes = await dbFetch<PosteItem[]>(
             `match_postes?match_id=in.(${ids})&personne=is.null&facultatif=eq.false&select=match_id,poste`
           );

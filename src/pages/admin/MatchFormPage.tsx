@@ -653,7 +653,7 @@ export default function MatchFormPage() {
         </div>
       </form>
 
-      {isEditMode && existing && (
+      {isEditMode && existing && existing.domicile && (
         <PostesSection matchId={id!} categorie={existing.categorie} />
       )}
     </div>
