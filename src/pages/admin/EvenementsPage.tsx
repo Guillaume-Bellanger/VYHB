@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -212,6 +213,7 @@ function PhotoUpload({
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function EvenementsPage() {
+  const { logAction } = useAuditLog();
   const [events, setEvents] = useState<Evenement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -356,17 +358,27 @@ export default function EvenementsPage() {
       if (formMode === "new") {
         const res = await fetch(evUrl("evenements"), {
           method: "POST",
-          headers: { ...evHeaders(), Prefer: "return=minimal" },
+          headers: { ...evHeaders(), Prefer: "return=representation", Accept: "application/vnd.pgrst.object+json" },
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const created = await res.json() as { id: string; titre: string; categorie: string; date_debut: string };
+        logAction("Événement créé", "evenement", created.id, created.titre, {
+          categorie: created.categorie,
+          date_debut: created.date_debut,
+        });
       } else {
+        const ancienEv = events.find((e) => e.id === formMode);
         const res = await fetch(evUrl(`evenements?id=eq.${formMode}`), {
           method: "PATCH",
           headers: { ...evHeaders(), Prefer: "return=minimal" },
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        logAction("Événement modifié", "evenement", formMode as string, data.titre, {
+          avant: ancienEv ? { titre: ancienEv.titre, categorie: ancienEv.categorie, actif: ancienEv.actif } : null,
+          apres: { titre: data.titre, categorie: data.categorie, actif: data.actif },
+        });
       }
 
       setFormMode(null);
@@ -398,11 +410,13 @@ export default function EvenementsPage() {
     if (!confirm("Supprimer cet événement ?")) return;
     setError(null);
     try {
+      const ev = events.find((e) => e.id === id);
       const res = await fetch(evUrl(`evenements?id=eq.${id}`), {
         method: "DELETE",
         headers: { ...evHeaders(), Prefer: "return=minimal" },
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      logAction("Événement supprimé", "evenement", id, ev?.titre ?? id);
       if (formMode === id) closeForm();
       await loadEvents();
     } catch (e) {

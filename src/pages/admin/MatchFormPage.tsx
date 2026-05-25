@@ -6,6 +6,7 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import { useMatch, useCreateMatch, useUpdateMatch } from "@/hooks/useMatches";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -172,7 +173,8 @@ function PosteRow({
 
 // ── PostesSection ────────────────────────────────────────────────────────────
 
-function PostesSection({ matchId, categorie }: { matchId: string; categorie: string }) {
+function PostesSection({ matchId, categorie, adversaire }: { matchId: string; categorie: string; adversaire: string }) {
+  const { logAction } = useAuditLog();
   const [postes, setPostes] = useState<MatchPoste[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -235,6 +237,11 @@ function PostesSection({ matchId, categorie }: { matchId: string; categorie: str
           ).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); })
         )
       );
+      logAction("Bénévoles mis à jour", "poste", matchId, adversaire, {
+        postes: postes
+          .filter((p) => personnes[p.poste]?.trim())
+          .map((p) => ({ poste: p.poste, personne: personnes[p.poste].trim() })),
+      });
       await loadPostes();
     } catch (e) {
       setError((e as Error).message);
@@ -659,7 +666,7 @@ export default function MatchFormPage() {
       </form>
 
       {isEditMode && existing && existing.domicile && (
-        <PostesSection matchId={id!} categorie={existing.categorie} />
+        <PostesSection matchId={id!} categorie={existing.categorie} adversaire={existing.adversaire} />
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import type { Profile, UserRole } from "@/types/database";
 
 export const USERS_QK = ["users"] as const;
@@ -80,8 +81,9 @@ export interface InvitePayload {
 
 export function useInviteUser() {
   const qc = useQueryClient();
+  const { logAction } = useAuditLog();
   return useMutation({
-    mutationFn: async ({ email, role, categorie }: InvitePayload) => {
+    mutationFn: async ({ email, role, categorie }: InvitePayload): Promise<InvitePayload> => {
       const serviceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string;
 
       // 1. Créer le user via l'endpoint admin
@@ -141,14 +143,19 @@ export function useInviteUser() {
           body: JSON.stringify({ full_name: email.split('@')[0], role, email, categorie: categorie ?? null }),
         });
         if (!patchRes.ok) throw new Error(`Erreur profil PATCH HTTP ${patchRes.status}`);
-        return;
+        return { email, role, categorie };
       }
 
       if (!profileRes.ok) {
         const err = await profileRes.json().catch(() => ({})) as { message?: string };
         throw new Error(err.message ?? `Erreur création profil HTTP ${profileRes.status}`);
       }
+
+      return { email, role, categorie };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: USERS_QK }),
+    onSuccess: ({ email, role, categorie }) => {
+      logAction("Utilisateur invité", "user", null, email, { role, categorie });
+      qc.invalidateQueries({ queryKey: USERS_QK });
+    },
   });
 }

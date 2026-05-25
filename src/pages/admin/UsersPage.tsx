@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { UserPlus, Pencil, Power, Loader2, ShieldAlert } from "lucide-react";
+import { UserPlus, Pencil, Power, Loader2, ShieldAlert, Clock, FileText } from "lucide-react";
 import { useUsers, useUpdateUser, useInviteUser, type InvitePayload } from "@/hooks/useUsers";
 import { useAuth } from "@/hooks/useAuth";
 import type { Profile, UserRole } from "@/types/database";
@@ -18,6 +18,221 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+
+// ── Audit log types & helpers ─────────────────────────────────
+
+interface AuditLog {
+  id: string;
+  user_id: string | null;
+  user_name: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  entity_label: string | null;
+  details: Record<string, unknown> | null;
+  created_at: string;
+}
+
+function auditHeaders(): Record<string, string> {
+  const url = import.meta.env.VITE_SUPABASE_URL as string;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+  let token = key;
+  try {
+    const ref = new URL(url).hostname.split(".")[0];
+    const raw = localStorage.getItem(`sb-${ref}-auth-token`);
+    if (raw) {
+      const s = JSON.parse(raw) as { access_token?: string };
+      token = s.access_token ?? key;
+    }
+  } catch {}
+  return { apikey: key, Authorization: `Bearer ${token}` };
+}
+
+function auditUrl(path: string): string {
+  return `${import.meta.env.VITE_SUPABASE_URL as string}/rest/v1/${path}`;
+}
+
+function formatRelativeDate(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 60) return `il y a ${Math.max(1, mins)} min`;
+  const hours = Math.floor(diff / 3_600_000);
+  if (hours < 24) return `il y a ${hours}h`;
+  const d = new Date(iso);
+  return (
+    d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }) +
+    " " +
+    d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+  );
+}
+
+const ENTITY_BADGE: Record<string, string> = {
+  match:     "bg-orange-500/15 text-orange-400 border-orange-500/25",
+  evenement: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+  poste:     "bg-blue-500/15 text-blue-400 border-blue-500/25",
+  user:      "bg-violet-500/15 text-violet-400 border-violet-500/25",
+};
+
+function DetailContent({ details }: { details: Record<string, unknown> }) {
+  const avant = details.avant as Record<string, unknown> | null | undefined;
+  const apres = details.apres as Record<string, unknown> | null | undefined;
+
+  if (avant && apres && typeof avant === "object" && typeof apres === "object") {
+    const allKeys = Array.from(new Set([...Object.keys(avant), ...Object.keys(apres)]));
+    const changed = new Set(allKeys.filter((k) => JSON.stringify(avant[k]) !== JSON.stringify(apres[k])));
+
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-white/35 mb-2">Avant</p>
+          <div className="space-y-1">
+            {allKeys.map((k) => (
+              <div key={k} className={`px-2 py-1 rounded text-xs ${changed.has(k) ? "bg-red-500/15 text-red-300" : "text-white/40"}`}>
+                <span className="font-medium">{k}: </span>
+                <span>{avant[k] == null ? "—" : String(avant[k])}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-white/35 mb-2">Après</p>
+          <div className="space-y-1">
+            {allKeys.map((k) => (
+              <div key={k} className={`px-2 py-1 rounded text-xs ${changed.has(k) ? "bg-emerald-500/15 text-emerald-300" : "text-white/40"}`}>
+                <span className="font-medium">{k}: </span>
+                <span>{apres[k] == null ? "—" : String(apres[k])}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {Object.entries(details).map(([k, v]) => (
+        <div key={k} className="flex gap-2 text-xs">
+          <span className="text-white/40 shrink-0 font-medium">{k}:</span>
+          <span className="text-white/70 break-all">
+            {typeof v === "object" ? JSON.stringify(v, null, 2) : String(v ?? "—")}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AuditLogSection() {
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<AuditLog | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        auditUrl("audit_logs?order=created_at.desc&limit=50&select=*"),
+        { headers: auditHeaders() }
+      );
+      if (res.ok) setLogs(await res.json());
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  return (
+    <div className="mt-10 pt-8 border-t border-white/[0.08]">
+      <div className="flex items-center gap-2 mb-5">
+        <Clock size={16} className="text-white/40" />
+        <h2 className="text-lg font-display font-black text-white">Journal d'activité</h2>
+      </div>
+
+      {loading && (
+        <div className="flex items-center gap-2 text-white/40 py-6">
+          <Loader2 size={14} className="animate-spin" />
+          <span className="text-sm">Chargement…</span>
+        </div>
+      )}
+
+      {!loading && logs.length === 0 && (
+        <p className="text-white/30 text-sm py-6 text-center">Aucune activité enregistrée.</p>
+      )}
+
+      {!loading && logs.length > 0 && (
+        <div className="rounded-2xl border border-white/[0.06] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/[0.06]">
+                  <th className="text-left px-4 py-2.5 text-white/40 font-medium text-xs">Date</th>
+                  <th className="text-left px-4 py-2.5 text-white/40 font-medium text-xs">Utilisateur</th>
+                  <th className="text-left px-4 py-2.5 text-white/40 font-medium text-xs">Action</th>
+                  <th className="text-left px-4 py-2.5 text-white/40 font-medium text-xs">Entité</th>
+                  <th className="px-4 py-2.5" />
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((log) => (
+                  <tr key={log.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
+                    <td className="px-4 py-2.5 text-white/40 text-xs whitespace-nowrap">
+                      {formatRelativeDate(log.created_at)}
+                    </td>
+                    <td className="px-4 py-2.5 text-white/70 text-xs whitespace-nowrap">
+                      {log.user_name ?? "—"}
+                    </td>
+                    <td className="px-4 py-2.5 text-white text-xs font-medium">
+                      {log.action}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex flex-col gap-0.5">
+                        <span className={`inline-flex self-start text-[10px] font-bold px-2 py-0.5 rounded-full border ${ENTITY_BADGE[log.entity_type] ?? "bg-white/[0.06] text-white/40 border-white/[0.10]"}`}>
+                          {log.entity_type}
+                        </span>
+                        {log.entity_label && (
+                          <span className="text-white/40 text-xs truncate max-w-[160px]">{log.entity_label}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      {log.details && (
+                        <button
+                          onClick={() => setSelected(log)}
+                          className="inline-flex items-center gap-1 text-[11px] text-white/40 hover:text-white hover:bg-white/[0.06] px-2 py-1 rounded-lg transition-colors"
+                        >
+                          <FileText size={11} />
+                          Détail
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {selected && (
+        <Dialog open onOpenChange={(o) => !o && setSelected(null)}>
+          <DialogContent className="bg-[#111118] border-white/[0.08] text-white max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-white text-base">
+                {selected.action}
+                {selected.entity_label && <span className="text-white/40 font-normal"> — {selected.entity_label}</span>}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-2 max-h-[60vh] overflow-y-auto">
+              <DetailContent details={selected.details!} />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+}
 
 // ── Constants ────────────────────────────────────────────────
 
@@ -256,7 +471,7 @@ function EditDialog({ user, onClose, canEditRole }: { user: Profile; onClose: ()
 export default function UsersPage() {
   const { data: users, isLoading, error } = useUsers();
   const updateUser = useUpdateUser();
-  const { can } = useAuth();
+  const { can, isAdmin } = useAuth();
   const canEditRole = can("edit_user_role");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Profile | null>(null);
@@ -421,6 +636,8 @@ export default function UsersPage() {
 
       <InviteDialog open={inviteOpen} onClose={() => setInviteOpen(false)} canEditRole={canEditRole} />
       {editTarget && <EditDialog user={editTarget} onClose={() => setEditTarget(null)} canEditRole={canEditRole} />}
+
+      {isAdmin && <AuditLogSection />}
     </div>
   );
 }

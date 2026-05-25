@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import type { Match, MatchStatut } from "@/types/database";
 
 export const MATCHES_QK = ["matches"] as const;
@@ -85,6 +86,23 @@ async function pgDelete(path: string): Promise<void> {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }
 
+// ── Cache helper ──────────────────────────────────────────────
+
+function findMatchInCache(
+  qc: ReturnType<typeof useQueryClient>,
+  id: string
+): Match | undefined {
+  const direct = qc.getQueryData<Match>([...MATCHES_QK, id]);
+  if (direct) return direct;
+  for (const [, data] of qc.getQueriesData<Match[]>({ queryKey: MATCHES_QK })) {
+    if (Array.isArray(data)) {
+      const m = data.find((m) => m.id === id);
+      if (m) return m;
+    }
+  }
+  return undefined;
+}
+
 // ── Queries ───────────────────────────────────────────────────
 
 export function useMatches(filters: MatchFilters = {}) {
@@ -115,29 +133,56 @@ export function useMatch(id: string | undefined) {
 export function useCreateMatch() {
   const qc = useQueryClient();
   const { user } = useAuth();
+  const { logAction } = useAuditLog();
 
   return useMutation({
     mutationFn: (data: MatchInsert) =>
       pgInsert<Match>("matches", { ...data, created_by: user!.id }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: MATCHES_QK }),
+    onSuccess: (match, data) => {
+      logAction("Match créé", "match", match.id, data.adversaire, {
+        domicile: data.domicile,
+        categorie: data.categorie,
+        type: data.type,
+        date: data.date,
+      });
+      qc.invalidateQueries({ queryKey: MATCHES_QK });
+    },
   });
 }
 
 export function useUpdateMatch() {
   const qc = useQueryClient();
+  const { logAction } = useAuditLog();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: MatchUpdate }) =>
       pgPatch(`matches?id=eq.${id}`, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: MATCHES_QK }),
+    onMutate: async ({ id }) => ({ previous: findMatchInCache(qc, id) }),
+    onSuccess: (_, { id, data }, context) => {
+      const prev = context?.previous;
+      if (data.statut === "publie") {
+        logAction("Match publié", "match", id, prev?.adversaire ?? id, { statut: "publie" });
+      } else {
+        logAction("Match modifié", "match", id, prev?.adversaire ?? id, {
+          avant: prev ?? null,
+          apres: data,
+        });
+      }
+      qc.invalidateQueries({ queryKey: MATCHES_QK });
+    },
   });
 }
 
 export function useDeleteMatch() {
   const qc = useQueryClient();
+  const { logAction } = useAuditLog();
 
   return useMutation({
     mutationFn: (id: string) => pgDelete(`matches?id=eq.${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: MATCHES_QK }),
+    onMutate: async (id) => ({ previous: findMatchInCache(qc, id) }),
+    onSuccess: (_, id, context) => {
+      logAction("Match supprimé", "match", id, context?.previous?.adversaire ?? id);
+      qc.invalidateQueries({ queryKey: MATCHES_QK });
+    },
   });
 }
