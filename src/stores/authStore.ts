@@ -37,18 +37,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           body: JSON.stringify({ email, password }),
         }
       );
-      const data = await response.json();
       console.log('[signIn] response ok:', response.ok);
-      if (!response.ok) throw new Error(data.error_description || data.msg || 'Login failed');
 
-      await authClient.auth.setSession({
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-      });
-      console.log('[signIn] user id:', data.user?.id);
-      console.log('[signIn] calling fetchProfile...');
-      await get().fetchProfile(data.user.id);
-      set({ user: data.user, isLoading: false });
+      try {
+        console.log('[signIn] parsing response...');
+        const session = await response.json();
+        console.log('[signIn] session keys:', Object.keys(session));
+        if (!response.ok) throw new Error(session.error_description || session.msg || 'Login failed');
+
+        await authClient.auth.setSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+        });
+        console.log('[signIn] user id:', session.user?.id);
+        console.log('[signIn] calling fetchProfile...');
+        await get().fetchProfile(session.user.id);
+        set({ user: session.user, isLoading: false });
+      } catch (e) {
+        const err = e as Error;
+        console.log('[signIn] ERROR after ok:', err.message, err.stack);
+        set({ isLoading: false });
+        throw e;
+      }
     } catch (e) {
       console.log('[signIn] catch:', e);
       set({ isLoading: false });
