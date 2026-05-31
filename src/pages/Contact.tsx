@@ -27,7 +27,7 @@ const coordonnees = [
   {
     icon: MapPin,
     label: "Gymnase",
-    value: "Gymnase Municipal",
+    value: "La Halle des Sports",
     sub: "Boussy-Saint-Antoine",
     href: null,
     accent: "text-emerald-400",

@@ -459,7 +459,7 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 z-10" />
 
         <a
-          href="https://www.instagram.com/VOTRE_COMPTE_INSTAGRAM/"
+          href="https://www.instagram.com/vyhb91/"
           target="_blank"
           rel="noopener noreferrer"
           className="block"
@@ -486,7 +486,7 @@ const Index = () => {
       className="mt-10 flex flex-wrap items-center justify-center gap-3"
     >
       <a
-        href="https://www.instagram.com/VOTRE_COMPTE_INSTAGRAM/"
+        href="https://www.instagram.com/vyhb91/"
         target="_blank"
         rel="noopener noreferrer"
         className="btn-secondary inline-flex items-center gap-2 text-xs"

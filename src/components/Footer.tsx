@@ -70,7 +70,7 @@ const Footer = () => (
               <Facebook size={15} />
             </a>
             <a
-              href="https://www.instagram.com/VOTRE_COMPTE_INSTAGRAM/"
+              href="https://www.instagram.com/vyhb91/"
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400/50 hover:text-pink-400 hover:border-pink-500/40 transition-colors duration-200"

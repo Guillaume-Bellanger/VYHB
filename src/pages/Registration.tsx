@@ -9,13 +9,11 @@ import Accordion from "@/components/Accordion";
 import { reglementInterieur } from "@/data/reglementInterieur";
 
 const tarifs = [
-  { category: "Baby Hand (5–6 ans)", price: "80 €", accent: "from-yellow-500/20 to-amber-600/10" },
-  { category: "-7 / -9", price: "100 €", accent: "from-lime-500/20 to-green-600/10" },
-  { category: "-11F / -11M", price: "120 €", accent: "from-sky-500/20 to-blue-600/10" },
-  { category: "-13F", price: "130 €", accent: "from-pink-500/20 to-rose-600/10" },
-  { category: "-15F / -15M", price: "150 €", accent: "from-violet-500/20 to-purple-600/10" },
-  { category: "Seniors Féminines / Seniors Masculins", price: "180 €", accent: "from-orange-500/20 to-red-600/10" },
-  { category: "Loisirs", price: "150 €", accent: "from-indigo-500/20 to-blue-600/10" },
+  { category: "Baby Hand / -7", price: "110 €", accent: "from-yellow-500/20 to-amber-600/10" },
+  { category: "-9 / -11 / -13", price: "120 €", accent: "from-lime-500/20 to-green-600/10" },
+  { category: "-15 / -18", price: "130 €", accent: "from-violet-500/20 to-purple-600/10" },
+  { category: "Seniors Féminines / Seniors Masculins", price: "150 €", accent: "from-orange-500/20 to-red-600/10" },
+  { category: "Loisirs", price: "120 €", accent: "from-indigo-500/20 to-blue-600/10" },
 ];
 
 const planning = [
@@ -24,11 +22,11 @@ const planning = [
   { categorie: "-9/-11 (7–10 ans)", horaires: "Mercredi 16h30–18h", lieu: "Gymnase Fontaine-Cornaille, Quincy-sous-Sénart" },
   { categorie: "-11F (9–10 ans)", horaires: "Mardi 17h–18h30", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
   { categorie: "-13M (11–12 ans)", horaires: "Mardi 17h–18h30", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
-  { categorie: "-15M", horaires: "Mardi 18h30–20h · Jeudi 18h30–20h", lieu: "Mardi : La Halle des Sports, Boussy-Saint-Antoine et Jeudi : Gymnase des Antonins, Boussy-Saint-Antoine" },
-  { categorie: "-15F", horaires: "Mardi 18h15–19h45 · Jeudi 18h30–20h", lieu: "Mardi : La Halle des Sports et Jeudi : Gymnase des Antonins, Boussy-Saint-Antoine" },
-  { categorie: "Seniors Féminines", horaires: "Lundi 20h–22h · Mercredi 20h–22h", lieu: "Lundi : Salle La Palestre, Crosne et Mercredi : La Halle des Sports, Boussy-Saint-Antoine" },
-  { categorie: "Seniors Masculins", horaires: "Mardi 20h–22h · Jeudi 20h–22h", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
-  { categorie: "Loisirs", horaires: "Lundi 20h30–22h30 · Vendredi 20h–22h", lieu: "Lundi : Gymnase Fontaine Cornaille, Quincy-sous-Sénart et Vendredi : La Halle des Sports, Boussy-Saint-Antoine" },
+  { categorie: "-15M", horaires: "Mardi 18h30–20h\nJeudi 18h30–20h", lieu: "Mardi : La Halle des Sports, Boussy-Saint-Antoine\nJeudi : Gymnase des Antonins, Boussy-Saint-Antoine" },
+  { categorie: "-15F", horaires: "Mardi 18h15–19h45\nJeudi 18h30–20h", lieu: "Mardi : La Halle des Sports\nJeudi : Gymnase des Antonins, Boussy-Saint-Antoine" },
+  { categorie: "Seniors Féminines", horaires: "Lundi 20h–22h\nMercredi 20h–22h", lieu: "Lundi : Salle La Palestre, Crosne\nMercredi : La Halle des Sports, Boussy-Saint-Antoine" },
+  { categorie: "Seniors Masculins", horaires: "Mardi 20h–22h\nJeudi 20h–22h", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
+  { categorie: "Loisirs", horaires: "Lundi 20h30–22h30\nVendredi 20h–22h", lieu: "Lundi : Gymnase Fontaine Cornaille, Quincy-sous-Sénart\nVendredi : La Halle des Sports, Boussy-Saint-Antoine" },
 ];
 
 const docsMineurs = [
@@ -171,8 +169,8 @@ const Registration = () => (
             {planning.map((row, i) => (
               <div key={i} className="glass-premium rounded-xl p-4 border border-white/[0.06]">
                 <p className="font-display font-semibold text-white text-sm">{row.categorie}</p>
-                <p className="text-sm text-orange-400 font-medium mt-1">{row.horaires}</p>
-                <p className="text-xs text-white/55 mt-0.5">{row.lieu}</p>
+                <p className="text-sm text-orange-400 font-medium mt-1 whitespace-pre-line">{row.horaires}</p>
+                <p className="text-xs text-white/55 mt-0.5 whitespace-pre-line">{row.lieu}</p>
               </div>
             ))}
           </div>
@@ -194,8 +192,8 @@ const Registration = () => (
                     className="border-t border-white/[0.04] hover:bg-white/[0.02] transition-colors"
                   >
                     <td className="px-6 py-4 font-medium text-white">{row.categorie}</td>
-                    <td className="px-6 py-4 text-orange-400 font-display font-semibold whitespace-nowrap">{row.horaires}</td>
-                    <td className="px-6 py-4 text-white/40">{row.lieu}</td>
+                    <td className="px-6 py-4 text-orange-400 font-display font-semibold whitespace-pre-line">{row.horaires}</td>
+                    <td className="px-6 py-4 text-white/40 whitespace-pre-line">{row.lieu}</td>
                   </tr>
                 ))}
               </tbody>
