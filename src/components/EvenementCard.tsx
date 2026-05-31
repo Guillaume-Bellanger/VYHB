@@ -94,7 +94,7 @@ export function formatDate(debut: string, fin: string | null): string {
   return `${fmt(debut)} – ${fmt(fin)}`;
 }
 
-function formatHeure(h: string): string {
+export function formatHeure(h: string): string {
   const [hours, minutes] = h.split(":");
   return minutes === "00" ? `${hours}h` : `${hours}h${minutes}`;
 }

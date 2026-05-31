@@ -6,9 +6,9 @@ import {
   ChevronDown, ChevronRight, ArrowRight,
   Users, Trophy, Clock, Heart,
   Phone, Mail, Megaphone, Zap, Facebook,
-  Home, Plane, CalendarX,
+  Home, Plane, CalendarX, CalendarDays, MapPin,
 } from "lucide-react";
-import { EvenementCard, type Evenement } from "@/components/EvenementCard";
+import { CATEGORIE_CONFIG, formatDate, formatHeure, type Evenement } from "@/components/EvenementCard";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import heroImage from "@/assets/hero-handball.jpg";
@@ -316,29 +316,75 @@ const Index = () => {
             subtitle="Recrutements, événements et infos — Saison 2026/2027"
           />
 
-          <div className="space-y-6">
+          <div className="space-y-3">
             {eventsLoading && (
-              <div className="space-y-3">
+              <>
                 {[1, 2].map((i) => (
-                  <Skeleton key={i} className="h-48 rounded-3xl bg-white/[0.04]" />
+                  <Skeleton key={i} className="h-[72px] rounded-2xl bg-white/[0.04]" />
                 ))}
-              </div>
+              </>
             )}
 
             {!eventsLoading && events.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-premium rounded-3xl p-12 text-center border border-white/[0.06]"
+                className="glass-premium rounded-2xl p-8 text-center border border-white/[0.06]"
               >
-                <CalendarX size={32} className="text-white/20 mx-auto mb-3" />
+                <CalendarX size={28} className="text-white/20 mx-auto mb-2" />
                 <p className="text-white/40 text-sm">Aucun événement en cours.</p>
               </motion.div>
             )}
 
-            {!eventsLoading && events.map((ev, i) => (
-              <EvenementCard key={ev.id} ev={ev} index={i} />
-            ))}
+            {!eventsLoading && events.map((ev, i) => {
+              const cfg = CATEGORIE_CONFIG[ev.categorie] ?? CATEGORIE_CONFIG.autre;
+              const Icon = cfg.icon;
+              return (
+                <motion.div
+                  key={ev.id}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.06 }}
+                >
+                  <Link
+                    to="/evenements"
+                    className="card-sport relative overflow-hidden group flex items-center gap-4 p-4 cursor-pointer hover:border-white/15 hover:-translate-y-0.5 transition-all duration-300 block"
+                  >
+                    <div className="absolute left-0 inset-y-3 w-[3px] rounded-r-full" style={{ background: cfg.gradientBar }} />
+                    <div className={`w-9 h-9 rounded-xl ${cfg.bg} flex items-center justify-center shrink-0 ml-3`}>
+                      <Icon size={17} className={cfg.accent} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display font-bold text-white text-sm leading-snug group-hover:text-accent transition-colors truncate">
+                        {ev.titre}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3 mt-0.5">
+                        <span className="flex items-center gap-1 text-[11px] text-white/40">
+                          <CalendarDays size={11} className={cfg.accent} />
+                          {formatDate(ev.date_debut, ev.date_fin)}
+                        </span>
+                        {(ev.heure_debut || ev.heure_fin) && (
+                          <span className="flex items-center gap-1 text-[11px] text-white/40">
+                            <Clock size={11} className={cfg.accent} />
+                            {ev.heure_debut ? formatHeure(ev.heure_debut) : ""}
+                            {ev.heure_debut && ev.heure_fin ? "–" : ""}
+                            {ev.heure_fin ? formatHeure(ev.heure_fin) : ""}
+                          </span>
+                        )}
+                        {ev.lieu && (
+                          <span className="flex items-center gap-1 text-[11px] text-white/40 truncate">
+                            <MapPin size={11} className={cfg.accent} />
+                            {ev.lieu}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <ArrowRight size={13} className="text-white/25 group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0" />
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
 
           <div className="mt-8 text-center">
