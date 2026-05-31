@@ -348,7 +348,7 @@ const Index = () => {
                   transition={{ delay: i * 0.06 }}
                 >
                   <Link
-                    to="/evenements"
+                    to={`/evenements#evenement-${ev.id}`}
                     className="card-sport relative overflow-hidden group flex items-center gap-4 p-4 cursor-pointer hover:border-white/15 hover:-translate-y-0.5 transition-all duration-300 block"
                   >
                     <div className="absolute left-0 inset-y-3 w-[3px] rounded-r-full" style={{ background: cfg.gradientBar }} />
