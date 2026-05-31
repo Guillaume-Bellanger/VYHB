@@ -241,7 +241,7 @@ const Index = () => {
         <img
           src="/images/final.png"
           alt="Match de handball en action"
-          className="absolute inset-0 w-full h-full object-cover object-top"
+          className="absolute inset-0 w-full h-full object-cover object-bottom"
           width={1920}
           height={1080}
         />
