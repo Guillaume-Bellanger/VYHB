@@ -69,7 +69,11 @@ const Events = () => {
     const id = hash.replace("#", "");
     const el = document.getElementById(id);
     if (el) {
-      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+      setTimeout(() => {
+        const offset = 120; // navbar + ticker
+        const top = el.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: "smooth" });
+      }, 100);
     }
   }, [hash, loading]);
 
