@@ -366,14 +366,27 @@ const Club = () => {
                     <span className="w-1 h-5 rounded-full bg-emerald-500 shrink-0" />
                     Bénévoles
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 max-w-xs sm:max-w-sm">
-                    {[1, 2].map((n) => (
-                      <div key={n} className="glass-premium rounded-2xl p-5 flex flex-col items-center text-center border border-white/[0.06]">
-                        <div className="w-12 h-12 rounded-xl mb-3 bg-white/[0.05] flex items-center justify-center">
-                          <User size={20} className="text-white/20" />
-                        </div>
-                        <p className="text-[11px] text-white/25 mt-1">Bénévole</p>
-                      </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    {[
+                      { src: "/images/stand%20et%20freed.jpeg", alt: "Bénévoles au stand" },
+                      { src: "/images/stand%20guillaume%20et%20lenacik.jpeg", alt: "Bénévoles au stand" },
+                      { src: "/images/supporters.jpeg", alt: "Supporters VYHB" },
+                    ].map((photo, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 15 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.08 }}
+                        className="rounded-2xl overflow-hidden border border-white/[0.06] aspect-video"
+                      >
+                        <img
+                          src={photo.src}
+                          alt={photo.alt}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </motion.div>
                     ))}
                   </div>
                   <div className="glass-premium rounded-2xl p-8 border border-white/[0.06] space-y-4 text-white/45 leading-relaxed text-sm">

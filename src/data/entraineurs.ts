@@ -8,47 +8,47 @@ export const entraineurs: Entraineur[] = [
   {
     prenom: "Véronique",
     role: "Baby / -7 / -9/-11",
-    avatarUrl: "https://ui-avatars.com/api/?name=Veronique&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Vero.jpeg",
   },
   {
     prenom: "Alexandre",
     role: "-7",
-    avatarUrl: "https://ui-avatars.com/api/?name=Alexandre&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Alexandre.jpeg",
   },
   {
     prenom: "Céline",
     role: "-9/-11",
-    avatarUrl: "https://ui-avatars.com/api/?name=Celine&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Celine.jpeg",
   },
   {
     prenom: "Fred",
     role: "-11F / -15F",
-    avatarUrl: "https://ui-avatars.com/api/?name=Fred&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Fred.jpeg",
   },
   {
     prenom: "Jérémy",
     role: "-13M",
-    avatarUrl: "https://ui-avatars.com/api/?name=Jeremy&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Jeremy.jpeg",
   },
   {
     prenom: "Guillaume",
     role: "-15M/-18M / Seniors Masculins",
-    avatarUrl: "https://ui-avatars.com/api/?name=Guillaume&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Guillaume.jpeg",
   },
   {
     prenom: "Lénaïck",
     role: "-15M/-18M",
-    avatarUrl: "https://ui-avatars.com/api/?name=Lenaick&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Lenaick.jpeg",
   },
   {
     prenom: "Ronan",
     role: "-18F",
-    avatarUrl: "https://ui-avatars.com/api/?name=Ronan&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Ronan.jpeg",
   },
   {
     prenom: "Sofian",
     role: "Seniors Féminines",
-    avatarUrl: "https://ui-avatars.com/api/?name=Sofian&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Sophian%20handball.jpeg",
   },
   {
     prenom: "Sylvain",
@@ -58,7 +58,7 @@ export const entraineurs: Entraineur[] = [
   {
     prenom: "Lydie",
     role: "Loisirs",
-    avatarUrl: "https://ui-avatars.com/api/?name=Lydie&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Lydie.jpeg",
   },
   {
     prenom: "Michel",
