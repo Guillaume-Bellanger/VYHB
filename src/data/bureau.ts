@@ -9,7 +9,7 @@ export const bureau: BureauMember[] = [
   {
     prenom: "Fred",
     role: "Président",
-    avatarUrl: "https://ui-avatars.com/api/?name=Fred&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Fred.jpeg",
     featured: true,
   },
   {
@@ -18,7 +18,7 @@ export const bureau: BureauMember[] = [
   {
     prenom: "Véronique",
     role: "Trésorière",
-    avatarUrl: "https://ui-avatars.com/api/?name=Veronique&background=059669&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Vero.jpeg",
     featured: true,
   },
   {
