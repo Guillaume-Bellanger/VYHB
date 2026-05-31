@@ -20,6 +20,7 @@ export interface Evenement {
   lieu: string | null;
   description: string;
   photo_url: string | null;
+  photo_url_2: string | null;
   lien_cta: string | null;
   label_cta: string | null;
 }
@@ -122,15 +123,15 @@ export function EvenementCard({ ev, index = 0 }: { ev: Evenement; index?: number
       {/* Colored top bar */}
       <div className="h-1 w-full" style={{ background: cfg.gradientBar }} />
 
-      {/* Photo */}
-      {ev.photo_url && (
-        <img
-          src={ev.photo_url}
-          alt={ev.titre}
-          style={{ width: "100%", height: "auto", display: "block" }}
-          loading="lazy"
-        />
-      )}
+      {/* Photo(s) */}
+      {ev.photo_url && ev.photo_url_2 ? (
+        <div className="grid grid-cols-2">
+          <img src={ev.photo_url} alt={ev.titre} style={{ width: "100%", height: "auto", display: "block" }} loading="lazy" />
+          <img src={ev.photo_url_2} alt={ev.titre} style={{ width: "100%", height: "auto", display: "block" }} loading="lazy" />
+        </div>
+      ) : ev.photo_url ? (
+        <img src={ev.photo_url} alt={ev.titre} style={{ width: "100%", height: "auto", display: "block" }} loading="lazy" />
+      ) : null}
 
       <div className="p-8 md:p-10">
         {/* Header */}

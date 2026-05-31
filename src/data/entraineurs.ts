@@ -63,6 +63,6 @@ export const entraineurs: Entraineur[] = [
   {
     prenom: "Michel",
     role: "Loisirs",
-    avatarUrl: "https://ui-avatars.com/api/?name=Michel&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "/images/Michel.jpeg",
   },
 ];

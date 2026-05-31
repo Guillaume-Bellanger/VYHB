@@ -30,6 +30,7 @@ interface Evenement {
   lieu: string | null;
   description: string;
   photo_url: string | null;
+  photo_url_2: string | null;
   lien_cta: string | null;
   label_cta: string | null;
   expire_le: string | null;
@@ -57,7 +58,7 @@ function evUrl(path: string): string {
   return `${import.meta.env.VITE_SUPABASE_URL as string}/rest/v1/${path}`;
 }
 
-async function uploadPhoto(file: File): Promise<string> {
+async function uploadPhoto(file: File, suffix?: string): Promise<string> {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
@@ -80,7 +81,7 @@ async function uploadPhoto(file: File): Promise<string> {
 
   const prefix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const filename = `${prefix}-${safeName}`;
+  const filename = suffix ? `${prefix}-${suffix}-${safeName}` : `${prefix}-${safeName}`;
 
   const res = await fetch(`${supabaseUrl}/storage/v1/object/evenements/${filename}`, {
     method: "PUT",
@@ -233,6 +234,15 @@ export default function EvenementsPage() {
   const displayPhotoUrl = photoPreview ?? (photoCleared ? null : existingPhotoUrl);
   const photoSizeWarning = photoFile !== null && photoFile.size > MAX_SIZE;
 
+  // Photo 2 state
+  const [photoFile2, setPhotoFile2] = useState<File | null>(null);
+  const [photoPreview2, setPhotoPreview2] = useState<string | null>(null);
+  const [existingPhotoUrl2, setExistingPhotoUrl2] = useState<string | null>(null);
+  const [photoCleared2, setPhotoCleared2] = useState(false);
+
+  const displayPhotoUrl2 = photoPreview2 ?? (photoCleared2 ? null : existingPhotoUrl2);
+  const photoSizeWarning2 = photoFile2 !== null && photoFile2.size > MAX_SIZE;
+
   const {
     register,
     handleSubmit,
@@ -268,6 +278,11 @@ export default function EvenementsPage() {
     setPhotoPreview(null);
     setExistingPhotoUrl(null);
     setPhotoCleared(false);
+    setPhotoFile2(null);
+    if (photoPreview2) URL.revokeObjectURL(photoPreview2);
+    setPhotoPreview2(null);
+    setExistingPhotoUrl2(null);
+    setPhotoCleared2(false);
   }
 
   function handlePhotoSelect(file: File) {
@@ -282,6 +297,20 @@ export default function EvenementsPage() {
     setPhotoFile(null);
     setPhotoPreview(null);
     setPhotoCleared(true);
+  }
+
+  function handlePhotoSelect2(file: File) {
+    if (photoPreview2) URL.revokeObjectURL(photoPreview2);
+    setPhotoFile2(file);
+    setPhotoPreview2(URL.createObjectURL(file));
+    setPhotoCleared2(false);
+  }
+
+  function handlePhotoClear2() {
+    if (photoPreview2) URL.revokeObjectURL(photoPreview2);
+    setPhotoFile2(null);
+    setPhotoPreview2(null);
+    setPhotoCleared2(true);
   }
 
   function openNew() {
@@ -308,6 +337,7 @@ export default function EvenementsPage() {
   function openEdit(ev: Evenement) {
     resetPhotoState();
     setExistingPhotoUrl(ev.photo_url ?? null);
+    setExistingPhotoUrl2(ev.photo_url_2 ?? null);
     reset({
       titre: ev.titre,
       categorie: ev.categorie,
@@ -331,6 +361,9 @@ export default function EvenementsPage() {
     if (photoPreview) URL.revokeObjectURL(photoPreview);
     setPhotoFile(null);
     setPhotoPreview(null);
+    if (photoPreview2) URL.revokeObjectURL(photoPreview2);
+    setPhotoFile2(null);
+    setPhotoPreview2(null);
     setFormMode(null);
   }
 
@@ -347,6 +380,15 @@ export default function EvenementsPage() {
         photo_url = existingPhotoUrl;
       }
 
+      let photo_url_2: string | null;
+      if (photoFile2) {
+        photo_url_2 = await uploadPhoto(photoFile2, "2");
+      } else if (photoCleared2) {
+        photo_url_2 = null;
+      } else {
+        photo_url_2 = existingPhotoUrl2;
+      }
+
       const payload = {
         titre: data.titre,
         categorie: data.categorie,
@@ -357,6 +399,7 @@ export default function EvenementsPage() {
         lieu: data.lieu || null,
         description: data.description,
         photo_url,
+        photo_url_2,
         lien_cta: data.lien_cta || null,
         label_cta: data.label_cta || null,
         expire_le: data.expire_le || null,
@@ -603,15 +646,26 @@ export default function EvenementsPage() {
             />
           </Field>
 
-          {/* Photo */}
-          <Field label="Photo" hint={displayPhotoUrl ? undefined : "Optionnel — apparaît en haut de la carte publique"}>
-            <PhotoUpload
-              previewUrl={displayPhotoUrl}
-              onSelect={handlePhotoSelect}
-              onClear={handlePhotoClear}
-              sizeWarning={photoSizeWarning}
-            />
-          </Field>
+          {/* Photos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <Field label="Photo 1" hint={displayPhotoUrl ? undefined : "Optionnel — apparaît en haut de la carte publique"}>
+              <PhotoUpload
+                previewUrl={displayPhotoUrl}
+                onSelect={handlePhotoSelect}
+                onClear={handlePhotoClear}
+                sizeWarning={photoSizeWarning}
+              />
+            </Field>
+
+            <Field label="Photo 2 (optionnel)" hint={displayPhotoUrl2 ? undefined : "Affichée côte à côte avec la photo 1"}>
+              <PhotoUpload
+                previewUrl={displayPhotoUrl2}
+                onSelect={handlePhotoSelect2}
+                onClear={handlePhotoClear2}
+                sizeWarning={photoSizeWarning2}
+              />
+            </Field>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <Field label="Label du bouton" hint="Optionnel — ex : S'inscrire maintenant">
@@ -648,7 +702,7 @@ export default function EvenementsPage() {
             >
               {saving && <Loader2 size={14} className="animate-spin" />}
               {saving
-                ? photoFile ? "Upload en cours…" : "Enregistrement…"
+                ? (photoFile || photoFile2) ? "Upload en cours…" : "Enregistrement…"
                 : formMode === "new" ? "Créer l'événement" : "Enregistrer"}
             </Button>
             <Button
