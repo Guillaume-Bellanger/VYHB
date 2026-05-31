@@ -19,17 +19,16 @@ const tarifs = [
 ];
 
 const planning = [
-  { categorie: "Baby Hand (5–6 ans)", horaires: "Samedi 9h–10h", lieu: "Gymnase Municipal" },
-  { categorie: "-7", horaires: "Samedi 9h30–10h30", lieu: "Gymnase Municipal" },
-  { categorie: "-9", horaires: "Samedi 10h–12h", lieu: "Gymnase Municipal" },
-  { categorie: "-11F", horaires: "Mercredi 14h–16h", lieu: "Gymnase Municipal" },
-  { categorie: "-11M", horaires: "Mercredi 14h–16h", lieu: "Gymnase Municipal" },
-  { categorie: "-13F", horaires: "Mer 15h–17h · Ven 18h–20h", lieu: "Gymnase Municipal" },
-  { categorie: "-15F", horaires: "Mer 17h–19h · Ven 17h–19h", lieu: "Gymnase Municipal" },
-  { categorie: "-15M", horaires: "Mer 17h–19h · Ven 18h–20h", lieu: "Gymnase Municipal" },
-  { categorie: "Seniors Féminines", horaires: "Mar & Jeu 19h–21h", lieu: "Gymnase Municipal" },
-  { categorie: "Seniors Masculins", horaires: "Mar & Jeu 20h–22h", lieu: "Gymnase Municipal" },
-  { categorie: "Loisirs", horaires: "Vendredi 20h–22h", lieu: "Gymnase Municipal" },
+  { categorie: "Baby Hand (3–4 ans)", horaires: "Samedi 10h–11h", lieu: "Espace Rochopt, Boussy-Saint-Antoine" },
+  { categorie: "-7 (5–6 ans)", horaires: "Samedi 11h–12h", lieu: "Espace Rochopt, Boussy-Saint-Antoine" },
+  { categorie: "-9/-11 (7–10 ans)", horaires: "Mercredi 16h30–18h", lieu: "Gymnase Fontaine-Cornaille, Quincy-sous-Sénart" },
+  { categorie: "-11F (9–10 ans)", horaires: "Mardi 17h–18h30", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
+  { categorie: "-13M (11–12 ans)", horaires: "Mardi 17h–18h30", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
+  { categorie: "-15M", horaires: "Mardi 18h30–20h · Jeudi 18h30–20h", lieu: "Mardi : La Halle des Sports, Boussy-Saint-Antoine et Jeudi : Gymnase des Antonins, Boussy-Saint-Antoine" },
+  { categorie: "-15F", horaires: "Mardi 18h15–19h45 · Jeudi 18h30–20h", lieu: "Mardi : La Halle des Sports et Jeudi : Gymnase des Antonins, Boussy-Saint-Antoine" },
+  { categorie: "Seniors Féminines", horaires: "Lundi 20h–22h · Mercredi 20h–22h", lieu: "Lundi : Salle La Palestre, Crosne et Mercredi : La Halle des Sports, Boussy-Saint-Antoine" },
+  { categorie: "Seniors Masculins", horaires: "Mardi 20h–22h · Jeudi 20h–22h", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
+  { categorie: "Loisirs", horaires: "Lundi 20h30–22h30 · Vendredi 20h–22h", lieu: "Lundi : Gymnase Fontaine Cornaille, Quincy-sous-Sénart et Vendredi : La Halle des Sports, Boussy-Saint-Antoine" },
 ];
 
 const docsMineurs = [

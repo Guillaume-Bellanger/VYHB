@@ -1,31 +1,32 @@
 export interface BureauMember {
+  prenom?: string;
   role: string;
-  avatarUrl: string;
+  avatarUrl?: string;
+  featured?: boolean;
 }
 
 export const bureau: BureauMember[] = [
   {
+    prenom: "Fred",
     role: "Président",
-    avatarUrl: "https://ui-avatars.com/api/?name=President&background=cc0000&color=fff&size=128&bold=true",
+    avatarUrl: "https://ui-avatars.com/api/?name=Fred&background=cc0000&color=fff&size=128&bold=true",
+    featured: true,
   },
   {
     role: "Vice-Président",
-    avatarUrl: "https://ui-avatars.com/api/?name=Vice+President&background=ea580c&color=fff&size=128&bold=true",
   },
   {
+    prenom: "Véronique",
     role: "Trésorière",
-    avatarUrl: "https://ui-avatars.com/api/?name=Tresoriere&background=059669&color=fff&size=128&bold=true",
+    avatarUrl: "https://ui-avatars.com/api/?name=Veronique&background=059669&color=fff&size=128&bold=true",
+    featured: true,
   },
   {
-    role: "Resp. Matériel",
-    avatarUrl: "https://ui-avatars.com/api/?name=Resp+Materiel&background=2563eb&color=fff&size=128&bold=true",
+    role: "Secrétaire",
   },
-  {
-    role: "Resp. Communication",
-    avatarUrl: "https://ui-avatars.com/api/?name=Resp+Communication&background=7c3aed&color=fff&size=128&bold=true",
-  },
-  {
-    role: "Resp. Événementiel",
-    avatarUrl: "https://ui-avatars.com/api/?name=Resp+Evenementiel&background=db2777&color=fff&size=128&bold=true",
-  },
+];
+
+export const responsablesPoles: BureauMember[] = [
+  { role: "Resp. Matériel" },
+  { role: "Resp. Communication" },
 ];

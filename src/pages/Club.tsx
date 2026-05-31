@@ -2,25 +2,25 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
-import { bureau } from "@/data/bureau";
+import { bureau, responsablesPoles } from "@/data/bureau";
 import { entraineurs as entraineursData } from "@/data/entraineurs";
 import {
   Clock, Users, User, GraduationCap,
   Award, ClipboardList, BookOpen,
-  Heart, Shield, Users2,
+  Heart, Shield, Users2, Zap,
 } from "lucide-react";
 
 
 const valeurs = [
-  { icon: Heart, title: "Solidarité", text: "Un club où chacun se sent chez soi, dans le respect et la bonne humeur.", accent: "text-orange-400", bg: "bg-orange-500/10" },
-  { icon: Shield, title: "Respect", text: "Respecter les autres, les arbitres et les adversaires — valeur fondamentale du handball.", accent: "text-blue-400", bg: "bg-blue-500/10" },
-  { icon: Users2, title: "Esprit d'équipe", text: "Le collectif avant tout. Sur le terrain comme en dehors.", accent: "text-emerald-400", bg: "bg-emerald-500/10" },
-  { icon: GraduationCap, title: "Formation", text: "Accompagner les jeunes joueurs vers l'excellence sportive et humaine.", accent: "text-violet-400", bg: "bg-violet-500/10" },
+  { icon: Shield, title: "Respect", text: "Le respect de chacun (coéquipiers, entraîneurs, adversaires, arbitres), des règles et de notre environnement est la base d'une pratique sportive saine, collective et constructive.", accent: "text-blue-400", bg: "bg-blue-500/10" },
+  { icon: Heart, title: "Plaisir", text: "Le plaisir, c'est partager des moments ensemble, s'investir dans l'effort, vivre sa passion et savourer les réussites ; il nourrit l'envie de progresser, de persévérer et de transmettre cette énergie aux autres.", accent: "text-orange-400", bg: "bg-orange-500/10" },
+  { icon: Zap, title: "Dépassement de soi", text: "Le dépassement de soi, c'est oser aller plus loin que ses limites, se découvrir de nouvelles capacités et progresser au service de soi-même comme du collectif.", accent: "text-violet-400", bg: "bg-violet-500/10" },
+  { icon: Users2, title: "Convivialité", text: "La convivialité, c'est créer des liens, partager des moments ensemble et faire vivre un esprit de club chaleureux et accueillant.", accent: "text-emerald-400", bg: "bg-emerald-500/10" },
 ];
 
 const timeline = [
-  { year: "~2003", title: "Fondation du club", desc: "Création du Val d'Yerres Handball dans la vallée de l'Yerres. Les premières équipes voient le jour avec une poignée de passionnés." },
-  { year: "~2010", title: "Développement du secteur jeunes", desc: "Naissance de l'école de handball. Les catégories Baby Hand, -7 et -9 se structurent. La formation devient une priorité." },
+  { year: "~2003", title: "Fondation du club", desc: "Création du VYHB au cœur du Val d'Yerres." },
+  { year: "~2010", title: "Développement du secteur jeunes", desc: "Naissance de l'école de handball et structuration du secteur Jeunes. Les catégories Baby Hand, -7 et -9 prennent forme. La formation devient une priorité." },
   { year: "~2015", title: "Croissance et compétitions", desc: "Le club atteint 10 équipes en compétition. Les seniors s'imposent en championnat départemental." },
   { year: "Aujourd'hui", title: "245 licenciés, 10 équipes", desc: "Plus qu'un club, une famille. Une communauté engagée, des bénévoles dévoués, et la même passion intacte depuis plus de 20 ans." },
 ];
@@ -48,7 +48,7 @@ const formations = [
     accent: "text-violet-400",
     bg: "bg-violet-500/10",
     border: "border-violet-500/20",
-    content: "Notre école d'arbitrage accompagne les jeunes qui souhaitent s'initier à l'arbitrage dans un cadre bienveillant et structuré. Encadrés par des arbitres expérimentés, ils apprennent à maîtriser les règles du jeu, à gérer une rencontre et à développer leur autorité naturelle. Arbitrer, c'est une autre façon d'aimer le handball.",
+    content: "Notre école d'arbitrage accompagne les jeunes qui souhaitent s'initier à l'arbitrage dans un cadre bienveillant et structuré. Encadrés par des arbitres expérimentés, ils apprennent à maîtriser les règles du jeu, à gérer une rencontre et à développer leur confiance en eux et leur sens des responsabilités. Arbitrer, c'est une autre façon d'aimer le handball.",
   },
 ];
 
@@ -58,7 +58,7 @@ type TabValue = (typeof VALID_TABS)[number];
 const tabItems = [
   { value: "historique" as TabValue, label: "Historique", icon: Clock },
   { value: "bureau" as TabValue, label: "L'Organisation", icon: Users },
-  { value: "entraineurs" as TabValue, label: "Entraîneurs", icon: User },
+  { value: "entraineurs" as TabValue, label: "Entraîneurs et bénévoles", icon: User },
   { value: "formations" as TabValue, label: "Formations", icon: GraduationCap },
 ];
 
@@ -102,7 +102,7 @@ const Club = () => {
               Le <span className="gradient-text">Club</span>
             </h1>
             <p className="text-white/45 text-lg max-w-lg leading-relaxed mx-auto">
-              Histoire, bureau dirigeant, entraîneurs et bénévoles du Val d'Yerres Handball.
+              Histoire, équipe dirigeante, entraîneurs et bénévoles du Val d'Yerres Handball.
             </p>
           </motion.div>
         </div>
@@ -198,7 +198,7 @@ const Club = () => {
                   {/* Valeurs */}
                   <h3 className="font-display font-black text-2xl text-white mb-4">Nos valeurs</h3>
                   <p className="text-white/50 text-sm leading-relaxed mb-3">
-                    Au-delà de la performance, le Val d'Yerres Handball cultive des valeurs fortes : solidarité, respect, et esprit d'équipe. Chaque joueur et joueuse, quel que soit son âge ou son niveau, trouve sa place et contribue à l'âme du club.
+                    Au-delà de la performance, le Val d'Yerres Handball cultive des valeurs fortes : respect, plaisir, dépassement de soi, et convivialité. Chaque joueur et joueuse, quel que soit son âge ou son niveau, trouve sa place et contribue à l'âme du club.
                   </p>
                   <p className="text-white/50 text-sm leading-relaxed mb-6">
                     Sur le terrain comme en dehors, le Val d'Yerres Handball est une grande famille où la passion du handball se vit intensément.
@@ -247,7 +247,7 @@ const Club = () => {
                       <h3 className="font-display font-black text-2xl text-white mb-2">Le Bureau</h3>
                       <p className="text-white/40 text-sm">Bénévoles élus lors de l'assemblée générale annuelle.</p>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       {bureau.map((person, i) => (
                         <motion.div
                           key={i}
@@ -257,14 +257,47 @@ const Club = () => {
                           transition={{ delay: i * 0.07 }}
                           className="glass-premium rounded-2xl p-6 flex flex-col items-center text-center border border-white/[0.06] hover:border-white/[0.14] hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)] transition-all duration-300"
                         >
-                          <img
-                            src={person.avatarUrl}
-                            alt={person.role}
-                            className="w-14 h-14 rounded-2xl mb-4 object-cover"
-                            loading="lazy"
-                            width={56}
-                            height={56}
-                          />
+                          {person.featured && person.avatarUrl ? (
+                            <>
+                              <img
+                                src={person.avatarUrl}
+                                alt={person.prenom}
+                                className="w-14 h-14 rounded-2xl mb-4 object-cover"
+                                loading="lazy"
+                                width={56}
+                                height={56}
+                              />
+                              <p className="font-display font-bold text-white text-sm mb-1">{person.prenom}</p>
+                            </>
+                          ) : (
+                            <div className="w-14 h-14 rounded-2xl mb-4 bg-white/[0.05] flex items-center justify-center">
+                              <User size={24} className="text-white/20" />
+                            </div>
+                          )}
+                          <span className="eyebrow text-[10px]">{person.role}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── Responsables de Pôles ── */}
+                  <div>
+                    <div className="text-center mb-8">
+                      <h3 className="font-display font-black text-2xl text-white mb-2">Responsables de Pôles</h3>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-sm mx-auto sm:max-w-none">
+                      {responsablesPoles.map((person, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.07 }}
+                          className="glass-premium rounded-2xl p-6 flex flex-col items-center text-center border border-white/[0.06] hover:border-white/[0.14] transition-all duration-300"
+                        >
+                          <div className="w-14 h-14 rounded-2xl mb-4 bg-white/[0.05] flex items-center justify-center">
+                            <User size={24} className="text-white/20" />
+                          </div>
                           <span className="eyebrow text-[10px]">{person.role}</span>
                         </motion.div>
                       ))}
@@ -298,7 +331,7 @@ const Club = () => {
               >
                 <div className="max-w-4xl">
                   <p className="text-white/45 text-base leading-relaxed mb-10 max-w-2xl">
-                    Nos entraîneurs et bénévoles sont le cœur battant du club. Merci à tous pour leur engagement au quotidien.
+                    Nos entraîneurs et bénévoles sont le cœur battant du club. Leur passion, leur disponibilité et leur engagement font vivre le club au quotidien.
                   </p>
 
                   <h3 className="font-display font-bold text-base text-white mb-5 flex items-center gap-3">
@@ -333,6 +366,16 @@ const Club = () => {
                     <span className="w-1 h-5 rounded-full bg-emerald-500 shrink-0" />
                     Bénévoles
                   </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 max-w-xs sm:max-w-sm">
+                    {[1, 2].map((n) => (
+                      <div key={n} className="glass-premium rounded-2xl p-5 flex flex-col items-center text-center border border-white/[0.06]">
+                        <div className="w-12 h-12 rounded-xl mb-3 bg-white/[0.05] flex items-center justify-center">
+                          <User size={20} className="text-white/20" />
+                        </div>
+                        <p className="text-[11px] text-white/25 mt-1">Bénévole</p>
+                      </div>
+                    ))}
+                  </div>
                   <div className="glass-premium rounded-2xl p-8 border border-white/[0.06] space-y-4 text-white/45 leading-relaxed text-sm">
                     <p>
                       Au Val d'Yerres Handball, rien ne serait possible sans l'engagement précieux de nos bénévoles. Qu'ils soient sur le terrain, en coulisses ou derrière un ordinateur, ils font vivre le club au quotidien et permettent à toutes nos équipes de pratiquer leur passion dans les meilleures conditions.
