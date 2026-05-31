@@ -9,6 +9,7 @@ export default function CartDrawer() {
     <Sheet open={isOpen} onOpenChange={toggleCart}>
       <SheetContent
         side="right"
+        style={{ top: "2rem", height: "calc(100vh - 2rem)" }}
         className="w-full sm:max-w-md flex flex-col p-0 gap-0 border-l border-white/[0.08] bg-[#0d0d0f] [&>button:first-of-type]:hidden"
       >
         {/* Header */}

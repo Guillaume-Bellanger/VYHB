@@ -6,8 +6,9 @@ import {
   ChevronDown, ChevronRight, ArrowRight,
   Users, Trophy, Clock, Heart,
   Phone, Mail, Megaphone, Zap, Facebook,
-  UserPlus, Home, PartyPopper, Recycle, Plane,
+  Home, Plane, CalendarX,
 } from "lucide-react";
+import { EvenementCard, type Evenement } from "@/components/EvenementCard";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import heroImage from "@/assets/hero-handball.jpg";
@@ -149,53 +150,6 @@ const sportsOrgSchema = {
 };
 
 // ─── Data
-const news = [
-  {
-    slug: "recrutement",
-    tag: "Recrutement",
-    tagClass: "bg-orange-500/15 text-orange-400 border border-orange-500/25",
-    accent: "bg-orange-500",
-    hoverGlow: "group-hover:bg-orange-500/6",
-    Icon: UserPlus,
-    title: "Recrutement ouvert — Saison 2026/2027",
-    desc: "Le club recrute ! Venez essayer gratuitement lors de nos séances d'essai. Toutes les catégories sont ouvertes à de nouveaux licenciés.",
-    date: "Saison 2026/2027",
-  },
-  {
-    slug: "portes-ouvertes",
-    tag: "Événement",
-    tagClass: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25",
-    accent: "bg-emerald-500",
-    hoverGlow: "group-hover:bg-emerald-500/5",
-    Icon: Home,
-    title: "Portes ouvertes — Mai 2026",
-    desc: "Portes ouvertes du 01/05 au 31/05/2026. Venez découvrir notre club et essayer le handball gratuitement !",
-    date: "01–31 Mai 2026",
-  },
-  {
-    slug: "assemblee-generale",
-    tag: "Événement",
-    tagClass: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25",
-    accent: "bg-emerald-500",
-    hoverGlow: "group-hover:bg-emerald-500/5",
-    Icon: PartyPopper,
-    title: "Assemblée générale annuelle",
-    desc: "L'AG du club se tiendra en juin 2026. Tous les licenciés et parents sont invités à participer.",
-    date: "Juin 2026",
-  },
-  {
-    slug: "collecte-bouchons",
-    tag: "Info",
-    tagClass: "bg-blue-500/15 text-blue-400 border border-blue-500/25",
-    accent: "bg-blue-400",
-    hoverGlow: "group-hover:bg-blue-500/5",
-    Icon: Recycle,
-    title: "Collecte de bouchons plastiques",
-    desc: "Participez à notre collecte solidaire. Apportez vos bouchons plastiques lors des entraînements !",
-    date: "Toute la saison",
-  },
-];
-
 const statsData = [
   { value: 245, label: "Licenciés", icon: Users, suffix: "" },
   { value: 10,  label: "Équipes",   icon: Trophy, suffix: "" },
@@ -250,6 +204,27 @@ const SectionHeader = ({ title, subtitle }: { title: string; subtitle: string })
 const Index = () => {
   const { data: upcomingData, isLoading: upcomingLoading } = usePublicUpcoming();
   const upcomingMatches = (upcomingData ?? []).slice(0, 3);
+
+  const [events, setEvents] = useState<Evenement[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+
+  useEffect(() => {
+    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+    if (!url || !key) { setEventsLoading(false); return; }
+    const today = new Date().toISOString().split("T")[0];
+    fetch(
+      `${url}/rest/v1/evenements?actif=eq.true&or=(expire_le.is.null,expire_le.gte.${today})&order=ordre.asc,date_debut.asc`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+    )
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((data: Array<Evenement & { publie_le?: string | null }>) => {
+        const filtered = data.filter((ev) => !ev.publie_le || ev.publie_le <= today);
+        setEvents(filtered.slice(0, 3));
+      })
+      .catch(() => {})
+      .finally(() => setEventsLoading(false));
+  }, []);
 
   return (
     <>
@@ -332,7 +307,7 @@ const Index = () => {
       </section>
 
       {/* ══════════════════════════════════════════
-          ACTUALITÉS — BENTO
+          ACTUALITÉS
       ══════════════════════════════════════════ */}
       <section className="section-padding">
         <div className="container-narrow">
@@ -341,70 +316,29 @@ const Index = () => {
             subtitle="Recrutements, événements et infos — Saison 2026/2027"
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:items-stretch">
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="h-full"
-            >
-              <Link
-                to="/evenements"
-                className="card-sport relative overflow-hidden group flex flex-col justify-between min-h-[240px] h-full p-7 block cursor-pointer hover:border-orange-500/30 hover:shadow-[0_16px_48px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-0.5"
-              >
-                <div className={`absolute inset-0 transition-opacity duration-500 opacity-0 pointer-events-none ${news[0].hoverGlow}`} />
-                <div className="absolute left-0 inset-y-6 w-[3px] rounded-r-full bg-orange-500" />
-                <div className="pl-4">
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <span className={`rounded-full px-3 py-1 text-[11px] font-display font-bold uppercase ${news[0].tagClass}`}>
-                      {news[0].tag}
-                    </span>
-                    <span className="text-xs text-muted-foreground shrink-0">{news[0].date}</span>
-                  </div>
-                  <h3 className="font-display font-black text-xl text-foreground mb-2 leading-tight group-hover:text-orange-400 transition-colors">
-                    {news[0].title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{news[0].desc}</p>
-                </div>
-                <div className="mt-6 pl-4 inline-flex items-center gap-2 text-xs font-display font-bold text-accent uppercase tracking-wider group-hover:gap-3 transition-all duration-200">
-                  Voir les détails <ArrowRight size={13} />
-                </div>
-              </Link>
-            </motion.div>
+          <div className="space-y-6">
+            {eventsLoading && (
+              <div className="space-y-3">
+                {[1, 2].map((i) => (
+                  <Skeleton key={i} className="h-48 rounded-3xl bg-white/[0.04]" />
+                ))}
+              </div>
+            )}
 
-            <div className="grid grid-cols-1 gap-4">
-              {news.slice(1).map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: (i + 1) * 0.08, duration: 0.5 }}
-                >
-                  <Link
-                    to="/evenements"
-                    className="card-sport relative overflow-hidden group flex items-start gap-4 p-5 block cursor-pointer hover:border-white/15 hover:-translate-y-0.5 transition-all duration-300"
-                  >
-                    <div className={`absolute inset-0 transition-opacity duration-500 opacity-0 pointer-events-none ${item.hoverGlow}`} />
-                    <div className={`absolute left-0 inset-y-4 w-[3px] rounded-r-full ${item.accent}`} />
-                    <div className="pl-3 flex-1 relative">
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-display font-bold uppercase ${item.tagClass}`}>
-                          {item.tag}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">{item.date}</span>
-                      </div>
-                      <h3 className="font-display font-bold text-sm text-foreground mb-1 leading-snug group-hover:text-accent transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-                    </div>
-                    <ArrowRight size={13} className="text-muted-foreground/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
+            {!eventsLoading && events.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="glass-premium rounded-3xl p-12 text-center border border-white/[0.06]"
+              >
+                <CalendarX size={32} className="text-white/20 mx-auto mb-3" />
+                <p className="text-white/40 text-sm">Aucun événement en cours.</p>
+              </motion.div>
+            )}
+
+            {!eventsLoading && events.map((ev, i) => (
+              <EvenementCard key={ev.id} ev={ev} index={i} />
+            ))}
           </div>
 
           <div className="mt-8 text-center">

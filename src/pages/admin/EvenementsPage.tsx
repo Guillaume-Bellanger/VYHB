@@ -25,6 +25,8 @@ interface Evenement {
   categorie: EvenementCategorie;
   date_debut: string;
   date_fin: string | null;
+  heure_debut: string | null;
+  heure_fin: string | null;
   lieu: string | null;
   description: string;
   photo_url: string | null;
@@ -124,6 +126,8 @@ const schema = z.object({
   categorie: z.enum(["recrutement", "evenement", "tournoi", "info", "autre"]),
   date_debut: z.string().min(1, "Date de début requise"),
   date_fin: z.string().nullable().optional(),
+  heure_debut: z.string().nullable().optional(),
+  heure_fin: z.string().nullable().optional(),
   lieu: z.string().nullable().optional(),
   description: z.string().min(1, "Description requise"),
   lien_cta: z.string().nullable().optional(),
@@ -290,6 +294,8 @@ export default function EvenementsPage() {
       date_debut: "",
       description: "",
       date_fin: null,
+      heure_debut: null,
+      heure_fin: null,
       lieu: null,
       lien_cta: null,
       label_cta: null,
@@ -307,6 +313,8 @@ export default function EvenementsPage() {
       categorie: ev.categorie,
       date_debut: ev.date_debut,
       date_fin: ev.date_fin ?? null,
+      heure_debut: ev.heure_debut ?? null,
+      heure_fin: ev.heure_fin ?? null,
       lieu: ev.lieu ?? null,
       description: ev.description,
       lien_cta: ev.lien_cta ?? null,
@@ -344,6 +352,8 @@ export default function EvenementsPage() {
         categorie: data.categorie,
         date_debut: data.date_debut,
         date_fin: data.date_fin || null,
+        heure_debut: data.heure_debut || null,
+        heure_fin: data.heure_fin || null,
         lieu: data.lieu || null,
         description: data.description,
         photo_url,
@@ -534,6 +544,24 @@ export default function EvenementsPage() {
               <Input
                 type="date"
                 {...register("date_fin")}
+                className="bg-white/[0.04] border-white/[0.10] text-white"
+              />
+            </Field>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <Field label="Heure de début" hint="Optionnel">
+              <Input
+                type="time"
+                {...register("heure_debut")}
+                className="bg-white/[0.04] border-white/[0.10] text-white"
+              />
+            </Field>
+
+            <Field label="Heure de fin" hint="Optionnel">
+              <Input
+                type="time"
+                {...register("heure_fin")}
                 className="bg-white/[0.04] border-white/[0.10] text-white"
               />
             </Field>
