@@ -14,7 +14,7 @@ import {
 // ── Constants ────────────────────────────────────────────────
 
 const ALL_CATS = [
-  "Baby / -7", "-7", "-9/-11", "-11F", "-13M",
+  "-7", "-9/-11", "-11F", "-13M",
   "-15M", "-15F", "Séniors Féminines", "Séniors Masculins", "Loisirs",
 ];
 
