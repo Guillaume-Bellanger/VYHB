@@ -28,7 +28,15 @@ const CollectifDetail = () => {
     <>
       {/* Hero avec gradient collectif */}
       <section className={`relative min-h-[40vh] flex items-end pb-12 bg-gradient-to-br ${collectif.gradient} overflow-hidden`}>
-        <div className="absolute inset-0 bg-black/55" />
+        {collectif.photo && (
+          <img
+            src={collectif.photo}
+            alt={collectif.name}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+        )}
+        <div className="absolute inset-0 bg-black/60" />
         {/* Orb de fond */}
         <div className="absolute top-[-60px] right-[-60px] w-[320px] h-[320px] rounded-full bg-white/[0.04] blur-3xl" />
         {/* Gros icon de fond */}

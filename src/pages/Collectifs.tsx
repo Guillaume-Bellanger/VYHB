@@ -68,7 +68,15 @@ const Collectifs = () => (
                 >
                   {/* Gradient header */}
                   <div className={`relative h-48 bg-gradient-to-br ${c.gradient} flex items-center justify-center overflow-hidden`}>
-                    <div className="absolute inset-0 bg-black/30" />
+                    {c.photo && (
+                      <img
+                        src={c.photo}
+                        alt={c.name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/40" />
                     {/* Big background letter */}
                     <span className="absolute right-4 bottom-2 font-display font-black text-[80px] text-white/5 leading-none select-none">
                       {c.shortName.charAt(0)}

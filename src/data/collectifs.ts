@@ -10,7 +10,7 @@ export interface Collectif {
   location: string;
   desc: string;
   gradient: string;
-  photo: string;
+  photo: string | null;
 }
 
 export const collectifs: Collectif[] = [
@@ -26,7 +26,7 @@ export const collectifs: Collectif[] = [
     location: "Espace Rochopt, Boussy-Saint-Antoine",
     desc: "Le Baby Hand initie les tout-petits au handball à travers des jeux adaptés. Éveil moteur, sens de l'équipe et plaisir avant tout.",
     gradient: "from-yellow-900/70 to-yellow-700/40",
-    photo: "[À compléter]",
+    photo: "/images/Baby.jpeg",
   },
   {
     slug: "-7",
@@ -40,7 +40,7 @@ export const collectifs: Collectif[] = [
     location: "Espace Rochopt, Boussy-Saint-Antoine",
     desc: "Les -7 découvrent le handball à travers des jeux simples et ludiques. Ils apprennent à bouger, à lancer et à jouer ensemble, tout en développant coordination et esprit d'équipe.",
     gradient: "from-lime-900/70 to-lime-700/40",
-    photo: "[À compléter]",
+    photo: "/images/-7.jpeg",
   },
   {
     slug: "-9-11",
@@ -54,7 +54,7 @@ export const collectifs: Collectif[] = [
     location: "Gymnase Fontaine-Cornaille, Quincy-sous-Sénart",
     desc: "Les -9 poursuivent leur découverte du handball avec des jeux plus structurés. Ils apprennent les bases du jeu collectif et gagnent en coordination, tout en construisant leurs premiers automatismes en équipe.",
     gradient: "from-green-900/70 to-green-700/40",
-    photo: "[À compléter]",
+    photo: "/images/-9-11.jpeg",
   },
   {
     slug: "-11f",
@@ -68,7 +68,7 @@ export const collectifs: Collectif[] = [
     location: "Halle des Sports, Boussy-Saint-Antoine",
     desc: "Les -11F développent leurs bases techniques et tactiques dans un environnement compétitif et solidaire.",
     gradient: "from-pink-900/70 to-pink-700/40",
-    photo: "[À compléter]",
+    photo: "/images/-11F.jpeg",
   },
   {
     slug: "-13m",
@@ -82,7 +82,7 @@ export const collectifs: Collectif[] = [
     location: "Halle des Sports, Boussy-Saint-Antoine",
     desc: "Les -13M évoluent en compétition départementale et perfectionnent leur jeu dans un groupe soudé et ambitieux.",
     gradient: "from-rose-900/70 to-rose-700/40",
-    photo: "[À compléter]",
+    photo: "/images/-13M.jpeg",
   },
   {
     slug: "-15-18m",
@@ -99,7 +99,7 @@ export const collectifs: Collectif[] = [
     location: "Mardi : La Halle des Sports, Boussy-Saint-Antoine et Jeudi : Gymnase des Antonins, Boussy-Saint-Antoine",
     desc: "Un collectif engagé, une vraie dynamique de groupe pour se dépasser ensemble et préparer l'avenir vers les seniors.",
     gradient: "from-orange-900/70 to-orange-700/40",
-    photo: "[À compléter]",
+    photo: "/images/-15M.jpeg",
   },
   {
     slug: "-15-18f",
@@ -114,9 +114,9 @@ export const collectifs: Collectif[] = [
       "Jeudi 18h30–20h",
     ],
     location: "Mardi : La Halle des Sports et Jeudi : Gymnase des Antonins, Boussy-Saint-Antoine",
-    desc: "Un collectif engagé, une vraie dynamique de groupe pour se dépasser ensemble et préparer l'avenir vers les seniors.",
+    desc: "Un handball qui se vit en équipe, une belle dynamique de groupe pour progresser ensemble vers le handball senior.",
     gradient: "from-purple-900/70 to-purple-700/40",
-    photo: "[À compléter]",
+    photo: "/images/-15-18.jpeg",
   },
   {
     slug: "seniors-feminines",
@@ -133,7 +133,7 @@ export const collectifs: Collectif[] = [
     location: "Lundi : Salle La Palestre, Crosne et Mercredi : La Halle des Sports, Boussy-Saint-Antoine",
     desc: "La force d'une entente, l'énergie d'un collectif et la passion du handball pour avancer ensemble.",
     gradient: "from-violet-900/70 to-violet-700/40",
-    photo: "[À compléter]",
+    photo: "/images/S%C3%A9nior%20Feminines.jpeg",
   },
   {
     slug: "seniors-masculins",
@@ -150,7 +150,7 @@ export const collectifs: Collectif[] = [
     location: "Halle des Sports, Boussy-Saint-Antoine",
     desc: "L'expérience au service du collectif, avec toujours l'envie d'aller plus loin.",
     gradient: "from-blue-900/70 to-blue-700/40",
-    photo: "[À compléter]",
+    photo: "/images/Senior%20Masculins.jpeg",
   },
   {
     slug: "loisirs",
@@ -167,6 +167,6 @@ export const collectifs: Collectif[] = [
     location: "Lundi : Gymnase Fontaine Cornaille, Quincy-sous-Sénart et Vendredi : La Halle des Sports, Boussy-Saint-Antoine",
     desc: "Le handball version plaisir : jouer, partager, progresser… et se retrouver aussi lors de matchs amicaux.",
     gradient: "from-indigo-900/70 to-indigo-700/40",
-    photo: "[À compléter]",
+    photo: "/images/Loisir.jpeg",
   },
 ];
