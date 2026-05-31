@@ -64,12 +64,12 @@ export const CATEGORIE_CONFIG: Record<EvenementCategorie, {
   },
   info: {
     tag: "Info",
-    tagClass: "bg-white/10 text-white/50 border border-white/15",
+    tagClass: "bg-blue-900/30 text-blue-300 border border-blue-800/40",
     icon: Info,
-    accent: "text-white/50",
-    bg: "bg-white/[0.06]",
-    border: "border-white/[0.08]",
-    gradientBar: "linear-gradient(135deg, hsl(0 0% 55%), hsl(0 0% 45%))",
+    accent: "text-blue-300",
+    bg: "bg-blue-900/20",
+    border: "border-blue-900/30",
+    gradientBar: "linear-gradient(135deg, hsl(215 70% 25%), hsl(220 65% 20%))",
   },
   autre: {
     tag: "Autre",
