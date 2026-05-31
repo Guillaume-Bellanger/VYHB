@@ -32,17 +32,17 @@ export const entraineurs: Entraineur[] = [
   },
   {
     prenom: "Guillaume",
-    role: "-15M / Seniors Masculins",
+    role: "-15M/-18M / Seniors Masculins",
     avatarUrl: "https://ui-avatars.com/api/?name=Guillaume&background=cc0000&color=fff&size=128&bold=true",
   },
   {
     prenom: "Lénaïck",
-    role: "-15M",
+    role: "-15M/-18M",
     avatarUrl: "https://ui-avatars.com/api/?name=Lenaick&background=cc0000&color=fff&size=128&bold=true",
   },
   {
     prenom: "Ronan",
-    role: "-15F",
+    role: "-18F",
     avatarUrl: "https://ui-avatars.com/api/?name=Ronan&background=cc0000&color=fff&size=128&bold=true",
   },
   {

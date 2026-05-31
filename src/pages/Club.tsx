@@ -20,7 +20,7 @@ const valeurs = [
 
 const timeline = [
   { year: "~2003", title: "Fondation du club", desc: "Création du VYHB au cœur du Val d'Yerres." },
-  { year: "~2010", title: "Développement du secteur jeunes", desc: "Naissance de l'école de handball et structuration du secteur Jeunes. Les catégories Baby Hand, -7 et -9 prennent forme. La formation devient une priorité." },
+  { year: "~2010", title: "Développement du secteur Jeunes", desc: "Naissance de l'école de handball et structuration du secteur Jeunes. Les catégories Baby Hand, -7 et -9 prennent forme. La formation devient une priorité." },
   { year: "~2015", title: "Croissance et compétitions", desc: "Le club atteint 10 équipes en compétition. Les seniors s'imposent en championnat départemental." },
   { year: "Aujourd'hui", title: "245 licenciés, 10 équipes", desc: "Plus qu'un club, une famille. Une communauté engagée, des bénévoles dévoués, et la même passion intacte depuis plus de 20 ans." },
 ];
