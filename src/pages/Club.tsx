@@ -367,10 +367,11 @@ const Club = () => {
                     <span className="w-1 h-5 rounded-full bg-emerald-500 shrink-0" />
                     Bénévoles
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                     {[
-                      { src: "/images/stand%20et%20freed.jpeg", alt: "Bénévoles au stand" },
-                      { src: "/images/stand%20guillaume%20et%20lenacik.jpeg", alt: "Bénévoles au stand" },
+                      { src: "/images/HandFLUO.jpeg", alt: "Hand Fluo" },
+                      { src: "/images/HANDYHAND.jpeg", alt: "Handy Hand" },
+                      { src: "/images/MArch%C3%A9NOEL.jpeg", alt: "Marché de Noël" },
                     ].map((photo, i) => (
                       <motion.div
                         key={i}
