@@ -11,7 +11,6 @@ import {
 import { CATEGORIE_CONFIG, formatDate, formatHeure, type Evenement } from "@/components/EvenementCard";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import heroImage from "@/assets/hero-handball.jpg";
 import { collectifs } from "@/data/collectifs";
 import { usePublicUpcoming } from "@/hooks/usePublicMatches";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -240,7 +239,7 @@ const Index = () => {
       ══════════════════════════════════════════ */}
       <section className="relative min-h-[100svh] flex items-center overflow-hidden">
         <img
-          src={heroImage}
+          src="/images/final.png"
           alt="Match de handball en action"
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}
