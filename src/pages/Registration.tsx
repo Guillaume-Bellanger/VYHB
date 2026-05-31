@@ -322,7 +322,7 @@ const Registration = () => (
             Le présent Règlement Intérieur s'applique à tous les membres de l'association du VYHB ainsi qu'aux représentants légaux des membres mineurs. En vous inscrivant, vous vous engagez à le respecter.
           </p>
           <div className="mb-6 flex flex-wrap gap-2">
-            {["Dispositions Générales (Art. 1–11)", "Activités Sportives (Art. 12–15)", "Bonne Conduite (Art. 16–17)", "Données & Droits (Art. 18–20)"].map((tag) => (
+            {["Dispositions Générales (Art. 1–11)", "Activités Sportives (Art. 12–15)", "Bonne Conduite (Art. 16–17)", "Données & Droits (Art. 18–21)"].map((tag) => (
               <span key={tag} className="eyebrow text-[10px]">{tag}</span>
             ))}
           </div>
