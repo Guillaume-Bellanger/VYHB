@@ -41,6 +41,7 @@ const formations = [
     bg: "bg-blue-500/10",
     border: "border-blue-500/20",
     content: "La table de marque, c'est le poste de confiance par excellence. Chronométreur, marqueur, secrétaire de match : ces rôles sont essentiels au bon déroulement de chaque rencontre. Nous formons nos bénévoles et nos jeunes à tenir la table de marque avec sérieux et rigueur. Une belle façon de s'impliquer dans la vie du club tout en apprenant les rouages du handball officiel.",
+    photo: "/images/tables.jpeg",
   },
   {
     icon: BookOpen,
@@ -433,6 +434,15 @@ const Club = () => {
                           <h3 className="font-display font-black text-xl text-white">{f.title}</h3>
                         </div>
                         <p className="text-white/45 leading-relaxed text-sm">{f.content}</p>
+                        {"photo" in f && f.photo && (
+                          <img
+                            src={f.photo as string}
+                            alt={f.title}
+                            className="mt-6 w-full rounded-xl object-cover"
+                            style={{ height: "auto" }}
+                            loading="lazy"
+                          />
+                        )}
                       </motion.div>
                     );
                   })}
