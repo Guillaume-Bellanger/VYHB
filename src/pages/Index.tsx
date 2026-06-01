@@ -219,7 +219,7 @@ const Index = () => {
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: Array<Evenement & { publie_le?: string | null }>) => {
         const filtered = data.filter((ev) => !ev.publie_le || ev.publie_le.split("T")[0] <= today);
-        setEvents(filtered.slice(0, 3));
+        setEvents(filtered);
       })
       .catch(() => {})
       .finally(() => setEventsLoading(false));
