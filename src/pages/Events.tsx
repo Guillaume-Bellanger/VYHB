@@ -52,12 +52,12 @@ const Events = () => {
 
     const today = new Date().toISOString().split("T")[0];
     fetch(
-      `${url}/rest/v1/evenements?actif=eq.true&or=(expire_le.is.null,expire_le.gte.${today})&order=ordre.asc,date_debut.asc`,
+      `${url}/rest/v1/evenements?actif=eq.true&or=(expire_le.is.null,expire_le.gte.${today})&or=(publie_le.is.null,publie_le.lte.${today})&order=ordre.asc,date_debut.asc`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` } }
     )
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: Array<Evenement & { publie_le?: string | null }>) => {
-        const filtered = data.filter((ev) => !ev.publie_le || ev.publie_le <= today);
+        const filtered = data.filter((ev) => !ev.publie_le || ev.publie_le.split("T")[0] <= today);
         setEvents(filtered);
       })
       .catch(() => {})

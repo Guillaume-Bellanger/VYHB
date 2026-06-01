@@ -124,7 +124,7 @@ const CollectifDetail = () => {
                   </div>
                   <span className="font-display font-bold text-xs text-white/60 uppercase tracking-wider">Lieu</span>
                 </div>
-                <p className="text-sm text-white font-medium leading-relaxed">{collectif.location}</p>
+                <p className="text-sm text-white font-medium leading-relaxed" style={{ whiteSpace: "pre-line" }}>{collectif.location}</p>
               </div>
             </div>
 
