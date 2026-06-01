@@ -41,5 +41,5 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: /v2.vyhb.fr/deploy-vyhb/
+          server-dir: /public_html/
           dangerous-clean-slate: true

@@ -200,7 +200,7 @@ function ForgotPasswordForm({ onCancel }: { onCancel: () => void }) {
       },
       body: JSON.stringify({
         email,
-        redirect_to: 'https://v2.vyhb.fr/admin/auth/callback',
+        redirect_to: 'https://www.vyhb.fr/admin/auth/callback',
       }),
     });
     if (!res.ok) {

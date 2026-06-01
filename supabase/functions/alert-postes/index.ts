@@ -30,7 +30,7 @@ const POSTE_LABELS: Record<string, string> = {
   arbitre: "Arbitre",
 };
 
-const ADMIN_URL = "https://v2.vyhb.fr/admin/matches";
+const ADMIN_URL = "https://www.vyhb.fr/admin/matches";
 
 const ALERT_CONFIG: Record<AlertLevel, { subject: string; intro: string; color: string }> = {
   7: {
