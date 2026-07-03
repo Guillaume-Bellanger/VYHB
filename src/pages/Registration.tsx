@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   CheckCircle, ArrowRight, AlertCircle,
-  Calendar, Euro, FileText, RefreshCw, ExternalLink, UserCheck, UserPlus,
+  Calendar, Euro, FileText, RefreshCw, Mail, UserCheck, UserPlus,
 } from "lucide-react";
 import SEO from "@/components/SEO";
 import Accordion from "@/components/Accordion";
@@ -35,7 +35,7 @@ const docsMineurs = [
   "Copie de la pièce d'identité ou extrait d'acte de naissance",
   "Autorisation parentale signée par les parents ou tuteur légal",
   "Photo d'identité récente",
-  "Attestation de paiement (Hello Asso, Pass'sport, LABAZ, chèque mairie, ANCV)",
+  "Attestation de paiement (Pass'sport, LABAZ, chèque mairie, ANCV)",
 ];
 
 const docsMajeurs = [
@@ -43,20 +43,20 @@ const docsMajeurs = [
   "Questionnaire de santé QS-SPORT complété et signé",
   "Copie de la pièce d'identité",
   "Photo d'identité récente",
-  "Attestation de paiement (Hello Asso, Pass'sport, LABAZ, chèque mairie, ANCV)",
+  "Attestation de paiement (Pass'sport, LABAZ, chèque mairie, ANCV)",
 ];
 
 const stepsInscription = [
   { step: "1", title: "Essai gratuit", desc: "Venez essayer 2 séances gratuitement sans engagement. Contactez-nous pour convenir d'une date." },
-  { step: "2", title: "Inscription en ligne", desc: "Tout est dématérialisé ! Remplissez le formulaire d'inscription via Hello Asso. Scannez ou photographiez vos pièces et joignez-les directement dans le formulaire." },
-  { step: "3", title: "Paiement en ligne", desc: "Réglez votre cotisation via Hello Asso. Moyens acceptés : Pass'sport · LABAZ · Chèque mairie · ANCV." },
+  { step: "2", title: "Inscription", desc: "Contactez-nous par email à vyhandball@gmail.com. Nous vous transmettrons le formulaire d'inscription et vous guiderons pour les pièces à fournir." },
+  { step: "3", title: "Paiement", desc: "Réglez votre cotisation. Moyens acceptés : Pass'sport · LABAZ · Chèque mairie · ANCV." },
   { step: "4", title: "Validation de la licence FFHB", desc: "Une fois le dossier validé par la trésorière, vous recevez votre licence Fédérale. Vous pouvez alors participer aux entraînements et compétitions." },
 ];
 
 const stepsReinscription = [
   { step: "1", title: "Vérifier le questionnaire de santé", desc: "Remplir le QS-SPORT. Si vous répondez OUI à une question, un certificat médical est nécessaire." },
-  { step: "2", title: "Renouvellement en ligne", desc: "Remplissez le formulaire de renouvellement via Hello Asso et joignez les pièces éventuellement requises." },
-  { step: "3", title: "Paiement en ligne", desc: "Réglez votre cotisation via Hello Asso. Moyens acceptés : Pass'sport · LABAZ · Chèque mairie · ANCV." },
+  { step: "2", title: "Renouvellement", desc: "Contactez-nous par email à vyhandball@gmail.com pour lancer votre renouvellement et joignez les pièces éventuellement requises." },
+  { step: "3", title: "Paiement", desc: "Réglez votre cotisation. Moyens acceptés : Pass'sport · LABAZ · Chèque mairie · ANCV." },
   { step: "4", title: "Renouvellement de la licence", desc: "La trésorière transmet les dossiers à la FFHB. Votre licence est renouvelée pour la nouvelle saison." },
 ];
 
@@ -95,30 +95,23 @@ const Steps = ({ steps, accent = "var(--gradient-accent)" }: { steps: typeof ste
   </div>
 );
 
-const HelloAssoBlock = () => (
+const ContactEmailBlock = () => (
   <div
-    className="mt-8 flex flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl border border-orange-500/20"
+    className="mt-8 p-6 rounded-2xl border border-orange-500/20"
     style={{ background: "rgba(249,115,22,0.05)" }}
   >
+    <p className="text-white/70 text-sm leading-relaxed mb-4">
+      Pour vous inscrire, contactez-nous directement par email à{" "}
+      <strong className="text-orange-400">vyhandball@gmail.com</strong>{" "}
+      ou venez nous retrouver lors de nos séances d'essai gratuites.
+    </p>
     <a
-      href="https://www.helloasso.com"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="btn-primary gap-2 shrink-0"
+      href="mailto:vyhandball@gmail.com"
+      className="btn-primary gap-2 inline-flex"
     >
-      S'inscrire sur Hello Asso <ExternalLink size={15} />
+      <Mail size={15} />
+      Envoyer un email
     </a>
-    <div className="flex flex-col items-center gap-1.5">
-      <img
-        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fwww.helloasso.com"
-        alt="QR Code Hello Asso"
-        className="w-24 h-24 rounded-xl object-cover"
-        loading="lazy"
-        width={96}
-        height={96}
-      />
-      <span className="text-[10px] text-white/25">QR Code Hello Asso</span>
-    </div>
   </div>
 );
 
@@ -126,7 +119,7 @@ const Registration = () => (
   <>
     <SEO
       title="Inscriptions 2026/2027"
-      description="Inscrivez-vous au Val d'Yerres Handball pour la saison 2026/2027 via Hello Asso. Pass'sport accepté. Tarifs, documents requis et règlement intérieur."
+      description="Inscrivez-vous au Val d'Yerres Handball pour la saison 2026/2027. Contactez-nous à vyhandball@gmail.com. Tarifs, documents requis et règlement intérieur."
       canonical="/inscriptions"
       breadcrumb={[
         { name: "Accueil", url: "/" },
@@ -228,7 +221,7 @@ const Registration = () => (
           <div className="mt-5 space-y-1.5 max-w-2xl">
             <p className="text-xs text-white/30">* Cotisation annuelle, licence FFHB incluse.</p>
             <p className="text-sm text-orange-400 font-display font-bold">
-              Pass'sport accepté · LABAZ · Chèque mairie · ANCV · Hello Asso
+              Pass'sport accepté · LABAZ · Chèque mairie · ANCV
             </p>
           </div>
         </motion.div>
@@ -289,10 +282,10 @@ const Registration = () => (
         >
           <SectionHeader icon={UserPlus} title="Première inscription" />
           <p className="text-white/45 text-sm mb-8 max-w-2xl leading-relaxed mx-auto text-center">
-            Tout est dématérialisé, y compris le paiement. L'inscription se fait entièrement en ligne via Hello Asso.
+            Venez essayer nos séances gratuitement, puis contactez-nous pour finaliser votre inscription.
           </p>
           <Steps steps={stepsInscription} />
-          <HelloAssoBlock />
+          <ContactEmailBlock />
         </motion.div>
 
         {/* ─── Renouvellement ─── */}
@@ -306,7 +299,7 @@ const Registration = () => (
             Vous êtes déjà licencié(e) ? Voici la procédure simplifiée pour renouveler votre inscription pour la prochaine saison.
           </p>
           <Steps steps={stepsReinscription} accent="hsl(265 85% 55%)" />
-          <HelloAssoBlock />
+          <ContactEmailBlock />
         </motion.div>
 
         {/* ─── Règlement intérieur ─── */}
