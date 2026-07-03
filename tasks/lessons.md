@@ -28,3 +28,5 @@
 [2026-05-22] | Une seule query + split client-side > deux queries séparées | Pour une page qui affiche deux sections (résultats + à venir) du même dataset, préférer un seul useQuery avec .in("statut", [...]) et filtrer côté client. Réduit les requêtes réseau et simplifie la gestion des états loading/error.
 
 [2026-05-22] | signIn() doit set user et isLoading explicitement, pas seulement via onAuthStateChange | Si onAuthStateChange arrive tard ou échoue silencieusement, le store reste bloqué (isLoading: true, user: null). Fix : dans signIn(), après fetchProfile(), appeler set({ user, isLoading: false }) explicitement. Ajouter aussi un safety timeout de 5s dans _init() qui force isLoading: false si toujours vrai.
+
+[2026-05-22] | useMatches (admin CRUD) : même pattern fetch natif que usePublicMatches | useMatches.ts utilisait supabase.from() → même bug de client figé en HMR. Fix définitif : helper baseHeaders() qui lit VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY à chaque appel + lit le token depuis localStorage (sb-{ref}-auth-token). Helpers pgList, pgOne, pgInsert, pgPatch, pgDelete couvrent tout le CRUD. Aucun import depuis @/lib/supabase.
