@@ -127,6 +127,23 @@ _Branche : `feat/refonte-contenu-seo`_
 - [ ] Vérification visuelle post-exécution SQL : `/inscriptions` (section Tarifs), `/admin/tarifs`
 
 ---
+
+## PHASE 21 – CMS TEXTES LIBRES DU SITE (site_content)
+
+- [x] `supabase/migrations/017_site_content.sql` — table `site_content` (clé texte en PK, `groupe`, `type` 'texte'|'texte_long'|'liste' avec CHECK, `valeur` JSONB), RLS lecture publique totale + écriture `get_my_role() IN ('super_admin','president')`, trigger `set_updated_at()`, INSERT de 9 clés reprises telles quelles de `Club.tsx`/`Contact.tsx`/`Index.tsx` (`club.historique`, `club.valeurs`, `club.texte_entraineurs`, `club.texte_benevoles`, `club.texte_ecole_arbitrage`, `contact.email`, `contact.adresse_gymnase`, `accueil.accroche_hero`, `accueil.texte_famille`)
+  - **Écart assumé** : `club.historique` garde 3 champs par entrée (`annee`, `titre`, `texte`) au lieu des 2 décrits dans la consigne — la donnée réelle de `Club.tsx` (`timeline`) a un titre en gras distinct du texte descriptif ; réduire à 2 champs aurait perdu cette structure visuelle
+  - **Écart assumé** : `club.texte_benevoles` consolide 4 paragraphes (dont un en gras/plus grand, "Nous avons besoin de vous !") en un seul champ `texte_long` séparé par des lignes vides — la mise en emphase de ce paragraphe est perdue au profit d'un champ CMS simple et éditable
+  - **Interprétation** : `accueil.accroche_hero` = le paragraphe sous le H1 hero (pas le H1 lui-même, qui contient des `<span>` stylés/gradient conservés en dur pour ne pas risquer de casser ce balisage)
+- [ ] **ACTION MANUELLE** : exécuter `017_site_content.sql` dans le Supabase SQL Editor
+- [x] `src/types/siteContent.ts` — types `SiteContentRow`, `SiteContentType`, `HistoriqueItem`, `ValeurItem`
+- [x] `src/hooks/useSiteContent.ts` — pattern fetch natif : `useSiteContent()` expose `get(cle, fallback)` (retourne le fallback en dur si la clé est absente — aucune régression possible), `useSiteContentAdmin`, `useUpdateSiteContent` (PATCH par `cle`, PK texte donc pas d'UUID)
+- [x] `src/pages/admin/ContenuPage.tsx` — textes groupés par `groupe` en `Accordion` (tous ouverts par défaut), un bouton "Enregistrer" par section (pas un seul pour toute la page) qui ne PATCH que les clés effectivement modifiées. Champ selon `type` : `Input` (texte), `Textarea` (texte_long), `ListEditor` générique pour `liste` (colonnes déduites des clés du premier élément — fonctionne pour `historique` à 3 champs et `valeurs` à 2 champs sans code dédié), avec ajout/suppression/réordonnancement des entrées
+- [x] `src/App.tsx` — route `/admin/contenu` (rôles `super_admin` + `president`)
+- [x] `src/components/admin/AdminLayout.tsx` — entrée "Textes du site" dans la sidebar
+- [x] `src/pages/Club.tsx`, `src/pages/Contact.tsx`, `src/pages/Index.tsx` — branchés sur `useSiteContent().get(cle, fallbackEnDur)`, design strictement inchangé, pas de skeleton nécessaire (le fallback s'affiche immédiatement, remplacé silencieusement une fois la donnée chargée). Icônes/couleurs des "valeurs" et de la timeline restent en dur (détails visuels, non éditables), associées par position aux entrées chargées. `contact.email` réutilisé à la fois sur Contact.tsx (affichage + lien mailto du formulaire) et Index.tsx (strip contact bas de page)
+- [ ] Vérification visuelle post-exécution SQL : `/club` (Historique + Entraîneurs/Bénévoles + Formations), `/contact`, `/` (accroche hero + section famille + strip contact), `/admin/contenu`
+
+---
 ---
 
 ## ÉTAT GLOBAL

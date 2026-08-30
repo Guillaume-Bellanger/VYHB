@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
 import { useEncadrementPublic } from "@/hooks/useEncadrement";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import type { HistoriqueItem, ValeurItem } from "@/types/siteContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Clock, Users, User, GraduationCap,
@@ -10,20 +12,40 @@ import {
   Heart, Shield, Users2, Zap,
 } from "lucide-react";
 
-
-const valeurs = [
-  { icon: Shield, title: "Respect", text: "Le respect de chacun (coéquipiers, entraîneurs, adversaires, arbitres), des règles et de notre environnement est la base d'une pratique sportive saine, collective et constructive.", accent: "text-blue-400", bg: "bg-blue-500/10" },
-  { icon: Heart, title: "Plaisir", text: "Le plaisir, c'est partager des moments ensemble, s'investir dans l'effort, vivre sa passion et savourer les réussites ; il nourrit l'envie de progresser, de persévérer et de transmettre cette énergie aux autres.", accent: "text-orange-400", bg: "bg-orange-500/10" },
-  { icon: Zap, title: "Dépassement de soi", text: "Le dépassement de soi, c'est oser aller plus loin que ses limites, se découvrir de nouvelles capacités et progresser au service de soi-même comme du collectif.", accent: "text-violet-400", bg: "bg-violet-500/10" },
-  { icon: Users2, title: "Convivialité", text: "La convivialité, c'est créer des liens, partager des moments ensemble et faire vivre un esprit de club chaleureux et accueillant.", accent: "text-emerald-400", bg: "bg-emerald-500/10" },
+// Détails visuels des valeurs (icône/couleur) — non éditables depuis l'admin,
+// associés par position au tableau `club.valeurs` chargé depuis site_content.
+const VALEUR_STYLES = [
+  { icon: Shield, accent: "text-blue-400", bg: "bg-blue-500/10" },
+  { icon: Heart, accent: "text-orange-400", bg: "bg-orange-500/10" },
+  { icon: Zap, accent: "text-violet-400", bg: "bg-violet-500/10" },
+  { icon: Users2, accent: "text-emerald-400", bg: "bg-emerald-500/10" },
 ];
 
-const timeline = [
-  { year: "~2003", title: "Fondation du club", desc: "Création du VYHB au cœur du Val d'Yerres. Les premières équipes voient le jour avec une poignée de passionnés." },
-  { year: "~2010", title: "Développement du secteur Jeunes", desc: "Naissance de l'école de handball. Les catégories Baby Hand, -7 et -9 se structurent. La formation devient une priorité." },
-  { year: "~2015", title: "Croissance et compétitions", desc: "Le club atteint 10 équipes en compétition. Les seniors s'imposent en championnat départemental." },
-  { year: "Aujourd'hui", title: "245 licenciés, 10 équipes", desc: "Plus qu'un club, une famille. Une communauté engagée, des bénévoles dévoués, et la même passion intacte depuis plus de 20 ans." },
+const FALLBACK_VALEURS: ValeurItem[] = [
+  { titre: "Respect", texte: "Le respect de chacun (coéquipiers, entraîneurs, adversaires, arbitres), des règles et de notre environnement est la base d'une pratique sportive saine, collective et constructive." },
+  { titre: "Plaisir", texte: "Le plaisir, c'est partager des moments ensemble, s'investir dans l'effort, vivre sa passion et savourer les réussites ; il nourrit l'envie de progresser, de persévérer et de transmettre cette énergie aux autres." },
+  { titre: "Dépassement de soi", texte: "Le dépassement de soi, c'est oser aller plus loin que ses limites, se découvrir de nouvelles capacités et progresser au service de soi-même comme du collectif." },
+  { titre: "Convivialité", texte: "La convivialité, c'est créer des liens, partager des moments ensemble et faire vivre un esprit de club chaleureux et accueillant." },
 ];
+
+const FALLBACK_HISTORIQUE: HistoriqueItem[] = [
+  { annee: "~2003", titre: "Fondation du club", texte: "Création du VYHB au cœur du Val d'Yerres. Les premières équipes voient le jour avec une poignée de passionnés." },
+  { annee: "~2010", titre: "Développement du secteur Jeunes", texte: "Naissance de l'école de handball. Les catégories Baby Hand, -7 et -9 se structurent. La formation devient une priorité." },
+  { annee: "~2015", titre: "Croissance et compétitions", texte: "Le club atteint 10 équipes en compétition. Les seniors s'imposent en championnat départemental." },
+  { annee: "Aujourd'hui", titre: "245 licenciés, 10 équipes", texte: "Plus qu'un club, une famille. Une communauté engagée, des bénévoles dévoués, et la même passion intacte depuis plus de 20 ans." },
+];
+
+const FALLBACK_TEXTE_ENTRAINEURS = "Nos entraîneurs et bénévoles sont le cœur battant du club. Leur passion, leur disponibilité et leur engagement font vivre le club au quotidien.";
+
+const FALLBACK_TEXTE_BENEVOLES = `Au Val d'Yerres Handball, rien ne serait possible sans l'engagement précieux de nos bénévoles. Qu'ils soient sur le terrain, en coulisses ou derrière un ordinateur, ils font vivre le club au quotidien et permettent à toutes nos équipes de pratiquer leur passion dans les meilleures conditions.
+
+Nous avons besoin de vous !
+
+Toutes les bonnes volontés sont les bienvenues : entraînement et encadrement, aide administrative, communication et réseaux sociaux, organisation d'événements, logistique, buvette, responsable de salles…
+
+Intéressé(e) ? Contactez-nous via le site ou par mail. Ensemble, faisons grandir notre club !`;
+
+const FALLBACK_TEXTE_ECOLE_ARBITRAGE = "Notre école d'arbitrage accompagne les jeunes qui souhaitent s'initier à l'arbitrage dans un cadre bienveillant et structuré. Encadrés par des arbitres expérimentés, ils apprennent à maîtriser les règles du jeu, à gérer une rencontre et à développer leur confiance en eux et leur sens des responsabilités. Arbitrer, c'est une autre façon d'aimer le handball.";
 
 const formations = [
   {
@@ -73,6 +95,13 @@ const Club = () => {
   const entraineursData = encadrement.filter((p) => p.type === "entraineur");
   const bureau = encadrement.filter((p) => p.type === "bureau");
   const responsablesPoles = encadrement.filter((p) => p.type === "pole");
+
+  const { get } = useSiteContent();
+  const valeurs = get<ValeurItem[]>("club.valeurs", FALLBACK_VALEURS);
+  const timeline = get<HistoriqueItem[]>("club.historique", FALLBACK_HISTORIQUE);
+  const texteEntraineurs = get<string>("club.texte_entraineurs", FALLBACK_TEXTE_ENTRAINEURS);
+  const texteBenevoles = get<string>("club.texte_benevoles", FALLBACK_TEXTE_BENEVOLES);
+  const texteEcoleArbitrage = get<string>("club.texte_ecole_arbitrage", FALLBACK_TEXTE_ECOLE_ARBITRAGE);
 
   useEffect(() => {
     const t = searchParams.get("tab");
@@ -179,9 +208,9 @@ const Club = () => {
                             {i + 1}
                           </div>
                           <div className="pt-1.5">
-                            <span className="text-xs font-display font-bold text-orange-400 uppercase tracking-wider">{item.year}</span>
-                            <h3 className="font-display font-bold text-white text-lg mt-0.5 mb-1">{item.title}</h3>
-                            <p className="text-white/45 text-sm leading-relaxed">{item.desc}</p>
+                            <span className="text-xs font-display font-bold text-orange-400 uppercase tracking-wider">{item.annee}</span>
+                            <h3 className="font-display font-bold text-white text-lg mt-0.5 mb-1">{item.titre}</h3>
+                            <p className="text-white/45 text-sm leading-relaxed">{item.texte}</p>
                           </div>
                         </motion.div>
                       ))}
@@ -211,7 +240,8 @@ const Club = () => {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {valeurs.map((v, i) => {
-                      const Icon = v.icon;
+                      const style = VALEUR_STYLES[i % VALEUR_STYLES.length];
+                      const Icon = style.icon;
                       return (
                         <motion.div
                           key={i}
@@ -221,12 +251,12 @@ const Club = () => {
                           transition={{ delay: i * 0.08 }}
                           className="glass-premium rounded-2xl p-6 flex items-start gap-4 border border-white/[0.06] hover:border-white/[0.12] transition-colors"
                         >
-                          <div className={`w-10 h-10 rounded-xl ${v.bg} flex items-center justify-center shrink-0`}>
-                            <Icon size={20} className={v.accent} />
+                          <div className={`w-10 h-10 rounded-xl ${style.bg} flex items-center justify-center shrink-0`}>
+                            <Icon size={20} className={style.accent} />
                           </div>
                           <div>
-                            <h4 className="font-display font-bold text-white mb-1">{v.title}</h4>
-                            <p className="text-sm text-white/45 leading-relaxed">{v.text}</p>
+                            <h4 className="font-display font-bold text-white mb-1">{v.titre}</h4>
+                            <p className="text-sm text-white/45 leading-relaxed">{v.texte}</p>
                           </div>
                         </motion.div>
                       );
@@ -369,7 +399,7 @@ const Club = () => {
               >
                 <div className="max-w-4xl">
                   <p className="text-white/45 text-base leading-relaxed mb-10 max-w-2xl">
-                    Nos entraîneurs et bénévoles sont le cœur battant du club. Leur passion, leur disponibilité et leur engagement font vivre le club au quotidien.
+                    {texteEntraineurs}
                   </p>
 
                   <h3 className="font-display font-bold text-base text-white mb-5 flex items-center gap-3">
@@ -442,16 +472,9 @@ const Club = () => {
                     ))}
                   </div>
                   <div className="glass-premium rounded-2xl p-8 border border-white/[0.06] space-y-4 text-white/45 leading-relaxed text-sm">
-                    <p>
-                      Au Val d'Yerres Handball, rien ne serait possible sans l'engagement précieux de nos bénévoles. Qu'ils soient sur le terrain, en coulisses ou derrière un ordinateur, ils font vivre le club au quotidien et permettent à toutes nos équipes de pratiquer leur passion dans les meilleures conditions.
-                    </p>
-                    <p className="font-display font-bold text-white text-base">Nous avons besoin de vous !</p>
-                    <p>
-                      Toutes les bonnes volontés sont les bienvenues : entraînement et encadrement, aide administrative, communication et réseaux sociaux, organisation d'événements, logistique, buvette, responsable de salles…
-                    </p>
-                    <p className="font-medium text-white/60">
-                      Intéressé(e) ? Contactez-nous via le site ou par mail. Ensemble, faisons grandir notre club !
-                    </p>
+                    {texteBenevoles.split("\n\n").map((paragraphe, i) => (
+                      <p key={i}>{paragraphe}</p>
+                    ))}
                   </div>
                 </div>
               </motion.div>
@@ -469,6 +492,7 @@ const Club = () => {
                 <div className="max-w-3xl space-y-6">
                   {formations.map((f, i) => {
                     const Icon = f.icon;
+                    const content = f.title === "École d'arbitrage" ? texteEcoleArbitrage : f.content;
                     return (
                       <motion.div
                         key={i}
@@ -484,7 +508,7 @@ const Club = () => {
                           </div>
                           <h3 className="font-display font-black text-xl text-white">{f.title}</h3>
                         </div>
-                        <p className="text-white/45 leading-relaxed text-sm">{f.content}</p>
+                        <p className="text-white/45 leading-relaxed text-sm">{content}</p>
                         {"photo" in f && f.photo && (
                           <img
                             src={f.photo as string}

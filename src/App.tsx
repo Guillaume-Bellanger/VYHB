@@ -31,6 +31,7 @@ import EvenementsPage from "./pages/admin/EvenementsPage";
 import CollectifsAdminPage from "./pages/admin/CollectifsAdminPage";
 import EncadrementPage from "./pages/admin/EncadrementPage";
 import TarifsPage from "./pages/admin/TarifsPage";
+import ContenuPage from "./pages/admin/ContenuPage";
 import { useAuthStore } from "./stores/authStore";
 
 const queryClient = new QueryClient();
@@ -100,6 +101,7 @@ const App = () => (
                 <Route path="/admin/collectifs" element={<CollectifsAdminPage />} />
                 <Route path="/admin/encadrement" element={<EncadrementPage />} />
                 <Route path="/admin/tarifs" element={<TarifsPage />} />
+                <Route path="/admin/contenu" element={<ContenuPage />} />
               </Route>
             </Route>
           </Routes>

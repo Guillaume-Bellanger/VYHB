@@ -13,7 +13,14 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { collectifs } from "@/data/collectifs";
 import { usePublicUpcoming } from "@/hooks/usePublicMatches";
+import { useSiteContent } from "@/hooks/useSiteContent";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const FALLBACK_ACCROCHE_HERO = "Un club convivial et dynamique. 245 licenciés, 10 équipes, 23 ans de passion — du baby hand aux seniors.";
+const FALLBACK_TEXTE_FAMILLE = `Fondé il y a bientôt 23 ans, le Val d'Yerres Handball rassemble 245 licenciés répartis dans 10 équipes, du Baby Hand aux seniors.
+
+Que vous soyez débutant ou confirmé, enfant ou adulte, compétiteur ou joueur loisir : il y a toujours une place pour vous chez nous.`;
+const FALLBACK_EMAIL = "vyhandball@gmail.com";
 
 
 // ─── Animation presets
@@ -204,6 +211,11 @@ const Index = () => {
   const { data: upcomingData, isLoading: upcomingLoading } = usePublicUpcoming();
   const upcomingMatches = (upcomingData ?? []).slice(0, 3);
 
+  const { get } = useSiteContent();
+  const accrocheHero = get<string>("accueil.accroche_hero", FALLBACK_ACCROCHE_HERO);
+  const texteFamille = get<string>("accueil.texte_famille", FALLBACK_TEXTE_FAMILLE);
+  const email = get<string>("contact.email", FALLBACK_EMAIL);
+
   const [events, setEvents] = useState<Evenement[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
 
@@ -280,7 +292,7 @@ const Index = () => {
             </motion.h1>
 
             <motion.p custom={2} variants={fadeUp} className="text-lg text-white/55 max-w-xl mb-10 leading-relaxed md:mx-auto">
-              Un club convivial et dynamique. 245 licenciés, 10 équipes, 23 ans de passion — du baby hand aux seniors.
+              {accrocheHero}
             </motion.p>
 
             <motion.div custom={3} variants={fadeUp} className="flex flex-col sm:flex-row gap-4 md:justify-center">
@@ -537,12 +549,11 @@ const Index = () => {
                 <br />
                 <span className="gradient-text">une famille</span>
               </h2>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                Fondé il y a bientôt 23 ans, le Val d'Yerres Handball rassemble 245 licenciés répartis dans 10 équipes, du Baby Hand aux seniors.
-              </p>
-              <p className="text-muted-foreground leading-relaxed mb-8">
-                Que vous soyez débutant ou confirmé, enfant ou adulte, compétiteur ou joueur loisir : il y a toujours une place pour vous chez nous.
-              </p>
+              {texteFamille.split("\n\n").map((paragraphe, i) => (
+                <p key={i} className={`text-muted-foreground leading-relaxed ${i === 0 ? "mb-4" : "mb-8"}`}>
+                  {paragraphe}
+                </p>
+              ))}
               <Link to="/club" className="btn-primary">
                 Découvrir le club <ArrowRight size={15} />
               </Link>
@@ -775,14 +786,14 @@ const Index = () => {
 
             <div className="hidden sm:block w-px h-10 bg-border/50" />
 
-            <a href="mailto:vyhandball@gmail.com" className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 group cursor-pointer text-center sm:text-left">
+            <a href={`mailto:${email}`} className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 group cursor-pointer text-center sm:text-left">
               <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors duration-300 shrink-0">
                 <Mail className="text-accent" size={17} />
               </div>
               <div>
                 <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">Email</p>
                 <p className="font-display font-bold text-sm text-foreground group-hover:text-accent transition-colors duration-200">
-                  vyhandball@gmail.com
+                  {email}
                 </p>
               </div>
             </a>

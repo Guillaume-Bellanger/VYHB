@@ -2,50 +2,60 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
 import SEO from "@/components/SEO";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
-const coordonnees = [
-  {
-    icon: Phone,
-    label: "Téléphone",
-    value: "06 75 26 43 58",
-    sub: "Président du club",
-    href: "tel:+33675264358",
-    accent: "text-orange-400",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/15",
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    value: "vyhandball@gmail.com",
-    sub: "Réponse sous 48h",
-    href: "mailto:vyhandball@gmail.com",
-    accent: "text-blue-400",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/15",
-  },
-  {
-    icon: MapPin,
-    label: "Gymnase",
-    value: "La Halle des Sports",
-    sub: "Boussy-Saint-Antoine",
-    href: null,
-    accent: "text-emerald-400",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/15",
-  },
-];
+const FALLBACK_EMAIL = "vyhandball@gmail.com";
+const FALLBACK_ADRESSE = "La Halle des Sports, Boussy-Saint-Antoine";
 
 const Contact = () => {
   const [sent, setSent] = useState(false);
+  const { get } = useSiteContent();
+
+  const email = get<string>("contact.email", FALLBACK_EMAIL);
+  const adresseGymnase = get<string>("contact.adresse_gymnase", FALLBACK_ADRESSE);
+  const [gymnaseValue, ...gymnaseRest] = adresseGymnase.split(", ");
+  const gymnaseSub = gymnaseRest.join(", ");
+
+  const coordonnees = [
+    {
+      icon: Phone,
+      label: "Téléphone",
+      value: "06 75 26 43 58",
+      sub: "Président du club",
+      href: "tel:+33675264358",
+      accent: "text-orange-400",
+      bg: "bg-orange-500/10",
+      border: "border-orange-500/15",
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      value: email,
+      sub: "Réponse sous 48h",
+      href: `mailto:${email}`,
+      accent: "text-blue-400",
+      bg: "bg-blue-500/10",
+      border: "border-blue-500/15",
+    },
+    {
+      icon: MapPin,
+      label: "Gymnase",
+      value: gymnaseValue,
+      sub: gymnaseSub,
+      href: null,
+      accent: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/15",
+    },
+  ];
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const senderEmail = (form.elements.namedItem("email") as HTMLInputElement).value;
     const message = (form.elements.namedItem("message") as HTMLTextAreaElement).value;
-    window.location.href = `mailto:vyhandball@gmail.com?subject=Contact site - ${encodeURIComponent(name)}&body=${encodeURIComponent(`De: ${name} (${email})\n\n${message}`)}`;
+    window.location.href = `mailto:${email}?subject=Contact site - ${encodeURIComponent(name)}&body=${encodeURIComponent(`De: ${name} (${senderEmail})\n\n${message}`)}`;
     setSent(true);
   };
 
@@ -104,7 +114,7 @@ const Contact = () => {
                       <div className="min-w-0">
                         <p className="text-[11px] text-white/30 uppercase tracking-[0.18em] font-display font-semibold mb-0.5">{item.label}</p>
                         <p className={`font-display font-bold text-sm text-white group-hover:${item.accent} transition-colors`}>{item.value}</p>
-                        <p className="text-xs text-white/35 mt-0.5">{item.sub}</p>
+                        {item.sub && <p className="text-xs text-white/35 mt-0.5">{item.sub}</p>}
                       </div>
                     </div>
                   );

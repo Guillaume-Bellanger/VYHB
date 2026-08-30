@@ -9,6 +9,7 @@ import {
   CalendarRange,
   Contact,
   Euro,
+  FileText,
   LogOut,
   Menu,
   X,
@@ -31,6 +32,7 @@ const navItems: NavItem[] = [
   { to: "/admin/collectifs", label: "Collectifs", icon: Users2, roles: ["super_admin", "president"] },
   { to: "/admin/encadrement", label: "Encadrement", icon: Contact, roles: ["super_admin", "president"] },
   { to: "/admin/tarifs", label: "Tarifs", icon: Euro, roles: ["super_admin", "president"] },
+  { to: "/admin/contenu", label: "Textes du site", icon: FileText, roles: ["super_admin", "president"] },
 ];
 
 function NavItems({ onClose }: { onClose?: () => void }) {
