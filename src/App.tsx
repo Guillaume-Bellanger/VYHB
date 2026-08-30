@@ -28,6 +28,7 @@ import MatchFormPage from "./pages/admin/MatchFormPage";
 import UsersPage from "./pages/admin/UsersPage";
 import TickerPage from "./pages/admin/TickerPage";
 import EvenementsPage from "./pages/admin/EvenementsPage";
+import CollectifsAdminPage from "./pages/admin/CollectifsAdminPage";
 import { useAuthStore } from "./stores/authStore";
 
 const queryClient = new QueryClient();
@@ -90,6 +91,11 @@ const App = () => (
               <Route element={<ProtectedRoute allowedRoles={["super_admin", "president", "evenements_com"]} />}>
                 <Route path="/admin/ticker" element={<TickerPage />} />
                 <Route path="/admin/evenements" element={<EvenementsPage />} />
+              </Route>
+
+              {/* super_admin + president */}
+              <Route element={<ProtectedRoute allowedRoles={["super_admin", "president"]} />}>
+                <Route path="/admin/collectifs" element={<CollectifsAdminPage />} />
               </Route>
             </Route>
           </Routes>

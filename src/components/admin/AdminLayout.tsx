@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   CalendarDays,
   Users,
+  Users2,
   Megaphone,
   CalendarRange,
   LogOut,
@@ -25,6 +26,7 @@ const navItems: NavItem[] = [
   { to: "/admin/users", label: "Utilisateurs", icon: Users, roles: ["super_admin"] },
   { to: "/admin/ticker", label: "Bandeau com", icon: Megaphone, roles: ["super_admin", "president", "evenements_com"] },
   { to: "/admin/evenements", label: "Événements", icon: CalendarRange, roles: ["super_admin", "president", "evenements_com"] },
+  { to: "/admin/collectifs", label: "Collectifs", icon: Users2, roles: ["super_admin", "president"] },
 ];
 
 function NavItems({ onClose }: { onClose?: () => void }) {

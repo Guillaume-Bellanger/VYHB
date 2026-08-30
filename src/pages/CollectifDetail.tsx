@@ -1,37 +1,43 @@
 import { motion } from "framer-motion";
 import { Link, useParams, Navigate } from "react-router-dom";
-import { MapPin, Clock, User, ChevronRight, ArrowLeft, Star, Zap, Trophy, Flame, Crown, Users, Heart, Sparkles } from "lucide-react";
-import { collectifs } from "@/data/collectifs";
+import { MapPin, Clock, User, ChevronRight, ArrowLeft } from "lucide-react";
+import { useCollectifsPublic } from "@/hooks/useCollectifs";
+import { getCollectifIcon, getCollectifGradient } from "@/data/collectifStyles";
+import { formatHoraire, formatLieux } from "@/lib/collectifFormat";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const collectifIcons: Record<string, React.ElementType> = {
-  "baby-hand": Heart,
-  "-7": Star,
-  "-9-11": Zap,
-  "-11f": Sparkles,
-  "-13m": Flame,
-  "-15-18f": Flame,
-  "-15-18m": Trophy,
-  "seniors-feminines": Crown,
-  "seniors-masculins": Trophy,
-  "loisirs": Users,
-};
+function CollectifDetailSkeleton() {
+  return (
+    <div className="container-narrow px-4 md:px-6 py-16 max-w-3xl">
+      <Skeleton className="h-10 w-48 mb-8 bg-white/[0.04]" />
+      <Skeleton className="h-24 w-full mb-8 bg-white/[0.04]" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-32 rounded-2xl bg-white/[0.04]" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const CollectifDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { data: collectifs = [], isLoading } = useCollectifsPublic();
   const collectif = collectifs.find((c) => c.slug === slug);
 
+  if (isLoading) return <CollectifDetailSkeleton />;
   if (!collectif) return <Navigate to="/collectifs" replace />;
 
-  const Icon = collectifIcons[collectif.slug] ?? Star;
+  const Icon = getCollectifIcon(collectif.slug);
 
   return (
     <>
       {/* Hero avec gradient collectif */}
-      <section className={`relative min-h-[40vh] flex items-end pb-12 bg-gradient-to-br ${collectif.gradient} overflow-hidden`}>
-        {collectif.photo && (
+      <section className={`relative min-h-[40vh] flex items-end pb-12 bg-gradient-to-br ${getCollectifGradient(collectif.slug)} overflow-hidden`}>
+        {collectif.photo_url && (
           <img
-            src={collectif.photo}
-            alt={collectif.name}
+            src={collectif.photo_url}
+            alt={collectif.nom}
             className="absolute inset-0 w-full h-full object-cover"
             loading="lazy"
           />
@@ -62,12 +68,12 @@ const CollectifDetail = () => {
             </div>
             <div>
               <span className="inline-block rounded-full bg-white/15 backdrop-blur-sm px-3 py-1 text-xs font-display font-bold uppercase tracking-wider text-white/80 mb-3">
-                {collectif.age}
+                {collectif.tranche_age}
               </span>
               <h1 className="font-display font-black text-4xl md:text-5xl text-white leading-tight mb-1">
-                {collectif.name}
+                {collectif.nom}
               </h1>
-              <p className="text-white/60 text-base font-medium">{collectif.level}</p>
+              <p className="text-white/60 text-base font-medium">{collectif.sous_titre}</p>
             </div>
           </motion.div>
         </div>
@@ -83,7 +89,7 @@ const CollectifDetail = () => {
             className="space-y-8"
           >
             {/* Description */}
-            <p className="text-white/55 text-lg leading-relaxed">{collectif.desc}</p>
+            <p className="text-white/55 text-lg leading-relaxed">{collectif.description}</p>
 
             {/* Infos pratiques */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -93,11 +99,11 @@ const CollectifDetail = () => {
                     <User size={16} className="text-orange-400" />
                   </div>
                   <span className="font-display font-bold text-xs text-white/60 uppercase tracking-wider">
-                    Entraîneur{collectif.coaches.length > 1 ? "s" : ""}
+                    Entraîneur{collectif.entraineurs.length > 1 ? "s" : ""}
                   </span>
                 </div>
                 <ul className="space-y-1">
-                  {collectif.coaches.map((coach, i) => (
+                  {collectif.entraineurs.map((coach, i) => (
                     <li key={i} className="text-sm text-white font-medium">{coach}</li>
                   ))}
                 </ul>
@@ -111,8 +117,8 @@ const CollectifDetail = () => {
                   <span className="font-display font-bold text-xs text-white/60 uppercase tracking-wider">Horaires</span>
                 </div>
                 <ul className="space-y-1">
-                  {collectif.schedule.map((slot, i) => (
-                    <li key={i} className="text-sm text-white font-medium">{slot}</li>
+                  {collectif.horaires.map((h, i) => (
+                    <li key={i} className="text-sm text-white font-medium">{formatHoraire(h)}</li>
                   ))}
                 </ul>
               </div>
@@ -124,7 +130,7 @@ const CollectifDetail = () => {
                   </div>
                   <span className="font-display font-bold text-xs text-white/60 uppercase tracking-wider">Lieu</span>
                 </div>
-                <p className="text-sm text-white font-medium leading-relaxed" style={{ whiteSpace: "pre-line" }}>{collectif.location}</p>
+                <p className="text-sm text-white font-medium leading-relaxed" style={{ whiteSpace: "pre-line" }}>{formatLieux(collectif.lieux)}</p>
               </div>
             </div>
 

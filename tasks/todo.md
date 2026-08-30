@@ -67,6 +67,23 @@ _Branche : `feat/refonte-contenu-seo`_
 
 ---
 
+## PHASE 17 – CMS COLLECTIFS ÉDITABLES DEPUIS L'ADMIN
+
+- [x] `supabase/migrations/014_collectifs.sql` — table `collectifs` (horaires/lieux JSONB, entraineurs TEXT[]), RLS (`get_my_role() IN ('super_admin','president')`), trigger `set_updated_at()`, bucket Storage `collectifs` + policies, INSERT des 10 lignes reprises exactement de `src/data/collectifs.ts` (ordre 0 à 9)
+- [ ] **ACTION MANUELLE** : exécuter `014_collectifs.sql` dans le Supabase SQL Editor, puis vérifier dans le Dashboard que le bucket Storage `collectifs` est bien créé et public
+- [x] `src/types/collectif.ts` — types `Collectif`, `Horaire`, `Lieu`
+- [x] `src/hooks/useCollectifs.ts` — pattern fetch natif (comme `useMatches.ts`) : `useCollectifsPublic`, `useCollectifsAdmin`, `useCreateCollectif`, `useUpdateCollectif`, `useDeleteCollectif`, `useReorderCollectifs`
+- [x] `src/lib/collectifFormat.ts` — `formatHoraire(s)`/`formatLieux` pour reconstruire l'affichage texte à partir des données structurées
+- [x] `src/data/collectifStyles.ts` — icônes + dégradés par slug (détails visuels non éditables, extraits de `Collectifs.tsx`/`CollectifDetail.tsx`, fallback par défaut pour les nouvelles fiches)
+- [x] `src/pages/admin/CollectifsAdminPage.tsx` — CRUD complet : liste (miniature, réordonnancement ↑↓, toggle actif, éditer, supprimer) + formulaire (slug auto-généré depuis le nom, horaires/lieux en `useFieldArray`, entraîneurs séparés par virgules, upload photo vers le bucket `collectifs`)
+- [x] `src/App.tsx` — route `/admin/collectifs` (rôles `super_admin` + `president` uniquement)
+- [x] `src/components/admin/AdminLayout.tsx` — entrée "Collectifs" dans la sidebar
+- [x] `src/pages/Collectifs.tsx`, `src/pages/CollectifDetail.tsx`, `src/pages/Registration.tsx` — branchés sur `useCollectifsPublic()` avec skeletons de chargement (design strictement conservé)
+- [x] `src/data/collectifs.ts` — conservé sans modification (fallback/référence, non importé par les pages publiques)
+- [ ] Vérification visuelle post-exécution SQL : `/collectifs`, `/collectifs/:slug`, `/inscriptions`, `/admin/collectifs`
+
+---
+
 ## ÉTAT GLOBAL
 - [x] Phase 0 – Audit initial
 - [x] Phase 1 – Prérequis techniques SEO

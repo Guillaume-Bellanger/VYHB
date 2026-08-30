@@ -7,6 +7,9 @@ import {
 import SEO from "@/components/SEO";
 import Accordion from "@/components/Accordion";
 import { reglementInterieur } from "@/data/reglementInterieur";
+import { useCollectifsPublic } from "@/hooks/useCollectifs";
+import { formatHoraires, formatLieux } from "@/lib/collectifFormat";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const tarifs = [
   { category: "Baby Hand / -7", price: "110 €", accent: "from-yellow-500/20 to-amber-600/10" },
@@ -16,18 +19,6 @@ const tarifs = [
   { category: "Loisirs", price: "120 €", accent: "from-indigo-500/20 to-blue-600/10" },
 ];
 
-const planning = [
-  { categorie: "Baby Hand (3–4 ans)", horaires: "Samedi 10h–11h", lieu: "Espace Rochopt, Boussy-Saint-Antoine" },
-  { categorie: "-7 (5–6 ans)", horaires: "Samedi 11h–12h", lieu: "Espace Rochopt, Boussy-Saint-Antoine" },
-  { categorie: "-9/-11 (7–10 ans)", horaires: "Mercredi 16h30–18h", lieu: "Gymnase Fontaine-Cornaille, Quincy-sous-Sénart" },
-  { categorie: "-11F (9–10 ans)", horaires: "Mardi 17h–18h30", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
-  { categorie: "-13M (11–12 ans)", horaires: "Mardi 17h–18h30", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
-  { categorie: "-15/-18M", horaires: "Mardi 18h30–20h\nJeudi 18h30–20h", lieu: "Mardi : La Halle des Sports, Boussy-Saint-Antoine\nJeudi : Gymnase des Antonins, Boussy-Saint-Antoine" },
-  { categorie: "-15/-18F", horaires: "Mardi 18h15–19h45\nJeudi 18h30–20h", lieu: "Gymnase des Antonins, Boussy-Saint-Antoine" },
-  { categorie: "Seniors Féminines", horaires: "Lundi 20h–22h\nMercredi 20h–22h", lieu: "Lundi : Salle La Palestre, Crosne\nMercredi : La Halle des Sports, Boussy-Saint-Antoine" },
-  { categorie: "Seniors Masculins", horaires: "Mardi 20h–22h\nJeudi 20h–22h", lieu: "Halle des Sports, Boussy-Saint-Antoine" },
-  { categorie: "Loisirs", horaires: "Lundi 20h30–22h30\nVendredi 20h–22h", lieu: "Lundi : Gymnase Fontaine Cornaille, Quincy-sous-Sénart\nVendredi : La Halle des Sports, Boussy-Saint-Antoine" },
-];
 
 const docsMineurs = [
   "Certificat médical de non contre-indication à la pratique du handball (1ère inscription uniquement, ou si réponse OUI au QS-SPORT)",
@@ -115,7 +106,25 @@ const ContactEmailBlock = () => (
   </div>
 );
 
-const Registration = () => (
+function PlanningSkeleton() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 10 }).map((_, i) => (
+        <Skeleton key={i} className="h-14 rounded-xl bg-white/[0.04]" />
+      ))}
+    </div>
+  );
+}
+
+const Registration = () => {
+  const { data: collectifs = [], isLoading: collectifsLoading } = useCollectifsPublic();
+  const planning = collectifs.map((c) => ({
+    categorie: `${c.nom} (${c.tranche_age})`,
+    horaires: formatHoraires(c.horaires),
+    lieu: formatLieux(c.lieux),
+  }));
+
+  return (
   <>
     <SEO
       title="Inscriptions 2026/2027"
@@ -157,41 +166,47 @@ const Registration = () => (
         >
           <SectionHeader icon={Calendar} title="Planning des entraînements" />
 
-          {/* Mobile cards — lieu visible */}
-          <div className="sm:hidden space-y-2">
-            {planning.map((row, i) => (
-              <div key={i} className="glass-premium rounded-xl p-4 border border-white/[0.06]">
-                <p className="font-display font-semibold text-white text-sm">{row.categorie}</p>
-                <p className="text-sm text-orange-400 font-medium mt-1 whitespace-pre-line">{row.horaires}</p>
-                <p className="text-xs text-white/55 mt-0.5 whitespace-pre-line">{row.lieu}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Desktop table */}
-          <div className="hidden sm:block rounded-2xl overflow-hidden border border-white/[0.07]">
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ background: "rgba(255,255,255,0.04)" }}>
-                  <th className="text-left px-6 py-4 font-display font-bold text-white/60 text-xs uppercase tracking-[0.15em]">Catégorie</th>
-                  <th className="text-left px-6 py-4 font-display font-bold text-white/60 text-xs uppercase tracking-[0.15em]">Horaires</th>
-                  <th className="text-left px-6 py-4 font-display font-bold text-white/60 text-xs uppercase tracking-[0.15em]">Lieu</th>
-                </tr>
-              </thead>
-              <tbody>
+          {collectifsLoading ? (
+            <PlanningSkeleton />
+          ) : (
+            <>
+              {/* Mobile cards — lieu visible */}
+              <div className="sm:hidden space-y-2">
                 {planning.map((row, i) => (
-                  <tr
-                    key={i}
-                    className="border-t border-white/[0.04] hover:bg-white/[0.02] transition-colors"
-                  >
-                    <td className="px-6 py-4 font-medium text-white">{row.categorie}</td>
-                    <td className="px-6 py-4 text-orange-400 font-display font-semibold whitespace-pre-line">{row.horaires}</td>
-                    <td className="px-6 py-4 text-white/40 whitespace-pre-line">{row.lieu}</td>
-                  </tr>
+                  <div key={i} className="glass-premium rounded-xl p-4 border border-white/[0.06]">
+                    <p className="font-display font-semibold text-white text-sm">{row.categorie}</p>
+                    <p className="text-sm text-orange-400 font-medium mt-1 whitespace-pre-line">{row.horaires}</p>
+                    <p className="text-xs text-white/55 mt-0.5 whitespace-pre-line">{row.lieu}</p>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </div>
+
+              {/* Desktop table */}
+              <div className="hidden sm:block rounded-2xl overflow-hidden border border-white/[0.07]">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+                      <th className="text-left px-6 py-4 font-display font-bold text-white/60 text-xs uppercase tracking-[0.15em]">Catégorie</th>
+                      <th className="text-left px-6 py-4 font-display font-bold text-white/60 text-xs uppercase tracking-[0.15em]">Horaires</th>
+                      <th className="text-left px-6 py-4 font-display font-bold text-white/60 text-xs uppercase tracking-[0.15em]">Lieu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {planning.map((row, i) => (
+                      <tr
+                        key={i}
+                        className="border-t border-white/[0.04] hover:bg-white/[0.02] transition-colors"
+                      >
+                        <td className="px-6 py-4 font-medium text-white">{row.categorie}</td>
+                        <td className="px-6 py-4 text-orange-400 font-display font-semibold whitespace-pre-line">{row.horaires}</td>
+                        <td className="px-6 py-4 text-white/40 whitespace-pre-line">{row.lieu}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </motion.div>
 
         {/* ─── Tarifs ─── */}
@@ -343,6 +358,7 @@ const Registration = () => (
       </div>
     </section>
   </>
-);
+  );
+};
 
 export default Registration;
