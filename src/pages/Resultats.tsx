@@ -10,9 +10,6 @@ import type { Match } from "@/types/database";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 
@@ -230,21 +227,79 @@ function SeasonGroup({
   );
 }
 
+function CategoryFilterBar({
+  value,
+  onChange,
+  hasResults,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  hasResults: (cat: string) => boolean;
+}) {
+  return (
+    <div
+      className="flex gap-1.5 overflow-x-auto scrollbar-none mb-4 pb-1"
+      style={{
+        WebkitMaskImage: "linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent)",
+        maskImage: "linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent)",
+      }}
+    >
+      <button
+        onClick={() => onChange("tous")}
+        className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+          value === "tous"
+            ? "bg-orange-500/15 text-orange-400"
+            : "text-white/45 hover:text-white/70 hover:bg-white/[0.04]"
+        }`}
+      >
+        Tous
+      </button>
+      {MATCH_CATEGORIES.map((cat) => {
+        const active = value === cat;
+        const empty = !hasResults(cat);
+        return (
+          <button
+            key={cat}
+            onClick={() => onChange(cat)}
+            className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+              active
+                ? "bg-orange-500/15 text-orange-400"
+                : empty
+                ? "text-white/15 hover:text-white/25"
+                : "text-white/45 hover:text-white/70 hover:bg-white/[0.04]"
+            }`}
+          >
+            {cat}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────
 
 export default function Resultats() {
   const [tab, setTab] = useState<string>("resultats");
-  const [historiqueCategorie, setHistoriqueCategorie] = useState<string>("toutes");
+  const [resultatsCategorie, setResultatsCategorie] = useState<string>("tous");
+  const [historiqueCategorie, setHistoriqueCategorie] = useState<string>("tous");
   const [resumeMatch, setResumeMatch] = useState<Match | null>(null);
 
   const { data, isLoading, isError } = usePublicMatches();
 
   const now = new Date();
   const publies = data?.filter((m) => m.statut === "publie") ?? [];
-  const upcoming = (data?.filter((m) => m.statut === "prevu" && new Date(m.date) > now) ?? [])
+  const allUpcoming = (data?.filter((m) => m.statut === "prevu" && new Date(m.date) > now) ?? [])
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const upcoming = resultatsCategorie === "tous"
+    ? allUpcoming
+    : allUpcoming.filter((m) => m.categorie === resultatsCategorie);
 
-  // Derniers résultats : 2 matchs les plus récents par catégorie, catégories vides masquées
+  function hasResults(cat: string): boolean {
+    return publies.some((m) => m.categorie === cat);
+  }
+
+  // Derniers résultats (mode "tous") : 2 matchs les plus récents par catégorie, catégories vides masquées
   const derniersParCategorie = MATCH_CATEGORIES
     .map((categorie) => ({
       categorie,
@@ -255,9 +310,17 @@ export default function Resultats() {
     }))
     .filter((g) => g.matches.length > 0);
 
+  // Derniers résultats (catégorie précise sélectionnée)
+  const resultatsCategorieMatches = resultatsCategorie === "tous"
+    ? []
+    : publies
+        .filter((m) => m.categorie === resultatsCategorie)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 2);
+
   // Historique : tous les matchs publiés, filtre catégorie, du plus ancien au plus récent
   const historiqueMatches = (
-    historiqueCategorie === "toutes"
+    historiqueCategorie === "tous"
       ? publies
       : publies.filter((m) => m.categorie === historiqueCategorie)
   ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -331,7 +394,11 @@ export default function Resultats() {
                 </h2>
                 {isLoading && <MatchSkeletons />}
                 {!isLoading && !isError && upcoming.length === 0 && (
-                  <p className="text-white/25 text-sm py-6 text-center">Aucun match à venir.</p>
+                  <p className="text-white/25 text-sm py-6 text-center">
+                    {resultatsCategorie === "tous"
+                      ? "Aucun match à venir."
+                      : `Aucun match à venir pour ${resultatsCategorie}.`}
+                  </p>
                 )}
                 {!isLoading && upcoming.length > 0 && (
                   <div className="space-y-3">
@@ -348,14 +415,15 @@ export default function Resultats() {
                   <Trophy size={18} className="text-orange-400" />
                   Derniers résultats
                 </h2>
+                <CategoryFilterBar value={resultatsCategorie} onChange={setResultatsCategorie} hasResults={hasResults} />
                 {isLoading && <MatchSkeletons />}
                 {!isLoading && isError && (
                   <p className="text-white/25 text-sm py-6 text-center">Impossible de charger les résultats.</p>
                 )}
-                {!isLoading && !isError && derniersParCategorie.length === 0 && (
+                {!isLoading && !isError && resultatsCategorie === "tous" && derniersParCategorie.length === 0 && (
                   <p className="text-white/25 text-sm py-6 text-center">Aucun résultat publié.</p>
                 )}
-                {!isLoading && !isError && derniersParCategorie.length > 0 && (
+                {!isLoading && !isError && resultatsCategorie === "tous" && derniersParCategorie.length > 0 && (
                   <div className="space-y-8">
                     {derniersParCategorie.map(({ categorie, matches }) => (
                       <CategoryResultsGroup
@@ -367,28 +435,26 @@ export default function Resultats() {
                     ))}
                   </div>
                 )}
+                {!isLoading && !isError && resultatsCategorie !== "tous" && resultatsCategorieMatches.length === 0 && (
+                  <p className="text-white/25 text-sm py-6 text-center">Aucun résultat publié pour {resultatsCategorie}.</p>
+                )}
+                {!isLoading && !isError && resultatsCategorie !== "tous" && resultatsCategorieMatches.length > 0 && (
+                  <div className="space-y-3">
+                    {resultatsCategorieMatches.map((m, i) => (
+                      <ResultCard key={m.id} match={m} index={i} onResume={setResumeMatch} />
+                    ))}
+                  </div>
+                )}
               </div>
             </TabsContent>
 
             {/* ── Onglet Historique ── */}
-            <TabsContent value="historique" className="mt-0 space-y-8">
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <h2 className="font-display font-black text-white text-lg flex items-center gap-2">
-                  <History size={18} className="text-orange-400" />
-                  Historique des matchs
-                </h2>
-                <Select value={historiqueCategorie} onValueChange={setHistoriqueCategorie}>
-                  <SelectTrigger className="w-full sm:w-56 bg-white/[0.04] border-white/[0.10] text-white">
-                    <SelectValue placeholder="Catégorie" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="toutes">Toutes catégories</SelectItem>
-                    {MATCH_CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <TabsContent value="historique" className="mt-0 space-y-4">
+              <h2 className="font-display font-black text-white text-lg flex items-center gap-2">
+                <History size={18} className="text-orange-400" />
+                Historique des matchs
+              </h2>
+              <CategoryFilterBar value={historiqueCategorie} onChange={setHistoriqueCategorie} hasResults={hasResults} />
 
               {isLoading && <MatchSkeletons />}
               {!isLoading && isError && (
@@ -396,7 +462,7 @@ export default function Resultats() {
               )}
               {!isLoading && !isError && historiqueParSaison.length === 0 && (
                 <p className="text-white/25 text-sm py-6 text-center">
-                  {historiqueCategorie === "toutes"
+                  {historiqueCategorie === "tous"
                     ? "Aucun résultat publié."
                     : `Aucun match publié pour ${historiqueCategorie}.`}
                 </p>
