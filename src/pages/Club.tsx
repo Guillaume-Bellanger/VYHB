@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
-import { bureau, responsablesPoles } from "@/data/bureau";
-import { entraineurs as entraineursData } from "@/data/entraineurs";
+import { useEncadrementPublic } from "@/hooks/useEncadrement";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Clock, Users, User, GraduationCap,
   Award, ClipboardList, BookOpen,
@@ -68,6 +68,11 @@ const Club = () => {
   const rawTab = searchParams.get("tab");
   const initialTab: TabValue = VALID_TABS.includes(rawTab as TabValue) ? (rawTab as TabValue) : "historique";
   const [activeTab, setActiveTab] = useState<TabValue>(initialTab);
+
+  const { data: encadrement = [], isLoading: encadrementLoading } = useEncadrementPublic();
+  const entraineursData = encadrement.filter((p) => p.type === "entraineur");
+  const bureau = encadrement.filter((p) => p.type === "bureau");
+  const responsablesPoles = encadrement.filter((p) => p.type === "pole");
 
   useEffect(() => {
     const t = searchParams.get("tab");
@@ -248,37 +253,45 @@ const Club = () => {
                       <h3 className="font-display font-black text-2xl text-white mb-2">Le Bureau</h3>
                       <p className="text-white/40 text-sm">Bénévoles élus lors de l'assemblée générale annuelle.</p>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      {bureau.map((person, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: i * 0.07 }}
-                          className="glass-premium rounded-2xl p-6 flex flex-col items-center text-center border border-white/[0.06] hover:border-white/[0.14] hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)] transition-all duration-300"
-                        >
-                          {person.featured && person.avatarUrl ? (
-                            <>
-                              <img
-                                src={person.avatarUrl}
-                                alt={person.prenom}
-                                className="w-14 h-14 rounded-2xl mb-4 object-cover"
-                                loading="lazy"
-                                width={56}
-                                height={56}
-                              />
-                              <p className="font-display font-bold text-white text-sm mb-1">{person.prenom}</p>
-                            </>
-                          ) : (
-                            <div className="w-14 h-14 rounded-2xl mb-4 bg-white/[0.05] flex items-center justify-center">
-                              <User size={24} className="text-white/20" />
-                            </div>
-                          )}
-                          <span className="eyebrow text-[10px]">{person.role}</span>
-                        </motion.div>
-                      ))}
-                    </div>
+                    {encadrementLoading ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        {[1, 2, 3, 4].map((i) => (
+                          <Skeleton key={i} className="h-36 rounded-2xl bg-white/[0.04]" />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        {bureau.map((person, i) => (
+                          <motion.div
+                            key={person.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: i * 0.07 }}
+                            className="glass-premium rounded-2xl p-6 flex flex-col items-center text-center border border-white/[0.06] hover:border-white/[0.14] hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)] transition-all duration-300"
+                          >
+                            {person.photo_url ? (
+                              <>
+                                <img
+                                  src={person.photo_url}
+                                  alt={person.prenom ?? ""}
+                                  className="w-14 h-14 rounded-2xl mb-4 object-cover"
+                                  loading="lazy"
+                                  width={56}
+                                  height={56}
+                                />
+                                <p className="font-display font-bold text-white text-sm mb-1">{person.prenom}</p>
+                              </>
+                            ) : (
+                              <div className="w-14 h-14 rounded-2xl mb-4 bg-white/[0.05] flex items-center justify-center">
+                                <User size={24} className="text-white/20" />
+                              </div>
+                            )}
+                            <span className="eyebrow text-[10px]">{person.role}</span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* ── Responsables de Pôles ── */}
@@ -286,23 +299,47 @@ const Club = () => {
                     <div className="text-center mb-8">
                       <h3 className="font-display font-black text-2xl text-white mb-2">Responsables de Pôles</h3>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-sm mx-auto sm:max-w-none">
-                      {responsablesPoles.map((person, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: i * 0.07 }}
-                          className="glass-premium rounded-2xl p-6 flex flex-col items-center text-center border border-white/[0.06] hover:border-white/[0.14] transition-all duration-300"
-                        >
-                          <div className="w-14 h-14 rounded-2xl mb-4 bg-white/[0.05] flex items-center justify-center">
-                            <User size={24} className="text-white/20" />
-                          </div>
-                          <span className="eyebrow text-[10px]">{person.role}</span>
-                        </motion.div>
-                      ))}
-                    </div>
+                    {encadrementLoading ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-sm mx-auto sm:max-w-none">
+                        {[1, 2].map((i) => (
+                          <Skeleton key={i} className="h-32 rounded-2xl bg-white/[0.04]" />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-sm mx-auto sm:max-w-none">
+                        {responsablesPoles.map((person, i) => (
+                          <motion.div
+                            key={person.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: i * 0.07 }}
+                            className="glass-premium rounded-2xl p-6 flex flex-col items-center text-center border border-white/[0.06] hover:border-white/[0.14] transition-all duration-300"
+                          >
+                            {person.photo_url ? (
+                              <>
+                                <img
+                                  src={person.photo_url}
+                                  alt={person.prenom ?? ""}
+                                  className="w-14 h-14 rounded-2xl mb-4 object-cover"
+                                  loading="lazy"
+                                  width={56}
+                                  height={56}
+                                />
+                                {person.prenom && (
+                                  <p className="font-display font-bold text-white text-sm mb-1">{person.prenom}</p>
+                                )}
+                              </>
+                            ) : (
+                              <div className="w-14 h-14 rounded-2xl mb-4 bg-white/[0.05] flex items-center justify-center">
+                                <User size={24} className="text-white/20" />
+                              </div>
+                            )}
+                            <span className="eyebrow text-[10px]">{person.role}</span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* CA note */}
@@ -339,29 +376,43 @@ const Club = () => {
                     <span className="w-1 h-5 rounded-full shrink-0" style={{ background: "var(--gradient-accent)" }} />
                     Entraîneurs
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-14">
-                    {entraineursData.map((person, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 15 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.06 }}
-                        className="glass-premium rounded-2xl p-5 flex flex-col items-center text-center border border-white/[0.06] hover:border-orange-500/20 transition-all duration-300"
-                      >
-                        <img
-                          src={person.avatarUrl}
-                          alt={person.prenom}
-                          className="w-12 h-12 rounded-xl mb-3 object-cover"
-                          loading="lazy"
-                          width={48}
-                          height={48}
-                        />
-                        <p className="font-display font-bold text-white text-sm">{person.prenom}</p>
-                        <p className="text-[11px] text-white/40 mt-1 leading-tight">{person.role}</p>
-                      </motion.div>
-                    ))}
-                  </div>
+                  {encadrementLoading ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-14">
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                        <Skeleton key={i} className="h-28 rounded-2xl bg-white/[0.04]" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-14">
+                      {entraineursData.map((person, i) => (
+                        <motion.div
+                          key={person.id}
+                          initial={{ opacity: 0, y: 15 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.06 }}
+                          className="glass-premium rounded-2xl p-5 flex flex-col items-center text-center border border-white/[0.06] hover:border-orange-500/20 transition-all duration-300"
+                        >
+                          {person.photo_url ? (
+                            <img
+                              src={person.photo_url}
+                              alt={person.prenom ?? ""}
+                              className="w-12 h-12 rounded-xl mb-3 object-cover"
+                              loading="lazy"
+                              width={48}
+                              height={48}
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-xl mb-3 bg-white/[0.05] flex items-center justify-center">
+                              <User size={20} className="text-white/20" />
+                            </div>
+                          )}
+                          <p className="font-display font-bold text-white text-sm">{person.prenom}</p>
+                          <p className="text-[11px] text-white/40 mt-1 leading-tight">{(person.categories ?? []).join(" / ")}</p>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
 
                   <h3 className="font-display font-bold text-base text-white mb-5 flex items-center gap-3">
                     <span className="w-1 h-5 rounded-full bg-emerald-500 shrink-0" />

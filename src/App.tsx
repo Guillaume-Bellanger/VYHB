@@ -29,6 +29,7 @@ import UsersPage from "./pages/admin/UsersPage";
 import TickerPage from "./pages/admin/TickerPage";
 import EvenementsPage from "./pages/admin/EvenementsPage";
 import CollectifsAdminPage from "./pages/admin/CollectifsAdminPage";
+import EncadrementPage from "./pages/admin/EncadrementPage";
 import { useAuthStore } from "./stores/authStore";
 
 const queryClient = new QueryClient();
@@ -96,6 +97,7 @@ const App = () => (
               {/* super_admin + president */}
               <Route element={<ProtectedRoute allowedRoles={["super_admin", "president"]} />}>
                 <Route path="/admin/collectifs" element={<CollectifsAdminPage />} />
+                <Route path="/admin/encadrement" element={<EncadrementPage />} />
               </Route>
             </Route>
           </Routes>

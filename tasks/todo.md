@@ -97,6 +97,23 @@ _Branche : `feat/refonte-contenu-seo`_
 
 ---
 
+## PHASE 19 – CMS ENCADREMENT (ENTRAÎNEURS + BUREAU) ÉDITABLE DEPUIS L'ADMIN
+
+- [x] `supabase/migrations/015_encadrement.sql` — table unique `encadrement` (`type` 'entraineur'|'bureau'|'pole' avec CHECK, `categories` TEXT[] pour les entraîneurs), RLS (`get_my_role() IN ('super_admin','president')`), trigger `set_updated_at()`, policies `storage.objects` pour le bucket `encadrement` (bucket créé manuellement côté Dashboard, pas de INSERT INTO storage.buckets), INSERT des 12 entraîneurs + 4 membres du bureau + 2 responsables de pôles repris de `src/data/entraineurs.ts`/`bureau.ts` (`ordre` scopé par section)
+  - **Écart assumé** : `prenom` rendu NULLABLE (pas NOT NULL comme demandé) — les postes vacants du bureau ("Vice-Président", "Secrétaire") et les pôles n'ont pas de titulaire dans les données actuelles
+  - **Écart assumé** : catégories des entraîneurs dérivées telles quelles du champ `role` texte existant (split sur `" / "`) — certaines valeurs ("-15M/-18M", "-18F") ne correspondent à aucune catégorie canonique de `src/data/categories.ts` mais sont conservées sans correction
+- [ ] **ACTION MANUELLE** : exécuter `015_encadrement.sql` dans le Supabase SQL Editor (bucket Storage `encadrement` déjà pris en charge côté Dashboard)
+- [x] `src/types/encadrement.ts` — types `Encadrement`, `EncadrementType`
+- [x] `src/hooks/useEncadrement.ts` — pattern fetch natif (comme `useCollectifs.ts`) : `useEncadrementPublic(type?)`, `useEncadrementAdmin`, `useCreateEncadrement`, `useUpdateEncadrement`, `useDeleteEncadrement`, `useReorderEncadrement`
+- [x] `src/pages/admin/EncadrementPage.tsx` — 3 sections (Entraîneurs / Le Bureau / Responsables de Pôles), chacune avec sa propre liste (miniature, ↑↓, toggle actif, éditer, supprimer, "+ Ajouter"). Formulaire partagé : type (Select), prénom, nom, rôle, catégories (multi-select chips alimenté par `MATCH_CATEGORIES`, affiché seulement si type = entraîneur, avec fallback pour préserver d'éventuelles valeurs historiques hors liste comme "Baby"), photo (upload bucket `encadrement`), actif
+- [x] `src/App.tsx` — route `/admin/encadrement` (rôles `super_admin` + `president`)
+- [x] `src/components/admin/AdminLayout.tsx` — entrée "Encadrement" dans la sidebar
+- [x] `src/pages/Club.tsx` — branché sur un seul `useEncadrementPublic()` filtré côté client par type (au lieu de 3 fetches), skeletons pendant le chargement. Comportement photo unifié : Bureau ET Responsables de Pôles affichent désormais une photo si `photo_url` est renseigné (avant, les pôles affichaient toujours un placeholder, quelle que soit la donnée — `featured` de l'ancien `bureau.ts` correspondait en réalité exactement à "a une photo")
+- [x] `src/data/entraineurs.ts`, `src/data/bureau.ts` — conservés sans modification (fallback/référence, non importés par les pages publiques)
+- [ ] Vérification visuelle post-exécution SQL : `/club` (onglets Organisation + Entraîneurs), `/admin/encadrement`
+
+---
+
 ## ÉTAT GLOBAL
 - [x] Phase 0 – Audit initial
 - [x] Phase 1 – Prérequis techniques SEO

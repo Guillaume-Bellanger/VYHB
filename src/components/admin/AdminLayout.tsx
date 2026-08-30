@@ -7,6 +7,7 @@ import {
   Users2,
   Megaphone,
   CalendarRange,
+  Contact,
   LogOut,
   Menu,
   X,
@@ -27,6 +28,7 @@ const navItems: NavItem[] = [
   { to: "/admin/ticker", label: "Bandeau com", icon: Megaphone, roles: ["super_admin", "president", "evenements_com"] },
   { to: "/admin/evenements", label: "Événements", icon: CalendarRange, roles: ["super_admin", "president", "evenements_com"] },
   { to: "/admin/collectifs", label: "Collectifs", icon: Users2, roles: ["super_admin", "president"] },
+  { to: "/admin/encadrement", label: "Encadrement", icon: Contact, roles: ["super_admin", "president"] },
 ];
 
 function NavItems({ onClose }: { onClose?: () => void }) {
