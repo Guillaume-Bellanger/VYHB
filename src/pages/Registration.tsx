@@ -9,14 +9,16 @@ import Accordion from "@/components/Accordion";
 import { reglementInterieur } from "@/data/reglementInterieur";
 import { useCollectifsPublic } from "@/hooks/useCollectifs";
 import { formatHoraires, formatLieux } from "@/lib/collectifFormat";
+import { useTarifs } from "@/hooks/useTarifs";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const tarifs = [
-  { category: "Baby Hand / -7", price: "110 €", accent: "from-yellow-500/20 to-amber-600/10" },
-  { category: "-9 / -11 / -13", price: "120 €", accent: "from-lime-500/20 to-green-600/10" },
-  { category: "-15 / -18", price: "130 €", accent: "from-violet-500/20 to-purple-600/10" },
-  { category: "Seniors Féminines / Seniors Masculins", price: "150 €", accent: "from-orange-500/20 to-red-600/10" },
-  { category: "Loisirs", price: "120 €", accent: "from-indigo-500/20 to-blue-600/10" },
+// Dégradé décoratif par ligne — cyclique, pas de correspondance figée avec un libellé
+const TARIF_ACCENTS = [
+  "from-yellow-500/20 to-amber-600/10",
+  "from-lime-500/20 to-green-600/10",
+  "from-violet-500/20 to-purple-600/10",
+  "from-orange-500/20 to-red-600/10",
+  "from-indigo-500/20 to-blue-600/10",
 ];
 
 
@@ -124,6 +126,9 @@ const Registration = () => {
     lieu: formatLieux(c.lieux),
   }));
 
+  const { data: tarifs = [], isLoading: tarifsLoading } = useTarifs();
+  const saisonTarifs = tarifs[0]?.saison;
+
   return (
   <>
     <SEO
@@ -215,24 +220,37 @@ const Registration = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <SectionHeader icon={Euro} title="Tarifs saison 2026/2027" accent="text-emerald-400" bg="bg-emerald-500/10" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
-            {tarifs.map((t, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -12 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07 }}
-                className="relative rounded-2xl p-5 flex items-center justify-between overflow-hidden border border-white/[0.06] hover:border-white/[0.12] transition-all"
-                style={{ background: "rgba(255,255,255,0.02)" }}
-              >
-                <div className={`absolute inset-0 bg-gradient-to-r ${t.accent} opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
-                <span className="relative font-medium text-white/80 text-sm mr-3">{t.category}</span>
-                <span className="relative font-display font-black text-xl text-orange-400 shrink-0">{t.price}</span>
-              </motion.div>
-            ))}
-          </div>
+          <SectionHeader
+            icon={Euro}
+            title={saisonTarifs ? `Tarifs saison ${saisonTarifs}` : "Tarifs"}
+            accent="text-emerald-400"
+            bg="bg-emerald-500/10"
+          />
+          {tarifsLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-[68px] rounded-2xl bg-white/[0.04]" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+              {tarifs.map((t, i) => (
+                <motion.div
+                  key={t.id}
+                  initial={{ opacity: 0, x: -12 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.07 }}
+                  className="relative rounded-2xl p-5 flex items-center justify-between overflow-hidden border border-white/[0.06] hover:border-white/[0.12] transition-all"
+                  style={{ background: "rgba(255,255,255,0.02)" }}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-r ${TARIF_ACCENTS[i % TARIF_ACCENTS.length]} opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
+                  <span className="relative font-medium text-white/80 text-sm mr-3">{t.libelle}</span>
+                  <span className="relative font-display font-black text-xl text-orange-400 shrink-0">{Number(t.montant)} €</span>
+                </motion.div>
+              ))}
+            </div>
+          )}
           <div className="mt-5 space-y-1.5 max-w-2xl">
             <p className="text-xs text-white/30">* Cotisation annuelle, licence FFHB incluse.</p>
             <p className="text-sm text-orange-400 font-display font-bold">

@@ -114,6 +114,21 @@ _Branche : `feat/refonte-contenu-seo`_
 
 ---
 
+## PHASE 20 – CMS TARIFS ÉDITABLE DEPUIS L'ADMIN
+
+- [x] `supabase/migrations/016_tarifs.sql` — table `tarifs` (libelle, montant NUMERIC(6,2), saison, note, ordre, actif), RLS (`get_my_role() IN ('super_admin','president')`), trigger `set_updated_at()`, INSERT des 5 tarifs actuels saison "2026/2027" (Baby Hand / -7 : 110, -9 / -11 / -13 : 120, -15 / -18 : 130, Seniors : 150, Loisirs : 120 — libellé "Seniors" repris tel que donné dans la consigne, plus court que l'ancien "Seniors Féminines / Seniors Masculins" de Registration.tsx)
+- [ ] **ACTION MANUELLE** : exécuter `016_tarifs.sql` dans le Supabase SQL Editor
+- [x] `src/types/tarif.ts` — type `Tarif`
+- [x] `src/hooks/useTarifs.ts` — pattern fetch natif (comme `useCollectifs.ts`/`useEncadrement.ts`) : `useTarifs()` (public), `useTarifsAdmin`, `useCreateTarif`, `useUpdateTarif`, `useDeleteTarif`, `useReorderTarifs`
+- [x] `src/pages/admin/TarifsPage.tsx` — tableau éditable (`ui/table`) par saison : champ Saison en haut (texte libre + pastilles de raccourci si plusieurs saisons existent), lignes éditables en ligne (libellé, montant, note, actif, ↑↓), ajout d'une ligne, suppression, `ordre` scopé par saison. Colonne "Note" masquée sous `sm:` pour la lisibilité mobile
+- [x] `src/App.tsx` — route `/admin/tarifs` (rôles `super_admin` + `president`)
+- [x] `src/components/admin/AdminLayout.tsx` — entrée "Tarifs" dans la sidebar
+- [x] `src/pages/Registration.tsx` — section Tarifs branchée sur `useTarifs()`, titre `Tarifs saison {saison}` dérivé de la donnée (saison du premier tarif actif) au lieu du texte en dur "saison 2026/2027", dégradés décoratifs désormais cycliques (`TARIF_ACCENTS[i % length]`, plus de correspondance figée par libellé), skeletons pendant le chargement
+- [ ] Vérification visuelle post-exécution SQL : `/inscriptions` (section Tarifs), `/admin/tarifs`
+
+---
+---
+
 ## ÉTAT GLOBAL
 - [x] Phase 0 – Audit initial
 - [x] Phase 1 – Prérequis techniques SEO
