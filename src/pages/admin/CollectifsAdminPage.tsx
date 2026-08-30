@@ -17,7 +17,12 @@ import {
   useUpdateCollectif,
   useDeleteCollectif,
   useReorderCollectifs,
+  useCollectifsTrash,
+  useRestoreCollectif,
+  useHardDeleteCollectif,
 } from "@/hooks/useCollectifs";
+import { useAuth } from "@/hooks/useAuth";
+import TrashSection from "@/components/admin/TrashSection";
 import type { Collectif } from "@/types/collectif";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -189,6 +194,10 @@ export default function CollectifsAdminPage() {
   const updateCollectif = useUpdateCollectif();
   const deleteCollectif = useDeleteCollectif();
   const reorderCollectifs = useReorderCollectifs();
+  const { data: trash = [], isLoading: trashLoading } = useCollectifsTrash();
+  const restoreCollectif = useRestoreCollectif();
+  const hardDeleteCollectif = useHardDeleteCollectif();
+  const { isAdmin } = useAuth();
 
   const [formMode, setFormMode] = useState<null | "new" | string>(null);
   const [saving, setSaving] = useState(false);
@@ -372,6 +381,24 @@ export default function CollectifsAdminPage() {
         { id: a.id, ordre: b.ordre },
         { id: b.id, ordre: a.ordre },
       ]);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function handleRestore(id: string) {
+    setError(null);
+    try {
+      await restoreCollectif.mutateAsync(id);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function handleHardDelete(id: string) {
+    setError(null);
+    try {
+      await hardDeleteCollectif.mutateAsync(id);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -717,6 +744,19 @@ export default function CollectifsAdminPage() {
       <p className="text-white/20 text-xs mt-6">
         Les collectifs inactifs ne s'affichent pas sur le site public.
       </p>
+
+      <TrashSection
+        items={trash.map((c) => ({
+          id: c.id,
+          label: c.nom,
+          supprime_le: c.supprime_le as string,
+          supprime_par_profile: c.supprime_par_profile,
+        }))}
+        isLoading={trashLoading}
+        canHardDelete={isAdmin}
+        onRestore={handleRestore}
+        onHardDelete={handleHardDelete}
+      />
     </div>
   );
 }

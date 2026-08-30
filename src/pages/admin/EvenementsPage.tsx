@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useAuth } from "@/hooks/useAuth";
+import TrashSection from "@/components/admin/TrashSection";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -37,6 +39,8 @@ interface Evenement {
   publie_le: string | null;
   actif: boolean;
   ordre: number;
+  supprime_le: string | null;
+  supprime_par: string | null;
 }
 
 function evHeaders(): Record<string, string> {
@@ -219,9 +223,12 @@ function PhotoUpload({
 
 export default function EvenementsPage() {
   const { logAction } = useAuditLog();
+  const { user, isAdmin } = useAuth();
   const [events, setEvents] = useState<Evenement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [trash, setTrash] = useState<(Evenement & { supprime_par_profile: { full_name: string | null } | null })[]>([]);
+  const [trashLoading, setTrashLoading] = useState(true);
   const [formMode, setFormMode] = useState<null | "new" | string>(null);
   const [saving, setSaving] = useState(false);
 
@@ -258,7 +265,7 @@ export default function EvenementsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(evUrl("evenements?order=ordre.asc,date_debut.asc"), {
+      const res = await fetch(evUrl("evenements?supprime_le=is.null&order=ordre.asc,date_debut.asc"), {
         headers: evHeaders(),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -270,7 +277,23 @@ export default function EvenementsPage() {
     }
   }, []);
 
-  useEffect(() => { loadEvents(); }, [loadEvents]);
+  const loadTrash = useCallback(async () => {
+    setTrashLoading(true);
+    try {
+      const res = await fetch(
+        evUrl("evenements?select=*,supprime_par_profile:profiles!supprime_par(full_name)&supprime_le=not.is.null&order=supprime_le.desc"),
+        { headers: evHeaders() }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setTrash(await res.json());
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setTrashLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadEvents(); loadTrash(); }, [loadEvents, loadTrash]);
 
   function resetPhotoState() {
     setPhotoFile(null);
@@ -465,13 +488,49 @@ export default function EvenementsPage() {
     try {
       const ev = events.find((e) => e.id === id);
       const res = await fetch(evUrl(`evenements?id=eq.${id}`), {
-        method: "DELETE",
+        method: "PATCH",
         headers: { ...evHeaders(), Prefer: "return=minimal" },
+        body: JSON.stringify({ supprime_le: new Date().toISOString(), supprime_par: user?.id ?? null }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       logAction("Événement supprimé", "evenement", id, ev?.titre ?? id);
       if (formMode === id) closeForm();
       await loadEvents();
+      await loadTrash();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function handleRestore(id: string) {
+    setError(null);
+    try {
+      const ev = trash.find((e) => e.id === id);
+      const res = await fetch(evUrl(`evenements?id=eq.${id}`), {
+        method: "PATCH",
+        headers: { ...evHeaders(), Prefer: "return=minimal" },
+        body: JSON.stringify({ supprime_le: null, supprime_par: null }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      logAction("Événement restauré", "evenement", id, ev?.titre ?? id);
+      await loadEvents();
+      await loadTrash();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function handleHardDelete(id: string) {
+    setError(null);
+    try {
+      const ev = trash.find((e) => e.id === id);
+      const res = await fetch(evUrl(`evenements?id=eq.${id}`), {
+        method: "DELETE",
+        headers: { ...evHeaders(), Prefer: "return=minimal" },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      logAction("Événement supprimé définitivement", "evenement", id, ev?.titre ?? id);
+      await loadTrash();
     } catch (e) {
       setError((e as Error).message);
     }
@@ -819,6 +878,19 @@ export default function EvenementsPage() {
       <p className="text-white/20 text-xs mt-6">
         Les événements inactifs ou expirés ne s'affichent pas sur le site public.
       </p>
+
+      <TrashSection
+        items={trash.map((ev) => ({
+          id: ev.id,
+          label: ev.titre,
+          supprime_le: ev.supprime_le as string,
+          supprime_par_profile: ev.supprime_par_profile,
+        }))}
+        isLoading={trashLoading}
+        canHardDelete={isAdmin}
+        onRestore={handleRestore}
+        onHardDelete={handleHardDelete}
+      />
     </div>
   );
 }

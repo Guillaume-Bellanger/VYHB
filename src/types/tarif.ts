@@ -6,6 +6,8 @@ export interface Tarif {
   note: string | null;
   ordre: number;
   actif: boolean;
+  supprime_le: string | null;
+  supprime_par: string | null;
   created_at: string;
   updated_at: string;
 }

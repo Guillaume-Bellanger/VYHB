@@ -16,7 +16,12 @@ import {
   useUpdateTarif,
   useDeleteTarif,
   useReorderTarifs,
+  useTarifsTrash,
+  useRestoreTarif,
+  useHardDeleteTarif,
 } from "@/hooks/useTarifs";
+import { useAuth } from "@/hooks/useAuth";
+import TrashSection from "@/components/admin/TrashSection";
 import type { Tarif } from "@/types/tarif";
 
 const DEFAULT_SAISON = "2026/2027";
@@ -40,6 +45,10 @@ export default function TarifsPage() {
   const updateTarif = useUpdateTarif();
   const deleteTarif = useDeleteTarif();
   const reorderTarif = useReorderTarifs();
+  const { data: trash = [], isLoading: trashLoading } = useTarifsTrash();
+  const restoreTarif = useRestoreTarif();
+  const hardDeleteTarif = useHardDeleteTarif();
+  const { isAdmin } = useAuth();
 
   const saisons = Array.from(new Set(all.map((t) => t.saison))).sort().reverse();
   const [saison, setSaison] = useState("");
@@ -148,6 +157,24 @@ export default function TarifsPage() {
         { id: a.id, ordre: b.ordre },
         { id: b.id, ordre: a.ordre },
       ]);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function handleRestore(id: string) {
+    setError(null);
+    try {
+      await restoreTarif.mutateAsync(id);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function handleHardDelete(id: string) {
+    setError(null);
+    try {
+      await hardDeleteTarif.mutateAsync(id);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -437,6 +464,19 @@ export default function TarifsPage() {
         <Euro size={12} />
         Les tarifs inactifs ne s'affichent pas sur la page publique Inscriptions.
       </p>
+
+      <TrashSection
+        items={trash.map((t) => ({
+          id: t.id,
+          label: `${t.libelle} (${t.saison})`,
+          supprime_le: t.supprime_le as string,
+          supprime_par_profile: t.supprime_par_profile,
+        }))}
+        isLoading={trashLoading}
+        canHardDelete={isAdmin}
+        onRestore={handleRestore}
+        onHardDelete={handleHardDelete}
+      />
     </div>
   );
 }

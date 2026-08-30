@@ -19,7 +19,12 @@ import {
   useUpdateEncadrement,
   useDeleteEncadrement,
   useReorderEncadrement,
+  useEncadrementTrash,
+  useRestoreEncadrement,
+  useHardDeleteEncadrement,
 } from "@/hooks/useEncadrement";
+import { useAuth } from "@/hooks/useAuth";
+import TrashSection from "@/components/admin/TrashSection";
 import { CATEGORIES } from "@/data/categories";
 import type { Encadrement, EncadrementType } from "@/types/encadrement";
 
@@ -312,6 +317,10 @@ export default function EncadrementPage() {
   const updateEncadrement = useUpdateEncadrement();
   const deleteEncadrement = useDeleteEncadrement();
   const reorderEncadrement = useReorderEncadrement();
+  const { data: trash = [], isLoading: trashLoading } = useEncadrementTrash();
+  const restoreEncadrement = useRestoreEncadrement();
+  const hardDeleteEncadrement = useHardDeleteEncadrement();
+  const { isAdmin } = useAuth();
 
   const entraineurs = all.filter((p) => p.type === "entraineur");
   const bureau = all.filter((p) => p.type === "bureau");
@@ -469,6 +478,24 @@ export default function EncadrementPage() {
         { id: a.id, ordre: b.ordre },
         { id: b.id, ordre: a.ordre },
       ]);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function handleRestore(id: string) {
+    setError(null);
+    try {
+      await restoreEncadrement.mutateAsync(id);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function handleHardDelete(id: string) {
+    setError(null);
+    try {
+      await hardDeleteEncadrement.mutateAsync(id);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -664,6 +691,19 @@ export default function EncadrementPage() {
       <p className="text-white/20 text-xs mt-6">
         Les fiches inactives ne s'affichent pas sur la page publique Le Club.
       </p>
+
+      <TrashSection
+        items={trash.map((p) => ({
+          id: p.id,
+          label: personLabel(p),
+          supprime_le: p.supprime_le as string,
+          supprime_par_profile: p.supprime_par_profile,
+        }))}
+        isLoading={trashLoading}
+        canHardDelete={isAdmin}
+        onRestore={handleRestore}
+        onHardDelete={handleHardDelete}
+      />
     </div>
   );
 }

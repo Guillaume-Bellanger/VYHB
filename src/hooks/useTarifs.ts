@@ -1,13 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useAuth } from "@/hooks/useAuth";
 import type { Tarif } from "@/types/tarif";
 
 export const TARIFS_QK = ["tarifs"] as const;
 export const PUBLIC_TARIFS_QK = ["public-tarifs"] as const;
+export const TARIFS_TRASH_QK = ["tarifs-trash"] as const;
 
 // ── Types ─────────────────────────────────────────────────────
 
-export type TarifInsert = Omit<Tarif, "id" | "created_at" | "updated_at">;
+export type TarifInsert = Omit<Tarif, "id" | "created_at" | "updated_at" | "supprime_le" | "supprime_par">;
 export type TarifUpdate = Partial<TarifInsert>;
 
 // ── Helpers (env vars + token lus à chaque appel) ─────────────
@@ -108,7 +110,19 @@ export function useTarifs() {
 export function useTarifsAdmin() {
   return useQuery({
     queryKey: TARIFS_QK,
-    queryFn: () => pgList<Tarif[]>("tarifs?select=*&order=saison.desc,ordre.asc", baseHeaders()),
+    queryFn: () => pgList<Tarif[]>("tarifs?select=*&supprime_le=is.null&order=saison.desc,ordre.asc", baseHeaders()),
+  });
+}
+
+// Corbeille : tarifs supprimés (soft delete), avec le nom de l'auteur
+export function useTarifsTrash() {
+  return useQuery({
+    queryKey: TARIFS_TRASH_QK,
+    queryFn: () =>
+      pgList<(Tarif & { supprime_par_profile: { full_name: string | null } | null })[]>(
+        "tarifs?select=*,supprime_par_profile:profiles!supprime_par(full_name)&supprime_le=not.is.null&order=supprime_le.desc",
+        baseHeaders()
+      ),
   });
 }
 
@@ -148,17 +162,50 @@ export function useUpdateTarif() {
   });
 }
 
+// Suppression réversible : passe par la corbeille (PATCH supprime_le/supprime_par)
 export function useDeleteTarif() {
   const qc = useQueryClient();
   const { logAction } = useAuditLog();
+  const { user } = useAuth();
 
   return useMutation({
-    mutationFn: (id: string) => pgDelete(`tarifs?id=eq.${id}`),
+    mutationFn: (id: string) =>
+      pgPatch(`tarifs?id=eq.${id}`, { supprime_le: new Date().toISOString(), supprime_par: user?.id ?? null }),
     onMutate: async (id) => ({ previous: findTarifInCache(qc, id) }),
     onSuccess: (_, id, context) => {
       logAction("Tarif supprimé", "tarif", id, context?.previous?.libelle ?? id);
       qc.invalidateQueries({ queryKey: TARIFS_QK });
       qc.invalidateQueries({ queryKey: PUBLIC_TARIFS_QK });
+      qc.invalidateQueries({ queryKey: TARIFS_TRASH_QK });
+    },
+  });
+}
+
+export function useRestoreTarif() {
+  const qc = useQueryClient();
+  const { logAction } = useAuditLog();
+
+  return useMutation({
+    mutationFn: (id: string) => pgPatch(`tarifs?id=eq.${id}`, { supprime_le: null, supprime_par: null }),
+    onSuccess: (_, id) => {
+      logAction("Tarif restauré", "tarif", id, id);
+      qc.invalidateQueries({ queryKey: TARIFS_QK });
+      qc.invalidateQueries({ queryKey: PUBLIC_TARIFS_QK });
+      qc.invalidateQueries({ queryKey: TARIFS_TRASH_QK });
+    },
+  });
+}
+
+// Suppression définitive — la RLS restreint déjà ceci à super_admin
+export function useHardDeleteTarif() {
+  const qc = useQueryClient();
+  const { logAction } = useAuditLog();
+
+  return useMutation({
+    mutationFn: (id: string) => pgDelete(`tarifs?id=eq.${id}`),
+    onSuccess: (_, id) => {
+      logAction("Tarif supprimé définitivement", "tarif", id, id);
+      qc.invalidateQueries({ queryKey: TARIFS_TRASH_QK });
     },
   });
 }

@@ -1,13 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useAuth } from "@/hooks/useAuth";
 import type { Encadrement, EncadrementType } from "@/types/encadrement";
 
 export const ENCADREMENT_QK = ["encadrement"] as const;
 export const PUBLIC_ENCADREMENT_QK = ["public-encadrement"] as const;
+export const ENCADREMENT_TRASH_QK = ["encadrement-trash"] as const;
 
 // ── Types ─────────────────────────────────────────────────────
 
-export type EncadrementInsert = Omit<Encadrement, "id" | "created_at" | "updated_at">;
+export type EncadrementInsert = Omit<Encadrement, "id" | "created_at" | "updated_at" | "supprime_le" | "supprime_par">;
 export type EncadrementUpdate = Partial<EncadrementInsert>;
 
 // ── Helpers (env vars + token lus à chaque appel) ─────────────
@@ -112,7 +114,20 @@ export function useEncadrementPublic(type?: EncadrementType) {
 export function useEncadrementAdmin() {
   return useQuery({
     queryKey: ENCADREMENT_QK,
-    queryFn: () => pgList<Encadrement[]>("encadrement?select=*&order=type.asc,ordre.asc", baseHeaders()),
+    queryFn: () =>
+      pgList<Encadrement[]>("encadrement?select=*&supprime_le=is.null&order=type.asc,ordre.asc", baseHeaders()),
+  });
+}
+
+// Corbeille : fiches supprimées (soft delete), avec le nom de l'auteur
+export function useEncadrementTrash() {
+  return useQuery({
+    queryKey: ENCADREMENT_TRASH_QK,
+    queryFn: () =>
+      pgList<(Encadrement & { supprime_par_profile: { full_name: string | null } | null })[]>(
+        "encadrement?select=*,supprime_par_profile:profiles!supprime_par(full_name)&supprime_le=not.is.null&order=supprime_le.desc",
+        baseHeaders()
+      ),
   });
 }
 
@@ -157,18 +172,51 @@ export function useUpdateEncadrement() {
   });
 }
 
+// Suppression réversible : passe par la corbeille (PATCH supprime_le/supprime_par)
 export function useDeleteEncadrement() {
   const qc = useQueryClient();
   const { logAction } = useAuditLog();
+  const { user } = useAuth();
 
   return useMutation({
-    mutationFn: (id: string) => pgDelete(`encadrement?id=eq.${id}`),
+    mutationFn: (id: string) =>
+      pgPatch(`encadrement?id=eq.${id}`, { supprime_le: new Date().toISOString(), supprime_par: user?.id ?? null }),
     onMutate: async (id) => ({ previous: findEncadrementInCache(qc, id) }),
     onSuccess: (_, id, context) => {
       const prev = context?.previous;
       logAction("Encadrement supprimé", "encadrement", id, prev?.prenom ?? prev?.role ?? id);
       qc.invalidateQueries({ queryKey: ENCADREMENT_QK });
       qc.invalidateQueries({ queryKey: PUBLIC_ENCADREMENT_QK });
+      qc.invalidateQueries({ queryKey: ENCADREMENT_TRASH_QK });
+    },
+  });
+}
+
+export function useRestoreEncadrement() {
+  const qc = useQueryClient();
+  const { logAction } = useAuditLog();
+
+  return useMutation({
+    mutationFn: (id: string) => pgPatch(`encadrement?id=eq.${id}`, { supprime_le: null, supprime_par: null }),
+    onSuccess: (_, id) => {
+      logAction("Encadrement restauré", "encadrement", id, id);
+      qc.invalidateQueries({ queryKey: ENCADREMENT_QK });
+      qc.invalidateQueries({ queryKey: PUBLIC_ENCADREMENT_QK });
+      qc.invalidateQueries({ queryKey: ENCADREMENT_TRASH_QK });
+    },
+  });
+}
+
+// Suppression définitive — la RLS restreint déjà ceci à super_admin
+export function useHardDeleteEncadrement() {
+  const qc = useQueryClient();
+  const { logAction } = useAuditLog();
+
+  return useMutation({
+    mutationFn: (id: string) => pgDelete(`encadrement?id=eq.${id}`),
+    onSuccess: (_, id) => {
+      logAction("Encadrement supprimé définitivement", "encadrement", id, id);
+      qc.invalidateQueries({ queryKey: ENCADREMENT_TRASH_QK });
     },
   });
 }

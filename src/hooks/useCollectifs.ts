@@ -1,13 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useAuth } from "@/hooks/useAuth";
 import type { Collectif } from "@/types/collectif";
 
 export const COLLECTIFS_QK = ["collectifs"] as const;
 export const PUBLIC_COLLECTIFS_QK = ["public-collectifs"] as const;
+export const COLLECTIFS_TRASH_QK = ["collectifs-trash"] as const;
 
 // ── Types ─────────────────────────────────────────────────────
 
-export type CollectifInsert = Omit<Collectif, "id" | "created_at" | "updated_at">;
+export type CollectifInsert = Omit<Collectif, "id" | "created_at" | "updated_at" | "supprime_le" | "supprime_par">;
 export type CollectifUpdate = Partial<CollectifInsert>;
 
 // ── Helpers (env vars + token lus à chaque appel) ─────────────
@@ -108,7 +110,19 @@ export function useCollectifsPublic() {
 export function useCollectifsAdmin() {
   return useQuery({
     queryKey: COLLECTIFS_QK,
-    queryFn: () => pgList<Collectif[]>("collectifs?select=*&order=ordre.asc", baseHeaders()),
+    queryFn: () => pgList<Collectif[]>("collectifs?select=*&supprime_le=is.null&order=ordre.asc", baseHeaders()),
+  });
+}
+
+// Corbeille : collectifs supprimés (soft delete), avec le nom de l'auteur
+export function useCollectifsTrash() {
+  return useQuery({
+    queryKey: COLLECTIFS_TRASH_QK,
+    queryFn: () =>
+      pgList<(Collectif & { supprime_par_profile: { full_name: string | null } | null })[]>(
+        "collectifs?select=*,supprime_par_profile:profiles!supprime_par(full_name)&supprime_le=not.is.null&order=supprime_le.desc",
+        baseHeaders()
+      ),
   });
 }
 
@@ -150,17 +164,50 @@ export function useUpdateCollectif() {
   });
 }
 
+// Suppression réversible : passe par la corbeille (PATCH supprime_le/supprime_par)
 export function useDeleteCollectif() {
   const qc = useQueryClient();
   const { logAction } = useAuditLog();
+  const { user } = useAuth();
 
   return useMutation({
-    mutationFn: (id: string) => pgDelete(`collectifs?id=eq.${id}`),
+    mutationFn: (id: string) =>
+      pgPatch(`collectifs?id=eq.${id}`, { supprime_le: new Date().toISOString(), supprime_par: user?.id ?? null }),
     onMutate: async (id) => ({ previous: findCollectifInCache(qc, id) }),
     onSuccess: (_, id, context) => {
       logAction("Collectif supprimé", "collectif", id, context?.previous?.nom ?? id);
       qc.invalidateQueries({ queryKey: COLLECTIFS_QK });
       qc.invalidateQueries({ queryKey: PUBLIC_COLLECTIFS_QK });
+      qc.invalidateQueries({ queryKey: COLLECTIFS_TRASH_QK });
+    },
+  });
+}
+
+export function useRestoreCollectif() {
+  const qc = useQueryClient();
+  const { logAction } = useAuditLog();
+
+  return useMutation({
+    mutationFn: (id: string) => pgPatch(`collectifs?id=eq.${id}`, { supprime_le: null, supprime_par: null }),
+    onSuccess: (_, id) => {
+      logAction("Collectif restauré", "collectif", id, id);
+      qc.invalidateQueries({ queryKey: COLLECTIFS_QK });
+      qc.invalidateQueries({ queryKey: PUBLIC_COLLECTIFS_QK });
+      qc.invalidateQueries({ queryKey: COLLECTIFS_TRASH_QK });
+    },
+  });
+}
+
+// Suppression définitive — la RLS restreint déjà ceci à super_admin
+export function useHardDeleteCollectif() {
+  const qc = useQueryClient();
+  const { logAction } = useAuditLog();
+
+  return useMutation({
+    mutationFn: (id: string) => pgDelete(`collectifs?id=eq.${id}`),
+    onSuccess: (_, id) => {
+      logAction("Collectif supprimé définitivement", "collectif", id, id);
+      qc.invalidateQueries({ queryKey: COLLECTIFS_TRASH_QK });
     },
   });
 }
