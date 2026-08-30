@@ -144,6 +144,34 @@ _Branche : `feat/refonte-contenu-seo`_
 - [ ] Vérification visuelle post-exécution SQL : `/club` (Historique + Entraîneurs/Bénévoles + Formations), `/contact`, `/` (accroche hero + section famille + strip contact), `/admin/contenu`
 
 ---
+
+## FIX HORS PHASE – Accueil branché sur collectifs Supabase
+
+- [x] `src/pages/Index.tsx` — la section "Nos collectifs" lisait encore `src/data/collectifs.ts` (seul fichier trouvé après grep de tous les imports de ce module) au lieu de `useCollectifsPublic()` : les modifications faites depuis `/admin/collectifs` n'y apparaissaient jamais. Branché sur le hook, repli sur les données statiques uniquement si le fetch échoue (`isError`, pas pendant le chargement où un skeleton s'affiche). Icône emoji remplacée par `getCollectifIcon(slug)` (Lucide, comme sur `/collectifs`) — le champ `icon` n'existe pas côté Supabase. Header/Footer/SEO vérifiés : aucune autre référence à la source statique.
+
+---
+
+## PHASE 22 – FILTRE CATÉGORIE /RESULTATS + REFONTE CATÉGORIES + CORBEILLE (SOFT DELETE)
+
+### Partie 1 — Filtre par catégorie sur /resultats
+- [x] `src/pages/Resultats.tsx` — nouveau `CategoryFilterBar` (scrollable horizontalement, fade sur les bords via `maskImage`, plus discret que les onglets principaux, catégories sans résultat grisées mais jamais masquées). Deux états indépendants `resultatsCategorie`/`historiqueCategorie` (sentinel `"tous"`). Onglet Résultats : la barre filtre "Derniers résultats" ET "Matchs à venir" (2 derniers résultats de la catégorie choisie, sans le sous-titre de groupe redondant). Onglet Historique : remplace le `Select` par la même barre, regroupement par saison et tri inchangés. Toujours un seul `usePublicMatches()`.
+
+### Partie 2 — Refonte src/data/categories.ts
+- [x] Nouvelle liste canonique (12 entrées) : `Baby Hand, -7, -9, -11 Mixte, -11F, -13M, -13F, -15M/-18M, -15F/-18F, Séniors Masculins, Séniors Féminines, Loisirs`. `MATCH_CATEGORIES` exclut seulement `"Baby Hand"`.
+- [x] `MatchFormPage.tsx`, `MatchListAdminPage.tsx`, `UsersPage.tsx` — suppression des copies locales de `CATEGORIES`, import unique depuis `src/data/categories.ts` (elles avaient déjà divergé une fois, cf. leçon 2026-08-30)
+- [x] `EncadrementPage.tsx` — fix explicite demandé : le multi-select catégories utilisait `MATCH_CATEGORIES` (donc "Baby Hand" y était impossible à sélectionner) → `CATEGORIES` (liste complète)
+- [x] `supabase/migrations/018_categories.sql` — **étape 1/2 seulement** : diagnostic en lecture seule (`SELECT DISTINCT` sur `matches.categorie` et `encadrement.categories[]`). Décision actée avec l'utilisateur : je n'ai pas d'accès direct à la base Supabase (connecteur MCP non authentifiable depuis cet environnement) ; l'utilisateur lance le diagnostic lui-même et me communique le résultat avant que j'ajoute les `UPDATE` définitifs. `collectifs` volontairement exclu (pas de colonne `categorie`, seul `nom` y ressemble — renommer/scinder un collectif est une décision métier à faire manuellement depuis `/admin/collectifs`)
+- [ ] **ACTION UTILISATEUR EN ATTENTE** : exécuter le diagnostic de `018_categories.sql` dans le Supabase SQL Editor et communiquer le résultat, afin que je complète la migration avec les `UPDATE` de réalignement (mapping donné : `-9/-11`→`-9`, `-15M`→`-15M/-18M`, `-15F`→`-15F/-18F`, `-15/-18M`→`-15M/-18M`, `-15/-18F`→`-15F/-18F`, `-18F`→`-15F/-18F`, `-13H`→`-13M`, `Loisir`→`Loisirs`)
+
+### Partie 3 — Corbeille (soft delete) sur encadrement, collectifs, evenements, tarifs
+- [x] `supabase/migrations/019_soft_delete.sql` — `supprime_le`/`supprime_par` sur les 4 tables. Policy publique mise à jour (`AND supprime_le IS NULL`). L'ancienne policy admin `FOR ALL` est scindée en 4 policies (SELECT/INSERT/UPDATE pour super_admin+président — +evenements_com pour `evenements`, qui avait ce rôle en plus — et DELETE réservé à super_admin seul) : Postgres ne permet pas de retirer uniquement DELETE d'un `FOR ALL`.
+- [ ] **ACTION MANUELLE** : exécuter `019_soft_delete.sql` dans le Supabase SQL Editor
+- [x] `useCollectifs.ts`, `useEncadrement.ts`, `useTarifs.ts` — le `useDeleteX` existant fait désormais un `PATCH` (soft delete) au lieu d'un `DELETE` ; nouveaux `useXTrash` (liste + `profiles!supprime_par(full_name)` embarqué), `useRestoreX`, `useHardDeleteX` (DELETE réel, RLS restreint déjà à super_admin). Les query admin normales gagnent `&supprime_le=is.null`.
+- [x] `EvenementsPage.tsx` — mêmes 4 opérations mais en fonctions locales (`loadEvents`/`loadTrash`/`handleDelete`/`handleRestore`/`handleHardDelete`), cohérent avec son architecture actuelle (pas de hook TanStack Query dédié, contrairement aux 3 autres tables)
+- [x] `src/components/admin/TrashSection.tsx` (nouveau, partagé) — Accordion repliable générique : date, auteur (`supprime_par_profile?.full_name`), bouton Restaurer, bouton Supprimer définitivement (avec confirmation) affiché seulement si `canHardDelete` (= `useAuth().isAdmin`). Réutilisé tel quel dans les 4 pages admin pour éviter 4 implémentations dupliquées.
+- [x] `CollectifsAdminPage.tsx`, `EncadrementPage.tsx`, `TarifsPage.tsx`, `EvenementsPage.tsx` — `<TrashSection>` ajoutée en bas de page
+- [ ] Vérification visuelle post-exécution SQL : suppression/restauration/suppression définitive sur les 4 pages admin, `/resultats` (filtre catégorie sur les deux onglets)
+
 ---
 
 ## ÉTAT GLOBAL
