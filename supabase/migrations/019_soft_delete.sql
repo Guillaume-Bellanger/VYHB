@@ -14,13 +14,19 @@
 -- DELETE pour super_admin seul). Pour evenements, la policy d'origine
 -- ("evenements: gestionnaires") inclut aussi evenements_com : ce rôle est
 -- conservé sur SELECT/INSERT/UPDATE mais pas sur DELETE définitif.
+--
+-- Idempotente : ADD COLUMN IF NOT EXISTS + DROP POLICY IF EXISTS devant
+-- chaque CREATE POLICY (y compris les policies nouvellement créées ici,
+-- pas seulement celles qui remplacent une policy pré-existante) —
+-- rejouable sans erreur quel que soit l'état d'avancement d'une exécution
+-- précédente partielle.
 -- ============================================================
 
 -- ── collectifs ──────────────────────────────────────────────
 
 ALTER TABLE collectifs
-  ADD COLUMN supprime_le  TIMESTAMPTZ,
-  ADD COLUMN supprime_par UUID REFERENCES profiles(id);
+  ADD COLUMN IF NOT EXISTS supprime_le  TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS supprime_par UUID REFERENCES profiles(id);
 
 DROP POLICY IF EXISTS "collectifs: lecture publique" ON collectifs;
 CREATE POLICY "collectifs: lecture publique"
@@ -28,19 +34,23 @@ CREATE POLICY "collectifs: lecture publique"
 
 DROP POLICY IF EXISTS "collectifs: admins gerent" ON collectifs;
 
+DROP POLICY IF EXISTS "collectifs: admins lisent tout" ON collectifs;
 CREATE POLICY "collectifs: admins lisent tout"
   ON collectifs FOR SELECT
   USING (get_my_role() IN ('super_admin', 'president'));
 
+DROP POLICY IF EXISTS "collectifs: admins inserent" ON collectifs;
 CREATE POLICY "collectifs: admins inserent"
   ON collectifs FOR INSERT
   WITH CHECK (get_my_role() IN ('super_admin', 'president'));
 
+DROP POLICY IF EXISTS "collectifs: admins modifient" ON collectifs;
 CREATE POLICY "collectifs: admins modifient"
   ON collectifs FOR UPDATE
   USING (get_my_role() IN ('super_admin', 'president'))
   WITH CHECK (get_my_role() IN ('super_admin', 'president'));
 
+DROP POLICY IF EXISTS "collectifs: super_admin supprime" ON collectifs;
 CREATE POLICY "collectifs: super_admin supprime"
   ON collectifs FOR DELETE
   USING (get_my_role() = 'super_admin');
@@ -48,8 +58,8 @@ CREATE POLICY "collectifs: super_admin supprime"
 -- ── encadrement ─────────────────────────────────────────────
 
 ALTER TABLE encadrement
-  ADD COLUMN supprime_le  TIMESTAMPTZ,
-  ADD COLUMN supprime_par UUID REFERENCES profiles(id);
+  ADD COLUMN IF NOT EXISTS supprime_le  TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS supprime_par UUID REFERENCES profiles(id);
 
 DROP POLICY IF EXISTS "encadrement: lecture publique" ON encadrement;
 CREATE POLICY "encadrement: lecture publique"
@@ -57,19 +67,23 @@ CREATE POLICY "encadrement: lecture publique"
 
 DROP POLICY IF EXISTS "encadrement: admins gerent" ON encadrement;
 
+DROP POLICY IF EXISTS "encadrement: admins lisent tout" ON encadrement;
 CREATE POLICY "encadrement: admins lisent tout"
   ON encadrement FOR SELECT
   USING (get_my_role() IN ('super_admin', 'president'));
 
+DROP POLICY IF EXISTS "encadrement: admins inserent" ON encadrement;
 CREATE POLICY "encadrement: admins inserent"
   ON encadrement FOR INSERT
   WITH CHECK (get_my_role() IN ('super_admin', 'president'));
 
+DROP POLICY IF EXISTS "encadrement: admins modifient" ON encadrement;
 CREATE POLICY "encadrement: admins modifient"
   ON encadrement FOR UPDATE
   USING (get_my_role() IN ('super_admin', 'president'))
   WITH CHECK (get_my_role() IN ('super_admin', 'president'));
 
+DROP POLICY IF EXISTS "encadrement: super_admin supprime" ON encadrement;
 CREATE POLICY "encadrement: super_admin supprime"
   ON encadrement FOR DELETE
   USING (get_my_role() = 'super_admin');
@@ -77,8 +91,8 @@ CREATE POLICY "encadrement: super_admin supprime"
 -- ── tarifs ──────────────────────────────────────────────────
 
 ALTER TABLE tarifs
-  ADD COLUMN supprime_le  TIMESTAMPTZ,
-  ADD COLUMN supprime_par UUID REFERENCES profiles(id);
+  ADD COLUMN IF NOT EXISTS supprime_le  TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS supprime_par UUID REFERENCES profiles(id);
 
 DROP POLICY IF EXISTS "tarifs: lecture publique" ON tarifs;
 CREATE POLICY "tarifs: lecture publique"
@@ -86,19 +100,23 @@ CREATE POLICY "tarifs: lecture publique"
 
 DROP POLICY IF EXISTS "tarifs: admins gerent" ON tarifs;
 
+DROP POLICY IF EXISTS "tarifs: admins lisent tout" ON tarifs;
 CREATE POLICY "tarifs: admins lisent tout"
   ON tarifs FOR SELECT
   USING (get_my_role() IN ('super_admin', 'president'));
 
+DROP POLICY IF EXISTS "tarifs: admins inserent" ON tarifs;
 CREATE POLICY "tarifs: admins inserent"
   ON tarifs FOR INSERT
   WITH CHECK (get_my_role() IN ('super_admin', 'president'));
 
+DROP POLICY IF EXISTS "tarifs: admins modifient" ON tarifs;
 CREATE POLICY "tarifs: admins modifient"
   ON tarifs FOR UPDATE
   USING (get_my_role() IN ('super_admin', 'president'))
   WITH CHECK (get_my_role() IN ('super_admin', 'president'));
 
+DROP POLICY IF EXISTS "tarifs: super_admin supprime" ON tarifs;
 CREATE POLICY "tarifs: super_admin supprime"
   ON tarifs FOR DELETE
   USING (get_my_role() = 'super_admin');
@@ -106,8 +124,8 @@ CREATE POLICY "tarifs: super_admin supprime"
 -- ── evenements ──────────────────────────────────────────────
 
 ALTER TABLE evenements
-  ADD COLUMN supprime_le  TIMESTAMPTZ,
-  ADD COLUMN supprime_par UUID REFERENCES profiles(id);
+  ADD COLUMN IF NOT EXISTS supprime_le  TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS supprime_par UUID REFERENCES profiles(id);
 
 DROP POLICY IF EXISTS "evenements_public_select" ON evenements;
 CREATE POLICY "evenements_public_select"
@@ -118,19 +136,23 @@ DROP POLICY IF EXISTS "evenements: gestionnaires" ON evenements;
 DROP POLICY IF EXISTS "evenements: super_admin total" ON evenements;
 DROP POLICY IF EXISTS "evenements_admin_all" ON evenements;
 
+DROP POLICY IF EXISTS "evenements: admins lisent tout" ON evenements;
 CREATE POLICY "evenements: admins lisent tout"
   ON evenements FOR SELECT
   USING (get_my_role() IN ('super_admin', 'president', 'evenements_com'));
 
+DROP POLICY IF EXISTS "evenements: admins inserent" ON evenements;
 CREATE POLICY "evenements: admins inserent"
   ON evenements FOR INSERT
   WITH CHECK (get_my_role() IN ('super_admin', 'president', 'evenements_com'));
 
+DROP POLICY IF EXISTS "evenements: admins modifient" ON evenements;
 CREATE POLICY "evenements: admins modifient"
   ON evenements FOR UPDATE
   USING (get_my_role() IN ('super_admin', 'president', 'evenements_com'))
   WITH CHECK (get_my_role() IN ('super_admin', 'president', 'evenements_com'));
 
+DROP POLICY IF EXISTS "evenements: super_admin supprime" ON evenements;
 CREATE POLICY "evenements: super_admin supprime"
   ON evenements FOR DELETE
   USING (get_my_role() = 'super_admin');
