@@ -1,22 +1,22 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Home, Plane, BookOpen, Calendar, Trophy } from "lucide-react";
+import { Home, Plane, BookOpen, Calendar, Trophy, History } from "lucide-react";
 import SEO from "@/components/SEO";
 import { usePublicMatches } from "@/hooks/usePublicMatches";
+import { MATCH_CATEGORIES } from "@/data/categories";
 import type { Match } from "@/types/database";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 
 // ── Constants ────────────────────────────────────────────────
-
-const ALL_CATS = [
-  "-7", "-9/-11", "-11F", "-13M",
-  "-15M", "-15F", "Séniors Féminines", "Séniors Masculins", "Loisirs",
-];
 
 const TYPE_LABELS: Record<string, string> = {
   championnat: "Championnat",
@@ -24,6 +24,31 @@ const TYPE_LABELS: Record<string, string> = {
   amical: "Amical",
   tournoi: "Tournoi",
 };
+
+// ── Helpers ──────────────────────────────────────────────────
+
+// Saison de septembre à août : mai 2026 → "2025/2026"
+function getSeasonLabel(dateStr: string): string {
+  const d = new Date(dateStr);
+  const startYear = d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1;
+  return `${startYear}/${startYear + 1}`;
+}
+
+// Regroupe une liste déjà triée par date croissante en groupes de saison
+// consécutifs (l'ordre des groupes suit donc naturellement l'ordre chronologique).
+function groupBySeason(matches: Match[]): { saison: string; matches: Match[] }[] {
+  const groups: { saison: string; matches: Match[] }[] = [];
+  for (const m of matches) {
+    const saison = getSeasonLabel(m.date);
+    const last = groups[groups.length - 1];
+    if (last && last.saison === saison) {
+      last.matches.push(m);
+    } else {
+      groups.push({ saison, matches: [m] });
+    }
+  }
+  return groups;
+}
 
 // ── Sub-components ───────────────────────────────────────────
 
@@ -158,22 +183,86 @@ function ResultCard({
   );
 }
 
+function CategoryResultsGroup({
+  categorie,
+  matches,
+  onResume,
+}: {
+  categorie: string;
+  matches: Match[];
+  onResume: (m: Match) => void;
+}) {
+  return (
+    <div>
+      <h3 className="font-display font-bold text-white/75 text-sm uppercase tracking-wider mb-3">{categorie}</h3>
+      <div className="space-y-3">
+        {matches.map((m, i) => (
+          <ResultCard key={m.id} match={m} index={i} onResume={onResume} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SeasonGroup({
+  saison,
+  matches,
+  onResume,
+}: {
+  saison: string;
+  matches: Match[];
+  onResume: (m: Match) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <h3 className="font-display font-black text-white/70 text-sm uppercase tracking-wider shrink-0">
+          Saison {saison}
+        </h3>
+        <span className="h-px flex-1 bg-white/[0.08]" />
+      </div>
+      <div className="space-y-3">
+        {matches.map((m, i) => (
+          <ResultCard key={m.id} match={m} index={i} onResume={onResume} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────
 
 export default function Resultats() {
-  const [activeTab, setActiveTab] = useState<string>("tous");
+  const [tab, setTab] = useState<string>("resultats");
+  const [historiqueCategorie, setHistoriqueCategorie] = useState<string>("toutes");
   const [resumeMatch, setResumeMatch] = useState<Match | null>(null);
 
-  const catFilter = activeTab === "tous" ? undefined : activeTab;
-
-  const { data, isLoading, isError } = usePublicMatches(catFilter);
+  const { data, isLoading, isError } = usePublicMatches();
 
   const now = new Date();
-  const results = data?.filter((m) => m.statut === "publie") ?? [];
+  const publies = data?.filter((m) => m.statut === "publie") ?? [];
   const upcoming = (data?.filter((m) => m.statut === "prevu" && new Date(m.date) > now) ?? [])
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  const tabs = [{ value: "tous", label: "Tous" }, ...ALL_CATS.map((c) => ({ value: c, label: c }))];
+  // Derniers résultats : 2 matchs les plus récents par catégorie, catégories vides masquées
+  const derniersParCategorie = MATCH_CATEGORIES
+    .map((categorie) => ({
+      categorie,
+      matches: publies
+        .filter((m) => m.categorie === categorie)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 2),
+    }))
+    .filter((g) => g.matches.length > 0);
+
+  // Historique : tous les matchs publiés, filtre catégorie, du plus ancien au plus récent
+  const historiqueMatches = (
+    historiqueCategorie === "toutes"
+      ? publies
+      : publies.filter((m) => m.categorie === historiqueCategorie)
+  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const historiqueParSaison = groupBySeason(historiqueMatches);
 
   return (
     <>
@@ -208,42 +297,33 @@ export default function Resultats() {
       {/* Content */}
       <section className="pb-24">
         <div className="container-narrow px-4 md:px-6">
-
-          {/* Tab bar — horizontal scroll sur mobile */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex gap-1 p-1.5 rounded-2xl mb-10 overflow-x-auto scrollbar-none"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            {tabs.map(({ value, label }) => (
-              <button
-                key={value}
-                onClick={() => setActiveTab(value)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-display font-bold whitespace-nowrap transition-all duration-300 shrink-0 cursor-pointer ${
-                  activeTab === value
-                    ? "text-white shadow-lg"
-                    : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]"
-                }`}
-                style={activeTab === value ? { background: "var(--gradient-accent)" } : {}}
-              >
-                {value === "tous" ? <Trophy size={12} /> : null}
-                {label}
-              </button>
-            ))}
-          </motion.div>
-
-          <AnimatePresence mode="wait">
+          <Tabs value={tab} onValueChange={setTab}>
             <motion.div
-              key={activeTab}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-10"
+              transition={{ delay: 0.2 }}
             >
-              {/* ── À venir ── */}
+              <TabsList className="grid grid-cols-2 w-full sm:w-auto sm:inline-grid mb-10 h-auto p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+                <TabsTrigger
+                  value="resultats"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-display font-bold data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:bg-transparent data-[state=inactive]:text-white/40 data-[state=active]:[background:var(--gradient-accent)]"
+                >
+                  <Trophy size={13} />
+                  Résultats
+                </TabsTrigger>
+                <TabsTrigger
+                  value="historique"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-display font-bold data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:bg-transparent data-[state=inactive]:text-white/40 data-[state=active]:[background:var(--gradient-accent)]"
+                >
+                  <History size={13} />
+                  Historique
+                </TabsTrigger>
+              </TabsList>
+            </motion.div>
+
+            {/* ── Onglet Résultats ── */}
+            <TabsContent value="resultats" className="mt-0 space-y-10">
+              {/* À venir */}
               <div>
                 <h2 className="font-display font-black text-white text-lg mb-4 flex items-center gap-2">
                   <Calendar size={18} className="text-orange-400" />
@@ -262,29 +342,79 @@ export default function Resultats() {
                 )}
               </div>
 
-              {/* ── Résultats ── */}
+              {/* Derniers résultats — 2 par catégorie */}
               <div>
                 <h2 className="font-display font-black text-white text-lg mb-4 flex items-center gap-2">
                   <Trophy size={18} className="text-orange-400" />
-                  Résultats
+                  Derniers résultats
                 </h2>
                 {isLoading && <MatchSkeletons />}
                 {!isLoading && isError && (
                   <p className="text-white/25 text-sm py-6 text-center">Impossible de charger les résultats.</p>
                 )}
-                {!isLoading && !isError && results.length === 0 && (
+                {!isLoading && !isError && derniersParCategorie.length === 0 && (
                   <p className="text-white/25 text-sm py-6 text-center">Aucun résultat publié.</p>
                 )}
-                {!isLoading && !isError && results.length > 0 && (
-                  <div className="space-y-3">
-                    {results.map((m, i) => (
-                      <ResultCard key={m.id} match={m} index={i} onResume={setResumeMatch} />
+                {!isLoading && !isError && derniersParCategorie.length > 0 && (
+                  <div className="space-y-8">
+                    {derniersParCategorie.map(({ categorie, matches }) => (
+                      <CategoryResultsGroup
+                        key={categorie}
+                        categorie={categorie}
+                        matches={matches}
+                        onResume={setResumeMatch}
+                      />
                     ))}
                   </div>
                 )}
               </div>
-            </motion.div>
-          </AnimatePresence>
+            </TabsContent>
+
+            {/* ── Onglet Historique ── */}
+            <TabsContent value="historique" className="mt-0 space-y-8">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <h2 className="font-display font-black text-white text-lg flex items-center gap-2">
+                  <History size={18} className="text-orange-400" />
+                  Historique des matchs
+                </h2>
+                <Select value={historiqueCategorie} onValueChange={setHistoriqueCategorie}>
+                  <SelectTrigger className="w-full sm:w-56 bg-white/[0.04] border-white/[0.10] text-white">
+                    <SelectValue placeholder="Catégorie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="toutes">Toutes catégories</SelectItem>
+                    {MATCH_CATEGORIES.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {isLoading && <MatchSkeletons />}
+              {!isLoading && isError && (
+                <p className="text-white/25 text-sm py-6 text-center">Impossible de charger l'historique.</p>
+              )}
+              {!isLoading && !isError && historiqueParSaison.length === 0 && (
+                <p className="text-white/25 text-sm py-6 text-center">
+                  {historiqueCategorie === "toutes"
+                    ? "Aucun résultat publié."
+                    : `Aucun match publié pour ${historiqueCategorie}.`}
+                </p>
+              )}
+              {!isLoading && !isError && historiqueParSaison.length > 0 && (
+                <div className="space-y-10">
+                  {historiqueParSaison.map(({ saison, matches }) => (
+                    <SeasonGroup
+                      key={saison}
+                      saison={saison}
+                      matches={matches}
+                      onResume={setResumeMatch}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </section>
 

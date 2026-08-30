@@ -84,6 +84,19 @@ _Branche : `feat/refonte-contenu-seo`_
 
 ---
 
+## PHASE 18 – RÉSULTATS LIMITÉS PAR COLLECTIF + ONGLET HISTORIQUE
+
+- [x] `src/data/categories.ts` — source unique de l'ordre des catégories (`CATEGORIES` + `MATCH_CATEGORIES` sans "Baby"). Fait foi : l'ancien `ALL_CATS` de `Resultats.tsx` avait Séniors Féminines/Masculins inversés par rapport aux 3 listes `CATEGORIES` dupliquées dans `MatchFormPage.tsx`, `MatchListAdminPage.tsx`, `UsersPage.tsx` — non touchées (hors scope), seul `Resultats.tsx` a été branché sur la nouvelle source
+- [x] `src/pages/Resultats.tsx` — refonte complète :
+  - Deux onglets shadcn `Tabs` : "Résultats" (par défaut) / "Historique"
+  - Un seul `usePublicMatches()` (sans filtre catégorie côté serveur), tout le filtrage/regroupement fait côté client
+  - Onglet Résultats : "Matchs à venir" inchangé + "Derniers résultats" groupés par catégorie (2 matchs `publie` les plus récents par catégorie, catégories vides masquées, ordre = `MATCH_CATEGORIES`)
+  - Onglet Historique : tous les matchs `publie`, filtre catégorie via `Select` (touch-friendly), tri du plus ancien au plus récent, regroupés par saison (sept.–août, ex. mai 2026 → "2025/2026") via `groupBySeason()`
+  - Mêmes composants `ResultCard`/`UpcomingCard` réutilisés pour un design identique entre les deux onglets
+- [ ] Vérification visuelle manuelle (`npm run dev` → `/resultats`) : bascule des onglets, filtre catégorie sur Historique, regroupement par saison, responsive mobile — non faite dans cette session (extension navigateur refusée), `tsc --noEmit` + `eslint` + `npm run build` passent sans erreur
+
+---
+
 ## ÉTAT GLOBAL
 - [x] Phase 0 – Audit initial
 - [x] Phase 1 – Prérequis techniques SEO
