@@ -454,7 +454,7 @@ export default function CollectifsAdminPage() {
             <Field label="Nom" error={errors.nom?.message}>
               <Input
                 {...register("nom")}
-                placeholder="Seniors Féminines"
+                placeholder="Séniors Féminines"
                 className="bg-white/[0.04] border-white/[0.10] text-white placeholder:text-white/25"
               />
             </Field>

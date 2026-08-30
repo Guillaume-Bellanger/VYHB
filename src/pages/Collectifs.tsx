@@ -23,7 +23,7 @@ const Collectifs = () => {
   <>
     <SEO
       title="Nos équipes"
-      description="Baby Hand, -7, -9/-11, -11F, -13M, -15/-18F, -15/-18M, Seniors, Loisirs — les 10 équipes du Val d'Yerres Handball en Essonne. Trouvez votre catégorie !"
+      description="Baby Hand, -7, -9/-11, -11F, -13M, -15/-18F, -15/-18M, Séniors, Loisirs — les 10 équipes du Val d'Yerres Handball en Essonne. Trouvez votre catégorie !"
       canonical="/collectifs"
       breadcrumb={[
         { name: "Accueil", url: "/" },
@@ -43,7 +43,7 @@ const Collectifs = () => {
             Nos <span className="gradient-text">Collectifs</span>
           </h1>
           <p className="text-white/45 text-lg max-w-2xl leading-relaxed mx-auto">
-            Du Baby Hand aux Seniors, trouvez votre catégorie et rejoignez l'aventure.
+            Du Baby Hand aux Séniors, trouvez votre catégorie et rejoignez l'aventure.
           </p>
         </motion.div>
       </div>

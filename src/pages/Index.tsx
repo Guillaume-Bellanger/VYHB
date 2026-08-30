@@ -251,7 +251,7 @@ const Index = () => {
     <>
       <SEO
         title={null}
-        description="Club de handball à Boussy-Saint-Antoine, Quincy-sous-Sénart et Épinay-sous-Sénart. 245 licenciés, 10 équipes du BabyHand aux Seniors. Inscriptions ouvertes saison 2026/2027."
+        description="Club de handball à Boussy-Saint-Antoine, Quincy-sous-Sénart et Épinay-sous-Sénart. 245 licenciés, 10 équipes du BabyHand aux Séniors. Inscriptions ouvertes saison 2026/2027."
         canonical="/"
         schema={sportsOrgSchema}
       />
