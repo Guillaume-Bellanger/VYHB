@@ -15,10 +15,11 @@
 --    diagnostic `unnest(categories)` (requête tout en bas de ce fichier,
 --    déjà présente) n'a pas encore été exécuté. À ajouter dans une
 --    prochaine version de ce fichier une fois le résultat communiqué.
--- ⏸️ `collectifs` : toujours volontairement exclu (décision actée) —
---    y compris pour le typo d'accent "Seniors"/"Séniors" repéré dans
---    collectifs.nom (migration 014), qui reste en attente de confirmation
---    explicite avant modification (cf. message de suivi).
+-- ✅ ÉTAPE 4 (UPDATE collectifs.nom, typo d'accent uniquement) : ci-dessous,
+--    confirmée par l'utilisateur. Correction orthographique pure — slug,
+--    horaires, entraîneurs et photo inchangés. La scission de la fiche
+--    "-9/-11" en deux collectifs reste explicitement hors périmètre
+--    (l'utilisateur la fera lui-même depuis /admin/collectifs).
 --
 -- ── DIAGNOSTIC matches.categorie (13 lignes, exécuté) ───────
 --   -11F                1        -15M/-18M           2
@@ -68,3 +69,10 @@ SELECT unnest(categories) AS categorie, count(*) AS nb
 FROM encadrement
 GROUP BY 1
 ORDER BY 1;
+
+-- ── ÉTAPE 4 : UPDATE collectifs.nom (typo d'accent) ─────────
+-- Ne touche que `nom` — slug, horaires, lieux, entraineurs, photo_url
+-- restent identiques. Ne reclasse ni ne scinde aucune fiche.
+
+UPDATE collectifs SET nom = 'Séniors Féminines' WHERE nom = 'Seniors Féminines';
+UPDATE collectifs SET nom = 'Séniors Masculins' WHERE nom = 'Seniors Masculins';
