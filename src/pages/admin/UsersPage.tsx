@@ -18,6 +18,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { CATEGORIES } from "@/data/categories";
 
 // ── Audit log types & helpers ─────────────────────────────────
 
@@ -235,11 +236,6 @@ function AuditLogSection() {
 }
 
 // ── Constants ────────────────────────────────────────────────
-
-const CATEGORIES = [
-  "Baby", "-7", "-9/-11", "-11F", "-13M",
-  "-15M", "-15F", "Séniors Masculins", "Séniors Féminines", "Loisirs",
-];
 
 const ROLE_LABELS: Record<UserRole, string> = {
   super_admin: "Super Admin",

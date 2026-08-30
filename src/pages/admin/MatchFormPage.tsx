@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { CATEGORIES } from "@/data/categories";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -23,19 +24,6 @@ const SALLES_DOMICILE = [
   "Halle des sports",
   "Salle polyvalente Georges Pompidou",
 ] as const;
-
-const CATEGORIES = [
-  "Baby",
-  "-7",
-  "-9/-11",
-  "-11F",
-  "-13M",
-  "-15M",
-  "-15F",
-  "Séniors Masculins",
-  "Séniors Féminines",
-  "Loisirs",
-];
 
 const TYPE_OPTIONS = [
   { value: "championnat", label: "Championnat" },

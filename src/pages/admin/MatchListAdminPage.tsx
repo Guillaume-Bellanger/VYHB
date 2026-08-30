@@ -18,6 +18,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { CATEGORIES } from "@/data/categories";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -332,15 +333,3 @@ export default function MatchListAdminPage() {
   );
 }
 
-const CATEGORIES = [
-  "Baby",
-  "-7",
-  "-9/-11",
-  "-11F",
-  "-13M",
-  "-15M",
-  "-15F",
-  "Séniors Masculins",
-  "Séniors Féminines",
-  "Loisirs",
-];

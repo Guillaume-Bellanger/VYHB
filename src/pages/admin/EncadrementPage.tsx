@@ -20,7 +20,7 @@ import {
   useDeleteEncadrement,
   useReorderEncadrement,
 } from "@/hooks/useEncadrement";
-import { MATCH_CATEGORIES } from "@/data/categories";
+import { CATEGORIES } from "@/data/categories";
 import type { Encadrement, EncadrementType } from "@/types/encadrement";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -349,7 +349,7 @@ export default function EncadrementPage() {
 
   const watchedType = watch("type");
   const watchedCategories = watch("categories") ?? [];
-  const categoryOptions = Array.from(new Set([...MATCH_CATEGORIES, ...watchedCategories]));
+  const categoryOptions = Array.from(new Set([...CATEGORIES, ...watchedCategories]));
 
   function resetPhotoState() {
     setPhotoFile(null);
