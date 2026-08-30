@@ -11,9 +11,11 @@ import {
 import { CATEGORIE_CONFIG, formatDate, formatHeure, type Evenement } from "@/components/EvenementCard";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { collectifs } from "@/data/collectifs";
+import { collectifs as fallbackCollectifs } from "@/data/collectifs";
 import { usePublicUpcoming } from "@/hooks/usePublicMatches";
+import { useCollectifsPublic } from "@/hooks/useCollectifs";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { getCollectifIcon } from "@/data/collectifStyles";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const FALLBACK_ACCROCHE_HERO = "Un club convivial et dynamique. 245 licenciés, 10 équipes, 23 ans de passion — du baby hand aux seniors.";
@@ -215,6 +217,14 @@ const Index = () => {
   const accrocheHero = get<string>("accueil.accroche_hero", FALLBACK_ACCROCHE_HERO);
   const texteFamille = get<string>("accueil.texte_famille", FALLBACK_TEXTE_FAMILLE);
   const email = get<string>("contact.email", FALLBACK_EMAIL);
+
+  // Fallback sur les données statiques uniquement si le fetch échoue (pas
+  // pendant le chargement, cf. skeleton) — évite une section vide/cassée
+  // en cas d'incident réseau ponctuel.
+  const { data: collectifsData, isLoading: collectifsLoading, isError: collectifsError } = useCollectifsPublic();
+  const collectifsList = collectifsError
+    ? fallbackCollectifs.map((c) => ({ slug: c.slug, nom: c.name, tranche_age: c.age }))
+    : (collectifsData ?? []).map((c) => ({ slug: c.slug, nom: c.nom, tranche_age: c.tranche_age }));
 
   const [events, setEvents] = useState<Evenement[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
@@ -577,33 +587,44 @@ const Index = () => {
             title="Nos collectifs"
             subtitle="Du baby hand aux seniors — trouvez votre catégorie"
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {collectifs.map((c, i) => (
-              <motion.div
-                key={c.slug}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.045, duration: 0.45 }}
-              >
-                <Link
-                  to={`/collectifs/${c.slug}`}
-                  className="card-sport px-5 py-4 flex items-center gap-4 group cursor-pointer"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors duration-300">
-                    <span className="text-xl leading-none" role="img" aria-label={c.name}>{c.icon}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-display font-bold text-sm text-foreground group-hover:text-accent transition-colors duration-200 truncate">
-                      {c.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{c.age}</div>
-                  </div>
-                  <ArrowRight size={14} className="text-muted-foreground/50 group-hover:text-accent group-hover:translate-x-1 transition-all duration-200 shrink-0" />
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+          {collectifsLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-[72px] rounded-2xl bg-white/[0.04]" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {collectifsList.map((c, i) => {
+                const Icon = getCollectifIcon(c.slug);
+                return (
+                  <motion.div
+                    key={c.slug}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.045, duration: 0.45 }}
+                  >
+                    <Link
+                      to={`/collectifs/${c.slug}`}
+                      className="card-sport px-5 py-4 flex items-center gap-4 group cursor-pointer"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors duration-300">
+                        <Icon size={18} className="text-accent" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-display font-bold text-sm text-foreground group-hover:text-accent transition-colors duration-200 truncate">
+                          {c.nom}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{c.tranche_age}</div>
+                      </div>
+                      <ArrowRight size={14} className="text-muted-foreground/50 group-hover:text-accent group-hover:translate-x-1 transition-all duration-200 shrink-0" />
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
