@@ -470,14 +470,11 @@ export default function EncadrementPage() {
   async function handleMove(sectionList: Encadrement[], index: number, direction: -1 | 1) {
     const target = index + direction;
     if (target < 0 || target >= sectionList.length) return;
-    const a = sectionList[index];
-    const b = sectionList[target];
     setError(null);
     try {
-      await reorderEncadrement.mutateAsync([
-        { id: a.id, ordre: b.ordre },
-        { id: b.id, ordre: a.ordre },
-      ]);
+      // La fonction SQL densifie la section puis échange les deux `ordre`
+      // de façon atomique — on ne lui passe que la fiche et la direction.
+      await reorderEncadrement.mutateAsync({ id: sectionList[index].id, direction });
     } catch (e) {
       setError((e as Error).message);
     }

@@ -301,21 +301,21 @@ const Club = () => {
                             className="glass-premium rounded-2xl p-6 flex flex-col items-center text-center border border-white/[0.06] hover:border-white/[0.14] hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)] transition-all duration-300"
                           >
                             {person.photo_url ? (
-                              <>
-                                <img
-                                  src={person.photo_url}
-                                  alt={person.prenom ?? ""}
-                                  className="w-14 h-14 rounded-2xl mb-4 object-cover"
-                                  loading="lazy"
-                                  width={56}
-                                  height={56}
-                                />
-                                <p className="font-display font-bold text-white text-sm mb-1">{person.prenom}</p>
-                              </>
+                              <img
+                                src={person.photo_url}
+                                alt={person.prenom ?? ""}
+                                className="w-14 h-14 rounded-2xl mb-4 object-cover"
+                                loading="lazy"
+                                width={56}
+                                height={56}
+                              />
                             ) : (
                               <div className="w-14 h-14 rounded-2xl mb-4 bg-white/[0.05] flex items-center justify-center">
                                 <User size={24} className="text-white/20" />
                               </div>
+                            )}
+                            {person.prenom && (
+                              <p className="font-display font-bold text-white text-sm mb-1">{person.prenom}</p>
                             )}
                             <span className="eyebrow text-[10px]">{person.role}</span>
                           </motion.div>
@@ -347,23 +347,21 @@ const Club = () => {
                             className="glass-premium rounded-2xl p-6 flex flex-col items-center text-center border border-white/[0.06] hover:border-white/[0.14] transition-all duration-300"
                           >
                             {person.photo_url ? (
-                              <>
-                                <img
-                                  src={person.photo_url}
-                                  alt={person.prenom ?? ""}
-                                  className="w-14 h-14 rounded-2xl mb-4 object-cover"
-                                  loading="lazy"
-                                  width={56}
-                                  height={56}
-                                />
-                                {person.prenom && (
-                                  <p className="font-display font-bold text-white text-sm mb-1">{person.prenom}</p>
-                                )}
-                              </>
+                              <img
+                                src={person.photo_url}
+                                alt={person.prenom ?? ""}
+                                className="w-14 h-14 rounded-2xl mb-4 object-cover"
+                                loading="lazy"
+                                width={56}
+                                height={56}
+                              />
                             ) : (
                               <div className="w-14 h-14 rounded-2xl mb-4 bg-white/[0.05] flex items-center justify-center">
                                 <User size={24} className="text-white/20" />
                               </div>
+                            )}
+                            {person.prenom && (
+                              <p className="font-display font-bold text-white text-sm mb-1">{person.prenom}</p>
                             )}
                             <span className="eyebrow text-[10px]">{person.role}</span>
                           </motion.div>
@@ -437,7 +435,9 @@ const Club = () => {
                               <User size={20} className="text-white/20" />
                             </div>
                           )}
-                          <p className="font-display font-bold text-white text-sm">{person.prenom}</p>
+                          {person.prenom && (
+                            <p className="font-display font-bold text-white text-sm">{person.prenom}</p>
+                          )}
                           <p className="text-[11px] text-white/40 mt-1 leading-tight">{(person.categories ?? []).join(" / ")}</p>
                         </motion.div>
                       ))}

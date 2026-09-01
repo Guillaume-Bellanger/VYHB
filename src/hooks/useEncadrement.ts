@@ -98,11 +98,15 @@ function findEncadrementInCache(
 
 // ── Queries publiques ─────────────────────────────────────────
 
+// Tri : `ordre` puis critères stables (created_at, id) — un éventuel
+// ex-aequo sur `ordre` ne doit jamais donner un affichage aléatoire.
+const ENCADREMENT_ORDER = "ordre.asc,created_at.asc,id.asc";
+
 export function useEncadrementPublic(type?: EncadrementType) {
   return useQuery({
     queryKey: [...PUBLIC_ENCADREMENT_QK, type ?? "all"],
     queryFn: () => {
-      let q = "encadrement?select=*&order=ordre.asc";
+      let q = `encadrement?select=*&order=${ENCADREMENT_ORDER}`;
       if (type) q += `&type=eq.${type}`;
       return pgList<Encadrement[]>(q, anonHeaders());
     },
@@ -115,7 +119,7 @@ export function useEncadrementAdmin() {
   return useQuery({
     queryKey: ENCADREMENT_QK,
     queryFn: () =>
-      pgList<Encadrement[]>("encadrement?select=*&supprime_le=is.null&order=type.asc,ordre.asc", baseHeaders()),
+      pgList<Encadrement[]>(`encadrement?select=*&supprime_le=is.null&order=type.asc,${ENCADREMENT_ORDER}`, baseHeaders()),
   });
 }
 
@@ -221,15 +225,21 @@ export function useHardDeleteEncadrement() {
   });
 }
 
-// Réordonnancement : permute le `ordre` de deux membres (boutons ↑↓, au sein d'une section)
+// Réordonnancement (boutons ↑↓) : délègue à la fonction SQL
+// `reorder_encadrement(p_id, p_direction)` — elle densifie la section
+// (0..N-1) puis échange les deux `ordre` dans une seule transaction.
+// Atomique côté serveur : aucun doublon transitoire ni persistant.
 export function useReorderEncadrement() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (updates: { id: string; ordre: number }[]) => {
-      await Promise.all(
-        updates.map((u) => pgPatch(`encadrement?id=eq.${u.id}`, { ordre: u.ordre }))
-      );
+    mutationFn: async ({ id, direction }: { id: string; direction: -1 | 1 }) => {
+      const res = await fetch(restUrl("rpc/reorder_encadrement"), {
+        method: "POST",
+        headers: { ...baseHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ p_id: id, p_direction: direction }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ENCADREMENT_QK });
