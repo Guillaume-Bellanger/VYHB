@@ -18,7 +18,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CATEGORIES } from "@/data/categories";
+import { MATCH_CATEGORIES } from "@/data/categories";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -138,7 +138,7 @@ export default function MatchListAdminPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="tous">Toutes les catégories</SelectItem>
-              {CATEGORIES.map((c) => (
+              {MATCH_CATEGORIES.map((c) => (
                 <SelectItem key={c} value={c}>{c}</SelectItem>
               ))}
             </SelectContent>

@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { CATEGORIES } from "@/data/categories";
+import { MATCH_CATEGORIES } from "@/data/categories";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -535,7 +535,7 @@ export default function MatchFormPage() {
                   <SelectValue placeholder="Choisir une catégorie" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => (
+                  {MATCH_CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
                 </SelectContent>
