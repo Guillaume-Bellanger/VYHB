@@ -102,11 +102,14 @@ function findEncadrementInCache(
 // ex-aequo sur `ordre` ne doit jamais donner un affichage aléatoire.
 const ENCADREMENT_ORDER = "ordre.asc,created_at.asc,id.asc";
 
+// actif=eq.true et supprime_le=is.null sont déjà imposés par la RLS
+// ("encadrement: lecture publique") — répétés ici en défense en profondeur,
+// pour ne pas dépendre uniquement de la policy côté serveur.
 export function useEncadrementPublic(type?: EncadrementType) {
   return useQuery({
     queryKey: [...PUBLIC_ENCADREMENT_QK, type ?? "all"],
     queryFn: () => {
-      let q = `encadrement?select=*&order=${ENCADREMENT_ORDER}`;
+      let q = `encadrement?select=*&actif=eq.true&supprime_le=is.null&order=${ENCADREMENT_ORDER}`;
       if (type) q += `&type=eq.${type}`;
       return pgList<Encadrement[]>(q, anonHeaders());
     },
