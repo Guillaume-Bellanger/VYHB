@@ -185,6 +185,24 @@ _Branche : `feat/refonte-contenu-seo`_
 
 ---
 
+## FIX HORS PHASE – Encadrant inactif visible sur /le-club + catégories -18M/-18F
+
+### Bug 1 — Encadrant inactif visible publiquement
+- [x] RLS `encadrement: lecture publique` (`019_soft_delete.sql`) : déjà correcte (`actif = TRUE AND supprime_le IS NULL`), aucun changement nécessaire
+- [x] `src/hooks/useEncadrement.ts` — `useEncadrementPublic()` ne filtrait ni `actif` ni `supprime_le` côté requête (reposait uniquement sur la RLS). Ajout de `&actif=eq.true&supprime_le=is.null` en défense en profondeur
+- [x] `useEncadrementAdmin()` — vérifié inchangé : ne filtre pas `actif`, les inactifs restent visibles/réactivables en admin
+- [x] `Club.tsx` — pas de filtre client nécessaire, les données arrivent déjà filtrées (RLS + hook)
+- [ ] **ACTION MANUELLE** : si le bug persiste après ce fix, vérifier dans le Supabase Dashboard que `019_soft_delete.sql` a bien été exécutée (policy "encadrement: lecture publique" à jour) — pas d'accès direct à la base depuis cette session pour le confirmer
+
+### Évolution 2 — Catégories de match -18M / -18F
+- [x] `src/data/categories.ts` — `MATCH_CATEGORIES` n'est plus dérivée de `CATEGORIES` par filtre : liste explicite avec "-18M" après "-15M/-18M" et "-18F" après "-15F/-18F". `CATEGORIES` (collectifs/encadrement) inchangée. Commentaires en tête de fichier clarifiés (les deux listes divergent maintenant dans les deux sens)
+- [x] `init_match_postes()` (`002_match_postes.sql`) — vérifié non touché : sa règle `NOT IN ('Séniors Masculins', 'Séniors Féminines')` couvre déjà -18M/-18F comme toute catégorie non-Séniors (arbitre obligatoire inclus)
+- [x] **Bug connexe corrigé** : `MatchFormPage.tsx` et `MatchListAdminPage.tsx` utilisaient `CATEGORIES` (donc proposaient "Baby Hand" comme catégorie de match) au lieu de `MATCH_CATEGORIES`. Corrigé — `Resultats.tsx` utilisait déjà la bonne source. `UsersPage.tsx` et `EncadrementPage.tsx` gardent `CATEGORIES` à raison (Baby Hand y est une valeur valide)
+- [x] `tsc --noEmit`, `eslint` (2 erreurs `no-empty` pré-existantes, non liées) et `npm run build:spa` passent sans erreur
+- [ ] Vérification visuelle manuelle non faite dans cette session : `/admin/matchs` (formulaire + liste + filtre), `/resultats` (onglets + filtre catégorie), `/club` (encadrant inactif absent)
+
+---
+
 ## ÉTAT GLOBAL
 - [x] Phase 0 – Audit initial
 - [x] Phase 1 – Prérequis techniques SEO
