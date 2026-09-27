@@ -5,7 +5,7 @@
 -- ── Enum types ──────────────────────────────────────────────
 
 CREATE TYPE user_role AS ENUM ('super_admin', 'responsable', 'redacteur');
-CREATE TYPE match_type AS ENUM ('championnat', 'coupe', 'amical', 'tournoi');
+CREATE TYPE match_type AS ENUM ('championnat', 'coupe', 'amical', 'tournoi', 'delayages');
 CREATE TYPE match_statut AS ENUM ('prevu', 'joue', 'publie');
 
 -- ── Table profiles ──────────────────────────────────────────
