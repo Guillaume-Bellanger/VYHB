@@ -30,6 +30,7 @@ const TYPE_OPTIONS = [
   { value: "coupe", label: "Coupe" },
   { value: "amical", label: "Amical" },
   { value: "tournoi", label: "Tournoi" },
+  { value: "delayages", label: "Delayages" },
 ] as const;
 
 const STATUT_OPTIONS = [
@@ -45,7 +46,7 @@ const schema = z.object({
   adversaire: z.string().min(1, "Adversaire requis").max(100, "100 caractères max"),
   domicile: z.boolean(),
   categorie: z.string().min(1, "Catégorie requise"),
-  type: z.enum(["championnat", "coupe", "amical", "tournoi"]),
+  type: z.enum(["championnat", "coupe", "amical", "tournoi", "delayages"]),
   statut: z.enum(["prevu", "joue", "publie"]),
   score_nous: z.number().int().min(0).nullable(),
   score_eux: z.number().int().min(0).nullable(),

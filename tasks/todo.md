@@ -542,3 +542,12 @@ git push origin feat/refonte-contenu-seo
 | `src/data/collectifs.js` | 11 collectifs ordonnés |
 | `src/data/reglementInterieur.js` | 20 articles du RI |
 | `public/robots.txt` | SEO crawl |
+---
+
+## Type de rencontre « Delayages » + crédit créateur (mentions légales)
+
+- [x] `supabase/migrations/021_match_type_delayages.sql` — `ALTER TYPE match_type ADD VALUE IF NOT EXISTS 'delayages'`
+- [x] `supabase/schema.sql`, `src/types/database.ts` — enum mis à jour
+- [x] `MatchFormPage` (option + zod), `MatchListAdminPage` et `Resultats` (libellés) — « Delayages »
+- [x] `src/pages/Legal.tsx` — éditeur = Val d'Yerres Handball (email/adresse via site_content, repli identique à Contact), directeur de la publication = Guillaume Bellanger, nouvelle section « Conception et réalisation » (site perso + mail pro)
+- [ ] Exécuter la migration 021 dans Supabase SQL Editor AVANT de merger sur main
