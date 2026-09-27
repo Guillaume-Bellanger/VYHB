@@ -174,6 +174,17 @@ const Footer = () => (
             <ExternalLink size={10} />
           </a>
         </div>
+        <p className="text-xs text-white/20">
+          Site réalisé par{" "}
+          <a
+            href="https://www.guillaumebellanger.fr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/35 hover:text-orange-400 transition-colors duration-200 underline-offset-2 hover:underline"
+          >
+            Guillaume Bellanger
+          </a>
+        </p>
       </div>
     </div>
   </footer>
