@@ -319,12 +319,12 @@ export default function Resultats() {
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 2);
 
-  // Historique : tous les matchs publiés, filtre catégorie, du plus ancien au plus récent
+  // Historique : tous les matchs publiés, filtre catégorie, du plus récent au plus ancien
   const historiqueMatches = (
     historiqueCategorie === "tous"
       ? publies
       : publies.filter((m) => m.categorie === historiqueCategorie)
-  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const historiqueParSaison = groupBySeason(historiqueMatches);
 
