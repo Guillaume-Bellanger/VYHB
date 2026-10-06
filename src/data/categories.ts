@@ -19,10 +19,12 @@
 //   match, liste admin, page publique /resultats, filtre par onglets). Deux
 //   différences avec CATEGORIES :
 //   - "Baby Hand" en est exclu (cette catégorie ne joue pas de matchs) ;
-//   - "-18M" et "-18F" y sont ajoutées en plus : en championnat, le collectif
-//     "-15/-18" engage DEUX équipes distinctes (une -15 et une -18), qui
-//     doivent donc pouvoir être sélectionnées séparément comme catégorie de
-//     match, alors qu'elles ne forment qu'un seul collectif à l'entraînement.
+//   - les collectifs "-15M/-18M" et "-15F/-18F" y sont éclatés en "-15M",
+//     "-18M", "-15F" et "-18F" : en championnat, chaque collectif "-15/-18"
+//     engage DEUX équipes distinctes (une -15 et une -18), qui doivent donc
+//     être sélectionnées séparément comme catégorie de match, alors qu'elles
+//     ne forment qu'un seul collectif à l'entraînement. (Aucun match en base
+//     n'utilisait les valeurs combinées au moment de l'éclatement.)
 
 export const CATEGORIES = [
   "Baby Hand",
@@ -46,9 +48,9 @@ export const MATCH_CATEGORIES = [
   "-11F",
   "-13M",
   "-13F",
-  "-15M/-18M",
+  "-15M",
   "-18M",
-  "-15F/-18F",
+  "-15F",
   "-18F",
   "Séniors Masculins",
   "Séniors Féminines",
