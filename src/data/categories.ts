@@ -58,3 +58,15 @@ export const MATCH_CATEGORIES = [
 ] as const;
 
 export type Categorie = (typeof CATEGORIES)[number];
+
+// Catégories de match couvertes par un collectif : un entraîneur rattaché à
+// "-15M/-18M" gère les matchs -15M ET -18M. Miroir SQL :
+// match_categories_for() (supabase/migrations/022_entraineur_categories_match.sql).
+const MATCH_CATEGORIES_PAR_COLLECTIF: Record<string, readonly string[]> = {
+  "-15M/-18M": ["-15M", "-18M"],
+  "-15F/-18F": ["-15F", "-18F"],
+};
+
+export function matchCategoriesFor(categorie: string): readonly string[] {
+  return MATCH_CATEGORIES_PAR_COLLECTIF[categorie] ?? [categorie];
+}

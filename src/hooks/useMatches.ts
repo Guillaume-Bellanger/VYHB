@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import type { Match, MatchStatut } from "@/types/database";
+import { matchCategoriesFor } from "@/data/categories";
 
 export const MATCHES_QK = ["matches"] as const;
 
@@ -112,7 +113,10 @@ export function useMatches(filters: MatchFilters = {}) {
     queryKey: [...MATCHES_QK, filters, isEntraineur, categorie],
     queryFn: () => {
       let q = `matches?select=*&order=date.desc`;
-      if (isEntraineur && categorie) q += `&categorie=eq.${encodeURIComponent(categorie)}`;
+      if (isEntraineur && categorie) {
+        const cats = matchCategoriesFor(categorie).map((c) => `"${c}"`).join(",");
+        q += `&categorie=in.(${encodeURIComponent(cats)})`;
+      }
       if (filters.statut) q += `&statut=eq.${filters.statut}`;
       if (filters.categorie) q += `&categorie=eq.${encodeURIComponent(filters.categorie)}`;
       return pgList<Match[]>(q);
