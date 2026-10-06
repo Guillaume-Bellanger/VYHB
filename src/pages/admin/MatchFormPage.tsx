@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { MATCH_CATEGORIES } from "@/data/categories";
+import { MATCH_CATEGORIES, matchCategoriesFor } from "@/data/categories";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -330,6 +330,11 @@ export default function MatchFormPage() {
 
   const { role, can, categorie: userCategorie } = useAuth();
 
+  // Un entraîneur ne choisit que parmi les catégories de match de son
+  // collectif (ex. "-15M/-18M" → "-15M" ou "-18M").
+  const categorieOptions =
+    role === "entraineur" && userCategorie ? matchCategoriesFor(userCategorie) : MATCH_CATEGORIES;
+
   const { data: existing, isLoading: loadingMatch } = useMatch(id);
   const createMutation = useCreateMatch();
   const updateMutation = useUpdateMatch();
@@ -350,7 +355,7 @@ export default function MatchFormPage() {
       domicile: true,
       statut: "prevu",
       type: "championnat",
-      categorie: userCategorie ?? "",
+      categorie: role === "entraineur" ? (categorieOptions[0] ?? "") : (userCategorie ?? ""),
       score_nous: null,
       score_eux: null,
       resume: null,
@@ -383,7 +388,7 @@ export default function MatchFormPage() {
 
   // Permissions
   const fieldsDisabled = !can("manage_own_matches");
-  const categorieLocked = role === "entraineur";
+  const categorieLocked = role === "entraineur" && categorieOptions.length <= 1;
 
   async function onSubmit(data: FormData) {
     const payload = {
@@ -536,7 +541,7 @@ export default function MatchFormPage() {
                   <SelectValue placeholder="Choisir une catégorie" />
                 </SelectTrigger>
                 <SelectContent>
-                  {MATCH_CATEGORIES.map((c) => (
+                  {categorieOptions.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
                 </SelectContent>
