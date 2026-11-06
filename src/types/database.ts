@@ -1,5 +1,5 @@
 export type UserRole = "super_admin" | "president" | "entraineur" | "evenements_com";
-export type MatchType = "championnat" | "coupe" | "amical" | "tournoi" | "delayages";
+export type MatchType = "championnat" | "coupe" | "amical" | "tournoi" | "delayages" | "challenge";
 export type MatchStatut = "prevu" | "joue" | "publie";
 
 export interface Profile {

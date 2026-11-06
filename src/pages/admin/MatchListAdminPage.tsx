@@ -40,6 +40,7 @@ const TYPE_LABELS: Record<string, string> = {
   amical: "Amical",
   tournoi: "Tournoi",
   delayages: "Delayages",
+  challenge: "Challenge",
 };
 
 // ── Sub-components ───────────────────────────────────────────────────────────
